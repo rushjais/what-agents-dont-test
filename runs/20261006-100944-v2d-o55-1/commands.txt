@@ -1,0 +1,293 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && head -c 600 tools/packignore
+
+$ cat tools/packignore; cat .packignore README.md snapshot/cli.py
+
+$ mkdir -p /tmp/probe && cat > /tmp/probe/q.py <<'EOF'
+import json, sys, urllib.request
+def q(files):
+    req = urllib.request.Request("http://127.0.0.1:8765/ignored", data=json.dumps({"files": files}).encode(), headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r: return json.load(r)["ignored"]
+    except urllib.error.HTTPError as e:
+        return ("ERR", e.code, e.read().decode())
+EOF
+cd /tmp/probe && python3 -c "
+from q import q
+print(q({'.packignore':'*.tmp\n','a.tmp':None,'b/c.tmp':None,'d':None}))
+print(q({'.packignore':'; x\n#y\nd\n',';x':None,'#y':None,'d':None}))
+print(q({}))
+"; curl -s http://127.0.0.1:8765/ ; curl -s http://127.0.0.1:8765/version
+
+$ env | grep -i pack; ls /work /work/repo -la; ls /tmp
+
+$ cd /tmp/probe && sed -i 's#"http://127.0.0.1:8765/ignored"#__import__("os").environ["PACKIGNORE_URL"]+"/ignored"#' q.py && python3 -c "
+from q import q
+print(q({'.packignore':'*.tmp\n','a.tmp':None,'b/c.tmp':None,'d':None}))
+print(q({'.packignore':'; x\n#y\nd\n',';x':None,'#y':None,'d':None, ' x':None}))
+print(q({}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import q
+F=['a','b','#y',' x','x ','x','.packignore','d/x','d/e/x','x/f','x/y/g','ab','a.b','A','D/e','sub/.packignore']
+def t(pi, extra={}, files=F):
+    d={f:None for f in files}; d['.packignore']=pi; d.update(extra)
+    print(repr(pi), extra if extra else '', '->', q(d))
+t('#y\n')
+t('\\\\#y\n')
+t(' x\n')
+t('x \n')
+t('x\\\\ \n')
+t('x\r\n')
+t('a\n')
+t('A\n')
+t('x/\n')
+t('/x\n')
+t('d/x\n')
+t('x\n!x/f\n')
+t('*\n!x\n')
+t('.packignore\n')
+t('**\n')
+t('d/**\n')
+t('**/x\n')
+t('a?\n')
+t('[ab]\n')
+t('[!a]\n')
+t('[^a]\n')
+t('a*\n')
+t('!a\n')
+t('\\\\!a\n')
+"
+
+$ cd /tmp/probe && cat > t.py <<'EOF'
+from q import q
+F=['a','b','#y',' x','x ','x','d/x','d/e/x','y/f','y/z/g','ab','a.b','A','D/e','sub/.packignore','sub/x','sub/y/x','x\\','a]','[ab]','!a']
+def t(pi, extra={}, files=F):
+    d={f:None for f in files}; d['.packignore']=pi; d.update(extra)
+    if 'sub/.packignore' in d and d['sub/.packignore'] is None: d['sub/.packignore']=''
+    print(repr(pi), extra if extra else '', '->', q(d))
+EOF
+python3 -c "
+from t import t
+for p in ['#y','\\\\#y',' x','x ','x\\\\ ','x\r','a','A','y/','x/','/x','d/x','y\n!y/f','*\n!x','.packignore','**','d/**','**/x','a?','[ab]','[!a]','[^a]','a*','!a','\\\\!a','y/*','y/**','**/','e/x','D','d','*/x','d/*/x','d/**/x','a]','\\\\[ab]','x\\\\','a\\\\b']:
+    t(p+'\n')
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import q
+F=['a','b','#y',' x','x ','x','d/x','d/e/x','y/f','y/z/g','ab','a.b','A','D/e','sub/x','sub/y/x','x\\\\','a]','[ab]','!a']
+for f in F: 
+  r=q({'.packignore':'a\n',f:None})
+  if isinstance(r,tuple): print(repr(f),r)
+print(q({'.packignore':'a\n','sub/.packignore':''}))
+print(q({'.packignore':'a\n','sub/.packignore':'x'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import q
+import itertools
+F=['a','b','#y',' x','x ','x','d/x','d/e/x','y/f','y/z/g','ab','a.b','A','D/e','sub/x','sub/y/x','x\\\\','a]','[ab]','!a','sub/.packignore']
+for f,g in itertools.combinations(F,2):
+  d={'.packignore':'a\n',f:None,g:None}
+  if 'sub/.packignore' in d: d['sub/.packignore']=''
+  r=q(d)
+  if isinstance(r,tuple): print(repr(f),repr(g),r)
+"
+
+$ cd /tmp/probe && sed -i "s#'D/e'#'D/f'#" t.py && python3 -c "
+from t import t
+for p in ['#y','\\\\#y',' x','x ','x\\\\ ','x\r','a','A','y/','x/','/x','d/x','y\n!y/f','*\n!x','.packignore','**','d/**','**/x','a?','[ab]','[!a]','[^a]','a*','!a','\\\\!a','y/*','y/**','**/','e/x','D','d','*/x','d/*/x','d/**/x','a]','\\\\[ab]','x\\\\','a\\\\b']:
+    t(p+'\n')
+"
+
+$ cd /tmp/probe && python3 -c "
+from t import t
+for p in ['x\n!d','d\n!x','d\n!e','d\n!d/e','d\n!e/','d/\n!x','*\n!d','*\n!d/','!x\nx','x\n!x\nx','x\n!*','d/e/','/d/e/','d/e','e/','/e/','/d/','/','!','!/','/*','**/e/x','**/e','**/d','d/**/','a**','**b','a**b','***','x/**','d/e/**','d/**/e/**','?/x','d?x','d/?/x','*x','d*','sub/x','./x','./d/x','d//x','../x','d/./x','d/../x','/**/x','**/**/x','d**/x','d/e**','*/','*/*/','d/*','d/*/']:
+    t(p+'\n')
+"
+
+$ cd /tmp/probe && python3 -c "
+from t import t
+for p in ['x\n!x','x\n!?','x\n!x*','a\n!a*','a*\n!a','a*\n!ab','*\n!a*','d\n!d','d\n!d*','d\n!*','d\n!**','d/x\n!d/*','d/x\n!*/x','d/x\n!**/x','x\n! x','x\n !x','x\n!!x','!!x','x\n!/x','x\n!/d/x','x\n!d/x','x\n!x/']:
+    t(p+'\n')
+"
+
+$ cd /tmp/probe && python3 -c "
+from t import t
+F=['ab','abc','abcd','a.b','x','d/x','d/e/x','xy','d/xy']
+for p in ['ab\n!a*','ab\n!a?','ab\n!?b','a?\n!ab','ab\n!a**','ab\n!*b*','abc\n!a*c','abc\n!ab*','abc\n!a?c','abc\n!*bc','a*c\n!abc','ab*\n!abc','!a*\nab','!ab\na*','abcd\n!ab*','abcd\n!a**d','/x\n!x','x\n!/x','/x\n!x\n','x/\n!x','d/\n!d','d\n!d/','d/x\n!x','x\n!d/x','d/*\n!x','x\n!d/*','d/x\n!/d/x','/d/x\n!d/x','d/e/x\n!**/x','**/x\n!d/e/x','*\n!?','?\n!*','**\n!*','*\n!**']:
+    t(p+'\n',files=F)
+"
+
+$ cd /tmp/probe && python3 -c "
+from t import t
+F=['ab','abc','x','d/x','d/e/x','xy','d/xy','dd/x','dd/ee/x','dd/ee/xx/f']
+for p in ['d/e\n!x','x\n!d/e','dd/ee\n!x','x\n!dd/ee','dd/ee/\n!x','dd/ee/**\n!x','dd/ee/*\n!x','dd/ee/xx\n!f','dd/ee/xx/\n!f','f\n!dd/ee/xx/','dd/**\n!x','dd/ee/xx/**\n!xx','xx\n!dd/ee/xx/f','!dd\ndd/**','dd\n!dd/**','dd/**\n!dd','dd/**/\n!dd']:
+    t(p+'\n',files=F)
+"
+
+$ cd /tmp/probe && cat > t2.py <<'EOF'
+from q import q
+F=['x','y','sub/x','sub/y','sub/z/x','sub/z/w','sub/sub2/x','sub/sub2/y','other/x']
+def t(root, sub, sub2=None, files=F):
+    d={f:None for f in files}; d['.packignore']=root; d['sub/.packignore']=sub
+    if sub2 is not None: d['sub/sub2/.packignore']=sub2
+    print(repr(root), repr(sub), repr(sub2) if sub2 is not None else '', '->', q(d))
+EOF
+python3 -c "
+from t2 import t
+t('x','!x'); t('!x','x'); t('sub/x','!x'); t('x','!*'); t('sub/*','!x'); t('sub/','!x'); t('sub','!x');t('sub/**','!x')
+t('','/x'); t('','x'); t('','z/x'); t('','/z'); t('','sub/x'); t('','../x'); t('','../other/x');t('','**/x')
+t('sub/.packignore','x'); t('sub/','x'); t('','.packignore'); t('x','!x','x'); t('x','x','!x'); t('','x','!*'); t('','!*','x')
+t('sub/x','!sub/x'); t('sub/z/x','!z/x'); t('!sub/z/x','z/x'); t('z/x','!x');
+"
+
+$ cd /tmp/probe && python3 -c "
+from t2 import t
+t('sub/x','!*'); t('sub/x','!?'); t('sub/z/x','!*/x'); t('sub/z/x','!z/*'); t('sub/z/x','!**/x'); t('x','!z'); t('!x','z'); t('sub/z/x','!x')
+t('sub\n!sub','!x'); t('*\n!sub','!x'); t('sub/\n!sub/x',''); t('sub/','','!x'); t('sub/sub2/','','!x'); t('','sub2/','!x'); t('','sub2','!x');t('sub2/','','!x')
+t('*/','!x'); t('*/\n!sub/','!x');t('sub/**/','!x')
+"
+
+$ cd /tmp/probe && python3 -c "
+from t import t
+F=['x',' x','\tx','x\t','a','b','!x','; x',';x','é','ab',' x','x ','﻿x','y','d/x','d/e/x','dir/f']
+for p in ['*\n! x','\tx','x\t','\x0bx','\x0cx',' x','　x',' x','x\ry','x\x0by','x\x0cy','x\x1cy','x y','x\x85y','﻿x','﻿;c\nx',' ;x\na',';x\na','x;y','\\\;x','!;x','*\n!;x','*\n! ;x','é\n!ab','ab\n!é','ab\n!éé','dir/**/','dir/*','dir/**','x/*','x/**/','x/**/**','dir//','dir/**/**','**/**','d/**/x/**','x**','**x**','*/**','**/*','x/','/x/','d/x/**','e/**']:
+    t(p+'\n',files=F)
+"
+
+$ cd /tmp/probe && python3 -c "
+from t import t
+F=['x','dir/f','sub/dir/f','sub/x','d/e/x','d/x','éb','ab','d/q/r/x']
+for p in ['dir//','dir///','//x','//','x//','/dir//','sub//','sub//x','d/***/x','d/**/**/x','é*\n!?b','?b\n!é*','ab\n!a*\n','/**','/**/','**/','!**/\n','d/**/q/**/x','d/**/r/x','d/**/e/x/','**/e/**']:
+    t(p+'\n',files=F)
+"
+
+$ mkdir -p /tmp/fuzz && cat > /tmp/fuzz/fuzz.py <<'EOF'
+import json, os, random, shutil, subprocess, sys, tempfile
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import ignored_files
+
+NAMES = ["a", "b", "ab", "a.b", "x", "d", "e", "ba", ".a", "#a", ";a", "!a", "a b", "[a]", "a\\b", "é", "aa", "bab"]
+CHUNKS = ["a", "b", "x", "d", "e", ".", "*", "**", "?", "/", "!", "#", ";", " ", "\\", "[", "]", "é", "***", "a*", "*b"]
+SEPS = ["\n", "\n", "\n", "\r\n", "\r", "\x0b", " "]
+
+def rand_tree(rng):
+    files = set()
+    for _ in range(rng.randint(1, 25)):
+        depth = rng.choice([1, 1, 2, 2, 3, 4])
+        files.add("/".join(rng.choice(NAMES) for _ in range(depth)))
+    # drop file/dir conflicts
+    dirs = {f.rsplit("/", 1)[0] for f in files if "/" in f}
+    alld = set()
+    for d in dirs:
+        p = d.split("/")
+        for i in range(1, len(p) + 1):
+            alld.add("/".join(p[:i]))
+    files = {f for f in files if f not in alld}
+    return files, sorted(alld)
+
+def rand_pattern(rng):
+    s = "".join(rng.choice(CHUNKS) for _ in range(rng.randint(1, 5)))
+    if rng.random() < 0.3: s = "!" + s
+    if rng.random() < 0.15: s = rng.choice([" ", "\t", "  "]) + s
+    if rng.random() < 0.15: s = s + rng.choice([" ", "\t"])
+    if rng.random() < 0.05: s = ";" + s
+    return s
+
+def rand_ignore(rng, names):
+    lines = []
+    for _ in range(rng.randint(0, 6)):
+        if rng.random() < 0.4 and names:
+            # path-ish pattern using real names
+            k = rng.randint(1, 3)
+            segs = [rng.choice(names + ["*", "**", "?"]) for _ in range(k)]
+            s = "/".join(segs)
+            if rng.random() < 0.3: s = "/" + s
+            if rng.random() < 0.3: s += "/"
+            if rng.random() < 0.4: s = "!" + s
+            lines.append(s)
+        else:
+            lines.append(rand_pattern(rng))
+    text = ""
+    for l in lines:
+        text += l + rng.choice(SEPS)
+    if lines and rng.random() < 0.2: text = text.rstrip("\n")
+    return text
+
+def run(seed):
+    rng = random.Random(seed)
+    files, dirs = rand_tree(rng)
+    root = tempfile.mkdtemp(prefix="fz")
+    try:
+        for f in files:
+            p = os.path.join(root, f)
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            open(p, "w").close()
+        for d in [""] + dirs:
+            if rng.random() < (0.9 if d == "" else 0.35):
+                ignore = rand_ignore(rng, NAMES)
+                p = os.path.join(root, d, ".packignore")
+                with open(p, "w", encoding="utf-8", newline="") as fh:
+                    fh.write(ignore)
+        r = subprocess.run([sys.executable, "/work/repo/tools/packignore", root], capture_output=True, text=True)
+        if r.returncode:
+            return None
+        theirs = sorted(l for l in r.stdout.splitlines() if l)
+        # client prints with print(); paths with line separators would break, skip
+        mine = ignored_files(root)
+        if mine != theirs:
+            dump = {}
+            for dp, dn, fn in os.walk(root):
+                for n in fn:
+                    full = os.path.join(dp, n)
+                    rel = os.path.relpath(full, root)
+                    dump[rel] = open(full, newline="").read() if n == ".packignore" else None
+            return dump, sorted(set(theirs) - set(mine)), sorted(set(mine) - set(theirs))
+        return True
+    finally:
+        shutil.rmtree(root)
+
+if __name__ == "__main__":
+    start, n = int(sys.argv[1]), int(sys.argv[2])
+    bad = errs = 0
+    for s in range(start, start + n):
+        res = run(s)
+        if res is None: errs += 1; continue
+        if res is not True:
+            bad += 1
+            if bad <= 3:
+                print("SEED", s); print(json.dumps(res[0], indent=1, ensure_ascii=False)); print("only theirs:", res[1]); print("only mine:", res[2])
+    print(f"done {n}: mismatches={bad} errors={errs}")
+EOF
+cd /tmp && python3 /tmp/fuzz/fuzz.py 0 300
+
+$ cd /tmp && for i in 0 1 2 3 4 5; do python3 /tmp/fuzz/fuzz.py $((1000+i*1000)) 1000 > /tmp/fuzz/out$i.txt 2>&1 & done; wait; cat /tmp/fuzz/out*.txt | head -80
+
+$ cd /tmp/probe && cat > cmp.py <<'EOF'
+import os, shutil, sys, tempfile
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import ignored_files
+from q import q
+def c(d):
+    theirs = q(d)
+    root = tempfile.mkdtemp()
+    for f, v in d.items():
+        p = os.path.join(root, f); os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, "w", newline="", encoding="utf-8") as fh: fh.write(v or "")
+    mine = ignored_files(root); shutil.rmtree(root)
+    print("OK " if mine == theirs else "BAD", d, theirs, "" if mine == theirs else mine)
+EOF
+python3 -c "
+from cmp import c
+base={'x':None,'y':None,'sub/x':None,'sub/y':None,'sub/z/x':None,'sub/z/y':None,'sub/z/w/x':None}
+def t(**pi):
+    d=dict(base); d.update({k.replace('_','/')+('/' if k!='root' else '')+'.packignore' if k!='root' else '.packignore':v for k,v in pi.items()}); c(d)
+t(sub='**\n!x'); t(sub='/**\n!x'); t(sub='**/'); t(root='sub\n!sub/z', sub_z='x'); t(root='sub/z\n', sub='!z', sub_z='x'); t(root='sub/z/', sub='!z/', sub_z='x')
+t(root='z', sub_z='!x'); t(root='*\n!sub\n!z', sub_z='!x'); t(root='sub/**\n!sub/z/', sub_z='!y')
+t(root='x\n'*3+'!x'); t(root='a'*5000); t(root='*a*a*a*a*a*a*a*a*a*a*a*a*b'); t(root='**/**/**/**/**/**/**/**/**/**/**/**/q')
+"
+
+$ python3 tools/packignore . ; python3 -c "from snapshot.ignore import ignored_files; print(ignored_files('.'))"; d=$(mktemp -d); python3 -m snapshot . $d/out && rm -rf $d
+
+$ cd /tmp/fuzz && sed -e 's/^NAMES = .*/NAMES = ["a", "b", "ab", "ba", "aa"]/' -e 's/depth = rng.choice(\[1, 1, 2, 2, 3, 4\])/depth = rng.choice([1, 2, 3, 4, 5])/' -e 's/0.9 if d == "" else 0.35/0.9 if d == "" else 0.6/' -e 's/rng.randint(0, 6)/rng.randint(0, 9)/' -e 's/rng.random() < 0.4 and names/rng.random() < 0.7 and names/' fuzz.py > fuzz2.py && grep -n "NAMES =\|depth =\|0.6\|0.7" fuzz2.py && (for i in 0 1 2; do python3 fuzz2.py $((50000+i*1000)) 1000 > out2_$i.txt 2>&1 & done; wait)

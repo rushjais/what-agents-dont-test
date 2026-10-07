@@ -1,0 +1,250 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..a4be47e 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,190 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. docs/PACKIGNORE.md describes the basics; the rules below are what the
++engine actually does, including the parts the docs leave out.
++
++Reading .packignore files
++    Lines are split with str.splitlines() (so \\r, \\v, \\f, \\x1c-\\x1e, \\x85,
++    \\u2028 and \\u2029 all end a line) and stripped with str.strip(). Empty
++    lines and lines starting with ";" are skipped. "#" is NOT a comment.
++    A leading "!" negates the rest of the line (which is not stripped again).
++    There are no escapes and no character classes: "\\" and "[" are literal.
++
++Patterns
++    A trailing "/" makes the pattern match directories only. Leading "/"s
++    are dropped; if the pattern had one, or still contains a "/", it is
++    anchored to the directory holding the .packignore, otherwise it matches
++    a name at any depth below it. A path segment of exactly "**" matches zero
++    or more segments; elsewhere "*" (including "**", "***", ...) matches any
++    run of characters within a segment and "?" exactly one character.
++
++Deciding a file
++    Every level of the file's path (each ancestor directory, then the file
++    itself) is checked. The deepest level that any rule matches decides.
++    Among the rules matching that level, the winner is the one from the
++    deepest .packignore; then the one with the most literal characters
++    (anything but "*", "?" and "/"); then the later line. The file is
++    excluded if the winner is a positive (non-"!") rule.
++
++    Before any .packignore rule, two implicit file-level rules exclude
++    executable files (any x bit) and files whose first line contains
++    "@generated". They rank below every real rule, so "!*" overrides them.
++
++    A .packignore inside a directory that is itself excluded is never read.
+ """
+ 
+ import os
+-import subprocess
+-import sys
++import re
++import stat
++import unicodedata
++
++_NAME = ".packignore"
++_GENERATED = b"@generated"
++
++
++class _Rule:
++    __slots__ = ("negated", "dir_only", "regex", "rank")
++
++    def __init__(self, negated, dir_only, regex, rank):
++        self.negated = negated
++        self.dir_only = dir_only
++        self.regex = regex
++        self.rank = rank
++
++
++def _segment_regex(seg):
++    out = []
++    for ch in seg:
++        if ch == "*":
++            if not out or out[-1] != "[^/]*":
++                out.append("[^/]*")
++        elif ch == "?":
++            out.append("[^/]")
++        else:
++            out.append(re.escape(ch))
++    return "".join(out)
++
++
++def _compile(line, depth, index):
++    """Turn one stripped, non-comment line into a _Rule, or None."""
++    negated = line.startswith("!")
++    if negated:
++        line = line[1:]
++    literal = sum(1 for ch in line if ch not in "*?/")
++    dir_only = line.endswith("/")
++    body = line.rstrip("/")
++    anchored = body.startswith("/") or "/" in body.strip("/")
++    body = body.lstrip("/")
++    if not body:
++        return None
++    parts = []
++    if not anchored:
++        parts.append("(?:/[^/]+)*")
++    for seg in body.split("/"):
++        if seg == "**":
++            parts.append("(?:/[^/]+)*")
++        else:
++            parts.append("/" + _segment_regex(seg))
++    regex = re.compile("".join(parts), re.DOTALL)
++    return _Rule(negated, dir_only, regex, (depth, literal, index))
++
++
++def _read_rules(path, depth):
++    with open(path, "rb") as f:
++        text = f.read().decode("utf-8")
++    rules = []
++    for index, line in enumerate(text.splitlines()):
++        line = line.strip()
++        if not line or line.startswith(";"):
++            continue
++        rule = _compile(line, depth, index)
++        if rule is not None:
++            rules.append(rule)
++    return rules
++
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++def _first_line_generated(path):
++    tail = b""
++    with open(path, "rb") as f:
++        while True:
++            chunk = f.read(65536)
++            if not chunk:
++                return False
++            nl = chunk.find(b"\n")
++            if nl >= 0:
++                return _GENERATED in tail + chunk[:nl]
++            tail = (tail + chunk)[-(len(_GENERATED) - 1):]
++            if _GENERATED in tail + chunk:
++                return True
++
++
++def _implicitly_excluded(path):
++    if os.stat(path).st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
++        return True
++    return _first_line_generated(path)
++
++
++def _decide(scopes, rel, is_dir):
++    """Return True/False if any rule matches `rel` itself, else None.
++
++    `scopes` is a list of (base, rules) for the .packignore files that apply,
++    where `base` is the holding directory relative to root ("" for root).
++    """
++    best = None
++    for base, rules in scopes:
++        if base:
++            if not rel.startswith(base + "/"):
++                continue
++            target = "/" + rel[len(base) + 1:]
++        else:
++            target = "/" + rel
++        for rule in rules:
++            if rule.dir_only and not is_dir:
++                continue
++            if best is not None and rule.rank < best.rank:
++                continue
++            if rule.regex.fullmatch(target):
++                best = rule
++    if best is None:
++        return None
++    return not best.negated
++
++
++def _fold(name):
++    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
++
++
++def _collect(root):
++    """Map each file path, as packignore sees it, to the file on disk to read.
++
++    packignore treats names case-insensitively (Unicode case folding after
++    canonical normalization). Files are visited in os.walk order. When names
++    collide, the first spelling seen is kept for every path component, while
++    the content and mode come from the last colliding file seen.
++    """
++    names = {}  # folded path -> spelling first seen
++    kinds = {}  # folded path -> "dir" or "file"
++    sources = {}
++    for dirpath, dirnames, filenames in os.walk(root):
++        if os.path.samefile(dirpath, root) and ".git" in dirnames:
++            dirnames.remove(".git")
++        for name in filenames:
++            full = os.path.join(dirpath, name)
++            if os.path.islink(full) or not os.path.isfile(full):
++                continue
++            parts = os.path.relpath(full, root).split(os.sep)
++            key = ""
++            spelled = []
++            for i, part in enumerate(parts):
++                key += "/" + _fold(part)
++                kind = "file" if i == len(parts) - 1 else "dir"
++                if kinds.setdefault(key, kind) != kind:
++                    raise ValueError(f"packignore: {'/'.join(parts)} collides with a "
++                                     f"{kinds[key]} of the same name")
++                spelled.append(names.setdefault(key, part))
++            sources["/".join(spelled)] = full
++    return sources
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +194,42 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    sources = _collect(root)
++    files = list(sources)
++    file_set = set(files)
++
++    # Status of each directory that contains files (directly or below), and
++    # the .packignore scopes in effect inside it.
++    dir_status = {"": False}
++    dir_scopes = {}
++
++    def scopes_for(d):
++        if d in dir_scopes:
++            return dir_scopes[d]
++        if d == "":
++            parent_scopes = []
++        else:
++            parent = d.rpartition("/")[0]
++            parent_scopes = scopes_for(parent)
++            decision = _decide(parent_scopes, d, True)
++            dir_status[d] = dir_status[parent] if decision is None else decision
++        scopes = parent_scopes
++        pi = d + "/" + _NAME if d else _NAME
++        if pi in file_set and not dir_status[d]:
++            depth = d.count("/") + 1 if d else 0
++            scopes = parent_scopes + [(d, _read_rules(sources[pi], depth))]
++        dir_scopes[d] = scopes
++        return scopes
++
++    ignored = []
++    for rel in files:
++        parent = rel.rpartition("/")[0]
++        scopes = scopes_for(parent)
++        decision = _decide(scopes, rel, False)
++        if decision is None:
++            # The implicit rules rank below every real rule at file level,
++            # so they only matter when no rule matches the file itself.
++            decision = dir_status[parent] or _implicitly_excluded(sources[rel])
++        if decision:
++            ignored.append(rel)
++    return sorted(ignored)
+
+# untracked files:
+snapshot/__pycache__/__init__.cpython-311.pyc
+snapshot/__pycache__/ignore.cpython-311.pyc

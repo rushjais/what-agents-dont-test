@@ -1,0 +1,42 @@
+{
+  "run_id": "20261006-074918-v2c-o55-2",
+  "model": "claude-opus-5-5",
+  "effort": null,
+  "agent_status": "timeout",
+  "minutes": 80.5,
+  "cost_usd": null,
+  "turns": null,
+  "token_usage_partial": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 23989,
+    "cache_read_input_tokens": 279817,
+    "output_tokens": 79
+  },
+  "agent_final_message": null,
+  "bash_commands": 12,
+  "static_flags": [
+    "/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-4bzvqxw8/repo/snapshot/ignore.py:8: imports subprocess"
+  ],
+  "task": "v2",
+  "visible_tests_pass": null,
+  "hidden_score": 0.0,
+  "hidden_passed": "0/600",
+  "hidden_errors": 600,
+  "per_set": {
+    "hidden": {
+      "score": 0.0,
+      "passed": "0/600",
+      "by_rule": {
+        "H1_specificity": 0.0,
+        "H2_depth_limit": 0.0,
+        "H3_reinclude": 0.0,
+        "H4_braces": 0.0,
+        "W1_semicolon_comments": 0.0,
+        "documented_only": 0.0
+      }
+    }
+  },
+  "solved": false,
+  "contamination_hits": [],
+  "reward": 0.0
+}

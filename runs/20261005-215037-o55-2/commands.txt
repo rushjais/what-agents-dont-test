@@ -1,0 +1,95 @@
+$ find . -path ./.git -prune -o -type f -print && cat snapshot/ignore.py && cat tests/*.py | head -150 && git --version
+
+$ cd /tmp && mkdir -p gitsrc && cd gitsrc && timeout 20 curl -sSfL -o wildmatch.c https://raw.githubusercontent.com/git/git/v2.47.3/wildmatch.c && curl -sSfL -o dir.c https://raw.githubusercontent.com/git/git/v2.47.3/dir.c && wc -l *; python3 --version
+
+$ cd /tmp/gitsrc && timeout 20 python3 -c "
+import urllib.request
+for f in ['wildmatch.c','dir.c']:
+    open(f,'wb').write(urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/'+f).read())
+" ; ls -la
+
+$ cd /tmp/gitsrc && grep -n "^int match_basename\|^int match_pathname\|^static int fnmatch_icase_mem\|^static void trim_trailing\|^void parse_path_pattern\|^static int add_patterns(\|add_patterns_from_buffer(char\|^static void prep_exclude\|^static struct path_pattern \*last_matching\|^static enum path_treatment treat_directory\|^static enum path_treatment treat_path\|^int is_nonbare\|^static int simple_length\|PATTERN_MAX" dir.c
+
+$ cd /tmp/gitsrc && sed -n 150,200p dir.c; sed -n 640,700p dir.c; sed -n 980,1010p dir.c; sed -n 1100,1420p dir.c
+
+$ cd /tmp/gitsrc && sed -n 1560,1720p dir.c; sed -n 1915,2010p dir.c; sed -n 2375,2470p dir.c
+
+$ cd /tmp/gitsrc && grep -n "^static enum path_treatment read_directory_recursive\|^int read_directory(\|^static int is_nonbare\|^int is_nonbare" dir.c; awk 'NR>=2010 && NR<=2030' dir.c; sed -n '/^static enum path_treatment read_directory_recursive/,/^}/p' dir.c | sed -n 1,200p | grep -v "^\s*\*" | head -150
+
+$ cd /tmp/gitsrc && sed -n '/^static void add_path_to_appropriate_result_list/,/^}/p;/^int read_directory(/,/^}/p' dir.c; grep -n "is_nonbare_repository_dir" -A25 dir.c | head -40; timeout 20 python3 -c "
+import urllib.request
+for f in ['setup.c','builtin/ls-files.c']:
+    open(f.replace('/','_'),'wb').write(urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/'+f).read())
+"
+
+$ cd /tmp/gitsrc && sed -n '/^static struct dir_entry \*dir_add_name/,/^}/p' dir.c; grep -n "DIR_\|exclude_per_dir\|setup_standard_excludes\|static void show_dir_entry" -A2 builtin_ls-files.c | head -60; sed -n '/^int is_nonbare_repository_dir/,/^}/p;/^int is_git_directory/,/^}/p' setup.c
+
+$ cd /tmp/gitsrc && sed -n 140,175p builtin_ls-files.c; sed -n '/^static int validate_headref/,/^}/p;/^const char \*read_gitfile_gently/,/^}/p;/^int get_common_dir(/,/^}/p;/^int get_common_dir_noenv/,/^}/p' setup.c; grep -n "get_common_dir" setup.c | head
+
+$ cd /tmp/gitsrc && timeout 20 python3 -c "
+import urllib.request
+for f in ['ctype.c','git-compat-util.h','hex-ll.c']:
+    open(f,'wb').write(urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/'+f).read())
+"; sed -n '/^enum {/,/^};/p;/sane_ctype\[256\]/,/^};/p' ctype.c; grep -n "define is[a-z]*(\|define ISASCII\|STDC_HEADERS\|sane_iscase" -A0 git-compat-util.h; grep -n "skip_utf8_bom" -A12 ../gitsrc/*.c | head -0; grep -rn "open_nofollow" git-compat-util.h
+
+$ cd /tmp/gitsrc && ls -la; grep -n "#define is\|ISASCII\|sane_iscase\|isblank\|isgraph" git-compat-util.h | head -40
+
+$ cd /tmp/gitsrc && timeout 20 python3 -c "
+import urllib.request
+open('sane-ctype.h','wb').write(urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/sane-ctype.h').read())
+"; grep -n "define\|sane_iscase" -A0 sane-ctype.h | head -50; grep -n "skip_utf8_bom" -B2 -A12 /tmp/gitsrc/*.c | grep -v "^--$" | head -5
+
+$ git show HEAD:snapshot/ignore.py > /tmp/orig_ignore.py && python3 -m unittest discover -s tests -t . 2>&1 | tail -3
+
+$ cd /tmp && for i in 0 1 2 3 4 5 6 7; do python3 /tmp/fuzz/fuzz.py $((i*500)) 500 > /tmp/fuzz/out$i.txt 2>&1 & done; wait; cat /tmp/fuzz/out*.txt | sort | uniq -c | sort -rn | head -30
+
+$ cd /tmp && for i in 0 1 2 3 4 5 6 7; do python3 /tmp/fuzz/fuzz2.py $((i+100)) 600 > /tmp/fuzz/o2_$i.txt 2>&1 & done; wait; cat /tmp/fuzz/o2_*.txt | head -30
+
+$ cd /tmp && cat > /tmp/fuzz/edge.py <<'EOF'
+import os, sys, tempfile, subprocess
+sys.path.insert(0, "/work/repo"); sys.path.insert(0, "/tmp")
+from snapshot.ignore import ignored_files as mine
+from orig_ignore import ignored_files as theirs
+def w(p, s="x"):
+    os.makedirs(os.path.dirname(p), exist_ok=True); open(p, "w").write(s)
+cases = []
+def case(fn):
+    cases.append(fn); return fn
+@case
+def nested(root):
+    w(f"{root}/.gitignore", "sub*\nlib/\n"); subprocess.run(["git","init","-q",f"{root}/sub"]); w(f"{root}/sub/f")
+    subprocess.run(["git","init","-q",f"{root}/keep"]); w(f"{root}/keep/f")
+    subprocess.run(["git","init","-q",f"{root}/lib/inner"]); w(f"{root}/lib/inner/z")
+@case
+def gitfile(root):
+    w(f"{root}/.gitignore", "w*\n"); subprocess.run(["git","init","-q",f"{root}/store"])
+    w(f"{root}/wt/.git", "gitdir: ../store/.git\n"); w(f"{root}/wt/a")
+    w(f"{root}/wx/.git", "gitdir: nope\n"); w(f"{root}/wx/a")
+    w(f"{root}/wy/.git", "garbage"); w(f"{root}/wy/a")
+@case
+def symlinked_gitignore(root):
+    w(f"{root}/real", "*.o\n"); w(f"{root}/d/x.o"); os.symlink("../real", f"{root}/d/.gitignore"); w(f"{root}/.gitignore", "!*.o\nreal\n")
+@case
+def dir_gitignore(root):
+    w(f"{root}/.gitignore/inner", "x"); w(f"{root}/a.o"); w(f"{root}/sub/.gitignore", "*.o\n.gitignore\n"); w(f"{root}/sub/.gitignore2")
+@case
+def dotgit_entries(root):
+    w(f"{root}/.gitignore", "*\n"); w(f"{root}/d/.git/HEAD", "junk"); w(f"{root}/d/f"); w(f"{root}/e/.git", "x"); w(f"{root}/.git/x")
+@case
+def crlf_bom(root):
+    w(f"{root}/.gitignore", "﻿*.a\r\n\r\n  \r\n\\#x\r\n#y\r\nz\\ \r\nq  \r\nt\\\n"); 
+    for n in ["1.a", "#x", "#y", "z ", "q", "q  ", "t\\", "t"]: w(f"{root}/{n}")
+@case
+def reinclude(root):
+    w(f"{root}/.gitignore", "build/\n!build/keep\n/*\n!/src\n"); w(f"{root}/build/keep"); w(f"{root}/src/build/keep"); w(f"{root}/src/a"); w(f"{root}/b")
+    w(f"{root}/src/.gitignore", "!build/\n*\n!keep\n")
+for fn in cases:
+    with tempfile.TemporaryDirectory() as root:
+        fn(root); a, b = mine(root), theirs(root)
+        print(fn.__name__, "OK" if a == b else "MISMATCH", b if a == b else (a, b))
+EOF
+python3 /tmp/fuzz/edge.py 2>&1 | grep -v hint
+
+$ cd /tmp && for i in 0 1 2 3 4 5 6 7; do python3 /tmp/fuzz/fuzz.py $((10000+i*1000)) 1000 > /tmp/fuzz/o3_$i.txt 2>&1 & python3 /tmp/fuzz/fuzz2.py $((200+i)) 500 > /tmp/fuzz/o4_$i.txt 2>&1 & done; wait; cat /tmp/fuzz/o3_*.txt /tmp/fuzz/o4_*.txt | grep -c MISMATCH; cat /tmp/fuzz/o3_*.txt /tmp/fuzz/o4_*.txt | grep done | awk '{s+=$3} END {print s, "cases"}'; cd /work/repo && python3 -m unittest discover -s tests -t . 2>&1 | tail -1; git status --short
+
+$ rm -rf snapshot/__pycache__ tests/__pycache__ && git status --short

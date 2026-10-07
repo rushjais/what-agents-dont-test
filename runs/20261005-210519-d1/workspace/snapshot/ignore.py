@@ -1,0 +1,270 @@
+"""Decide which files in a project tree are ignored by its .gitignore files.
+
+Pure-Python implementation of git's gitignore semantics; does not shell out
+to git. Only .gitignore files inside `root` are consulted (no global or
+per-repo excludes), and matching is case-sensitive.
+"""
+
+import os
+import re
+
+__all__ = ["ignored_files"]
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .gitignore files ignore.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. Only .gitignore files inside
+    `root` are consulted; a `.git` directory directly under `root` is skipped.
+    """
+    result = []
+    _walk(root, root, (), result, True)
+    return sorted(result)
+
+
+def _walk(root, cur_dir, stack, result, is_top):
+    try:
+        entries = list(os.scandir(cur_dir))
+    except OSError:
+        return
+
+    patterns = None
+    for entry in entries:
+        if entry.name == ".gitignore":
+            try:
+                if entry.is_file():
+                    patterns = _parse_gitignore(entry.path)
+            except OSError:
+                pass
+            break
+
+    if patterns:
+        gi_dir_rel = "" if is_top else os.path.relpath(cur_dir, root).replace(os.sep, "/")
+        new_stack = stack + ((gi_dir_rel, patterns),)
+    else:
+        new_stack = stack
+
+    for entry in entries:
+        if is_top and entry.name == ".git":
+            continue
+
+        rel = os.path.relpath(entry.path, root).replace(os.sep, "/")
+
+        try:
+            is_dir = entry.is_dir(follow_symlinks=False)
+        except OSError:
+            is_dir = False
+
+        if _is_ignored(rel, is_dir, new_stack):
+            if is_dir:
+                _collect_all_files(entry.path, rel, result)
+            else:
+                result.append(rel)
+        elif is_dir:
+            _walk(root, entry.path, new_stack, result, False)
+
+
+def _collect_all_files(dir_path, dir_rel, result):
+    try:
+        entries = os.scandir(dir_path)
+    except OSError:
+        return
+    for entry in entries:
+        rel = dir_rel + "/" + entry.name
+        try:
+            is_dir = entry.is_dir(follow_symlinks=False)
+        except OSError:
+            is_dir = False
+        if is_dir:
+            _collect_all_files(entry.path, rel, result)
+        else:
+            result.append(rel)
+
+
+def _is_ignored(rel_path, is_dir, stack):
+    for gi_dir, patterns in reversed(stack):
+        if gi_dir == "":
+            sub = rel_path
+        else:
+            prefix = gi_dir + "/"
+            if not rel_path.startswith(prefix):
+                continue
+            sub = rel_path[len(prefix):]
+        for regex, dir_only, negation in reversed(patterns):
+            if dir_only and not is_dir:
+                continue
+            if regex.fullmatch(sub):
+                return not negation
+    return False
+
+
+def _parse_gitignore(path):
+    try:
+        with open(path, "r", encoding="utf-8", errors="surrogateescape") as f:
+            data = f.read()
+    except OSError:
+        return []
+    patterns = []
+    for line in data.splitlines():
+        parsed = _parse_line(line)
+        if parsed is not None:
+            patterns.append(parsed)
+    return patterns
+
+
+def _parse_line(line):
+    if line.startswith("#"):
+        return None
+
+    line = _strip_trailing_spaces(line)
+    if not line:
+        return None
+
+    negation = False
+    if line.startswith("!"):
+        negation = True
+        line = line[1:]
+    elif line.startswith("\\!") or line.startswith("\\#"):
+        line = line[1:]
+
+    if not line:
+        return None
+
+    dir_only = False
+    if line.endswith("/"):
+        dir_only = True
+        line = line[:-1]
+
+    if not line:
+        return None
+
+    if line.startswith("/"):
+        line = line[1:]
+        anchored = True
+    elif "/" in line:
+        anchored = True
+    else:
+        anchored = False
+
+    if not line:
+        return None
+
+    body = _translate(line)
+    pattern = body if anchored else "(?:[^/]+/)*" + body
+    return re.compile(pattern), dir_only, negation
+
+
+def _strip_trailing_spaces(line):
+    end = len(line)
+    while end > 0 and line[end - 1] == " ":
+        bs = 0
+        k = end - 2
+        while k >= 0 and line[k] == "\\":
+            bs += 1
+            k -= 1
+        if bs % 2 == 1:
+            break
+        end -= 1
+    return line[:end]
+
+
+def _translate(pat):
+    i = 0
+    n = len(pat)
+    out = []
+    seen_wildcard = False
+    while i < n:
+        c = pat[i]
+        if c == "*":
+            j = i
+            while j < n and pat[j] == "*":
+                j += 1
+            num_stars = j - i
+            after_slash = j == n or pat[j] == "/"
+            # In git's wildmatch, ** is path-component when at the start of the
+            # sub-pattern (after literal-prefix stripping) or preceded by '/'.
+            # Equivalently: no wildcards before it, or immediately preceded by '/'.
+            before_eligible = (
+                i == 0
+                or pat[i - 1] == "/"
+                or not seen_wildcard
+            )
+            if num_stars >= 2 and before_eligible and after_slash:
+                # Path-component **
+                if j == n:
+                    # ** or /** at end — matches anything (incl. '/')
+                    out.append(".*")
+                    i = j
+                elif i == 0 or pat[i - 1] == "/":
+                    # **/ at start, or /**/ in middle
+                    out.append("(?:[^/]+/)*")
+                    i = j + 1
+                else:
+                    # literal**/ — the "zero chars" case must also consume the '/'
+                    out.append("(?:.*/)?")
+                    i = j + 1
+            else:
+                for _ in range(num_stars):
+                    out.append("[^/]*")
+                i = j
+            seen_wildcard = True
+        elif c == "/":
+            out.append("/")
+            i += 1
+        elif c == "?":
+            out.append("[^/]")
+            i += 1
+            seen_wildcard = True
+        elif c == "[":
+            j = i + 1
+            negated = False
+            if j < n and pat[j] == "!":
+                negated = True
+                j += 1
+            content_start = j
+            if j < n and pat[j] == "]":
+                j += 1
+            while j < n and pat[j] != "]":
+                if pat[j] == "\\" and j + 1 < n:
+                    j += 2
+                else:
+                    j += 1
+            if j >= n:
+                out.append(re.escape("["))
+                i += 1
+            else:
+                raw = pat[content_start:j]
+                parts = ["["]
+                if negated:
+                    parts.append("^")
+                k = 0
+                while k < len(raw):
+                    ch = raw[k]
+                    if ch == "\\" and k + 1 < len(raw):
+                        parts.append(re.escape(raw[k + 1]))
+                        k += 2
+                    elif ch == "]":
+                        parts.append(r"\]")
+                        k += 1
+                    elif ch == "\\":
+                        parts.append(r"\\")
+                        k += 1
+                    else:
+                        parts.append(ch)
+                        k += 1
+                parts.append("]")
+                out.append("".join(parts))
+                i = j + 1
+                seen_wildcard = True
+        elif c == "\\":
+            if i + 1 < n:
+                out.append(re.escape(pat[i + 1]))
+                i += 2
+            else:
+                out.append(re.escape(c))
+                i += 1
+        else:
+            out.append(re.escape(c))
+            i += 1
+    return "".join(out)

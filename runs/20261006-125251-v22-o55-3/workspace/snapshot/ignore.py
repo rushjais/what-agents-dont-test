@@ -1,0 +1,184 @@
+"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine. docs/PACKIGNORE.md describes the original, but it is out of date; the
+rules below are what `packignore` actually does.
+
+Syntax of a .packignore file (UTF-8):
+
+- The file is split with str.splitlines() and each line is stripped of
+  surrounding whitespace (str.strip()). Empty lines are ignored, and lines
+  starting with ";" are comments. "#" is not special.
+- A line starting with "!" is a negated (re-including) pattern. The rest of
+  the line after the "!" is the pattern, not stripped again.
+- Trailing "/" characters make the pattern match directories only.
+- If what remains contains a "/", the pattern is anchored to the directory
+  holding the .packignore and matched against the path relative to it
+  (leading "/" characters are then dropped). Otherwise it is matched against
+  the name of every file or directory at any depth below that directory.
+- Brace groups are expanded: the first "{" and the first "}" after it
+  enclose ","-separated alternatives; expansion then continues on the text
+  after the "}". Braces without a closing "}" are literal.
+- "*" matches any run of characters (possibly empty) within one path
+  segment, "?" exactly one character. A segment that is exactly "**"
+  matches zero to three whole segments (no more); "**" elsewhere behaves like "*".
+  Everything else, including "[", "]" and "\\", is literal. Matching is
+  case-sensitive.
+
+Evaluation:
+
+- Each pattern has a score: the number of characters in it (after the "!")
+  other than "*", "?", "{", "}", "," and "/".
+- A .packignore applies to everything below its directory (not to the
+  directory itself). For a given path, the applicable files are considered
+  from the outermost to the innermost. Within a file, patterns are
+  considered from the lowest score to the highest, in file order among
+  equal scores. The last matching pattern decides: excluded, or re-included
+  if it is negated. So an inner file always overrides an outer one, and
+  within a file a pattern only overrides earlier ones with the same or a
+  lower score.
+- If no pattern matches a path, it inherits the state of its parent
+  directory (the root is not excluded). So an excluded directory excludes
+  everything in it, unless a pattern matches something inside it again.
+- A .packignore inside an excluded directory is not read. Whether the
+  .packignore file itself is excluded does not matter.
+- Only regular files are considered; symlinks and a `.git` directory
+  directly under the root are skipped.
+"""
+
+import os
+import re
+
+_NAME = ".packignore"
+_NOT_SCORED = frozenset("*?{},/")
+
+
+def _expand_braces(pattern):
+    start = pattern.find("{")
+    if start < 0:
+        return [pattern]
+    end = pattern.find("}", start)
+    if end < 0:
+        return [pattern]
+    rests = _expand_braces(pattern[end + 1:])
+    return [pattern[:start] + alt + rest
+            for alt in pattern[start + 1:end].split(",") for rest in rests]
+
+
+def _segment_regex(segment):
+    if segment == "**":
+        return "(?:[^/]+/){0,3}"
+    out = []
+    for ch in segment:
+        if ch == "*":
+            out.append("[^/]*")
+        elif ch == "?":
+            out.append("[^/]")
+        else:
+            out.append(re.escape(ch))
+    return "".join(out) + "/"
+
+
+def _compile(pattern):
+    """Regex matching `path + "/"` for each brace alternative of `pattern`."""
+    alternatives = []
+    for alt in _expand_braces(pattern):
+        alternatives.append("".join(_segment_regex(seg) for seg in alt.split("/")))
+    return re.compile("|".join("(?:%s)" % a for a in alternatives), re.DOTALL)
+
+
+class _Rule:
+    def __init__(self, regex, negated, dir_only, anchored):
+        self.regex = regex
+        self.negated = negated
+        self.dir_only = dir_only
+        self.anchored = anchored
+
+
+def _parse(text):
+    rules = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith(";"):
+            continue
+        negated = line.startswith("!")
+        pattern = line[1:] if negated else line
+        stripped = pattern.rstrip("/")
+        dir_only = stripped != pattern
+        anchored = "/" in stripped
+        if anchored:
+            stripped = stripped.lstrip("/")
+        score = sum(ch not in _NOT_SCORED for ch in pattern)
+        rules.append((score, _Rule(_compile(stripped), negated, dir_only, anchored)))
+    # Rules are tried from the lowest score to the highest (stable), so a
+    # later rule only overrides an earlier one with the same or a lower score.
+    rules.sort(key=lambda r: r[0])
+    return [rule for _, rule in rules]
+
+
+def _walk(root):
+    """Return (files, dirs) under root as "/"-separated relative paths."""
+    files = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            if os.path.islink(full) or not os.path.isfile(full):
+                continue
+            files.append(os.path.relpath(full, root).replace(os.sep, "/"))
+    dirs = set()
+    for f in files:
+        parts = f.split("/")[:-1]
+        for i in range(1, len(parts) + 1):
+            dirs.add("/".join(parts[:i]))
+    return files, dirs
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .packignore files exclude.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. A `.git` directory directly
+    under `root` is skipped.
+    """
+    files, dirs = _walk(root)
+    file_set = set(files)
+
+    # Directory ("" for root) -> rules of its .packignore, read lazily only
+    # for directories that are not excluded.
+    rules_by_dir = {}
+    excluded = {"": False}
+
+    def rules_for(d):
+        if d not in rules_by_dir:
+            rules = []
+            rel = (d + "/" if d else "") + _NAME
+            if rel in file_set and not excluded[d]:
+                with open(os.path.join(root, *rel.split("/")), encoding="utf-8") as f:
+                    rules = _parse(f.read())
+            rules_by_dir[d] = rules
+        return rules_by_dir[d]
+
+    def state(path, is_dir):
+        parts = path.split("/")
+        parent = "/".join(parts[:-1])
+        result = None
+        for i in range(len(parts)):
+            base = "/".join(parts[:i])
+            rules = rules_for(base)
+            if not rules:
+                continue
+            rel = "/".join(parts[i:])
+            name = parts[-1]
+            for rule in rules:
+                if rule.dir_only and not is_dir:
+                    continue
+                target = rel if rule.anchored else name
+                if rule.regex.fullmatch(target + "/"):
+                    result = not rule.negated
+        return excluded[parent] if result is None else result
+
+    for d in sorted(dirs, key=lambda d: d.count("/")):
+        excluded[d] = state(d, True)
+    return sorted(f for f in files if state(f, False))

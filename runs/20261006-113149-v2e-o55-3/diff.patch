@@ -1,0 +1,282 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..1960006 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,219 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. docs/PACKIGNORE.md describes it only loosely; the rules below are the
++ones `packignore` actually applies:
++
++* The tree is looked at as on a case- and normalization-insensitive file
++  system: paths whose components are equal after Unicode case folding and
++  canonical normalization are the same entry. The first spelling seen (in
++  walk order) is kept, and for files the last contents win. A path that is
++  both a file and a directory is an error.
++* A file named exactly `.packignore` is read in a directory unless that
++  directory is itself excluded. Its patterns apply to paths below it.
++  Lines are capped (see the limits below), and so is the tree.
++* Lines are split with str.splitlines() and stripped of surrounding
++  whitespace. Empty lines and lines starting with `;` are skipped (`#` is
++  *not* a comment). A leading `!` negates. Trailing `/`s make the pattern
++  match directories only; leading `/`s are dropped. The pattern is anchored to
++  its `.packignore` directory if it had a leading `/` or contains a `/`,
++  otherwise it matches names at any depth. Backslash is an ordinary character.
++* Braces are then expanded: the first `{` and the first `}` after it enclose
++  comma-separated alternatives (not re-expanded); the rest of the pattern is
++  expanded recursively. `[` and `]` are literal.
++* `*` matches any run of characters except `/`, `?` exactly one such
++  character. In an anchored pattern a segment that is exactly `**` matches
++  zero to three path components (so a trailing `/**` also matches the
++  directory itself). Elsewhere `**` is just `*`.
++* A path's status is decided by the patterns matching the path itself; if
++  none does, it inherits its parent directory's status. So a negation can
++  re-include a file inside an excluded directory, but an excluded directory's
++  own `.packignore` is never read.
++* Among the patterns matching a path, one from a deeper `.packignore` wins;
++  within one file the most specific wins (the most characters other than
++  `*?/{},`), and ties go to the later line.
+ """
+ 
+ import os
+-import subprocess
+-import sys
++import unicodedata
++
++
++class PackignoreError(Exception):
++    """packignore refuses the tree (too large, or a path is both a file and a directory)."""
++
++
++# packignore's input limits.
++_MAX_FILES = 5000
++_MAX_DEPTH = 64  # path components
++_MAX_NAME_UNITS = 255  # UTF-16 code units per path component
++_MAX_PATH_BYTES = 955  # UTF-8 bytes per relative path
++_MAX_LINES = 2000  # per .packignore
++_MAX_LINE_CHARS = 1000
++
++
++def _fold(name):
++    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
++
++
++def _walk(root):
++    """Return {path: contents-or-None} for the files under `root`, in walk order."""
++    files = {}
++    for dirpath, dirnames, filenames in os.walk(root):
++        if os.path.samefile(dirpath, root) and ".git" in dirnames:
++            dirnames.remove(".git")
++        for name in filenames:
++            full = os.path.join(dirpath, name)
++            rel = os.path.relpath(full, root).replace(os.sep, "/")
++            if name == ".packignore":
++                with open(full, newline="") as f:
++                    files[rel] = f.read()
++            else:
++                files[rel] = None
++    return files
++
++
++def _check_limits(files):
++    """Reject the inputs packignore refuses to evaluate."""
++    if len(files) > _MAX_FILES:
++        raise PackignoreError(f"too many files (limit {_MAX_FILES})")
++    for rel, content in files.items():
++        parts = rel.split("/")
++        if len(parts) > _MAX_DEPTH:
++            raise PackignoreError(f"path too deep (limit {_MAX_DEPTH} levels)")
++        try:
++            too_long = len(rel.encode("utf-8")) > _MAX_PATH_BYTES or \
++                any(len(part.encode("utf-16-le")) > 2 * _MAX_NAME_UNITS for part in parts)
++        except UnicodeEncodeError:  # undecodable file name
++            too_long = True
++        if too_long or "\0" in rel:
++            raise PackignoreError(f"cannot handle path {rel!r}")
++        if content is not None:
++            lines = content.splitlines()
++            if len(lines) > _MAX_LINES or any(len(line) > _MAX_LINE_CHARS for line in lines):
++                raise PackignoreError(f"ignore file too large (limits: {_MAX_LINES} lines, "
++                                      f"{_MAX_LINE_CHARS} characters per line)")
++
++
++def _merge(files):
++    """Merge entries the way a case/normalization-insensitive file system would."""
++    dirs = {(): ()}  # folded parts -> spelled parts
++    merged = {}  # folded parts -> [spelled path, contents]
++    for rel, content in files.items():
++        parts = rel.split("/")
++        spelled = ()
++        key = ()
++        for part in parts[:-1]:
++            key += (_fold(part),)
++            if key in merged:
++                raise PackignoreError(f"invalid tree: {'/'.join(merged[key][0])!r} is both a file "
++                                      f"and a directory")
++            if key not in dirs:
++                dirs[key] = spelled + (part,)
++            spelled = dirs[key]
++        key += (_fold(parts[-1]),)
++        if key in dirs:
++            raise PackignoreError(f"invalid tree: {'/'.join(dirs[key])!r} is both a file and a "
++                                  f"directory")
++        if key in merged:
++            merged[key][1] = content
++        else:
++            merged[key] = [spelled + (parts[-1],), content]
++    return {"/".join(spelled): content for spelled, content in merged.values()}
++
++
++def _expand_braces(pattern):
++    start = pattern.find("{")
++    if start < 0:
++        return [pattern]
++    end = pattern.find("}", start)
++    if end < 0:
++        return [pattern]
++    head = pattern[:start]
++    rests = _expand_braces(pattern[end + 1:])
++    return [head + alt + rest for alt in pattern[start + 1:end].split(",") for rest in rests]
++
++
++_STAR = object()
++_GLOBSTAR = object()
++_GLOBSTAR_MAX = 3  # packignore's `**` spans at most this many path components
++
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++def _compile_segment(segment):
++    return [_STAR if c == "*" else c for c in segment]
++
++
++def _segment_matches(tokens, name):
++    """Match `name` against a list of characters and STARs (`?` matches any one character).
++
++    Greedy matching that only backtracks to the last STAR: O(len(tokens) * len(name)).
++    """
++    p = i = 0
++    star_p = star_i = -1
++    while i < len(name):
++        if p < len(tokens) and tokens[p] is _STAR:
++            star_p, star_i = p, i
++            p += 1
++        elif p < len(tokens) and (tokens[p] == "?" or tokens[p] == name[i]):
++            p += 1
++            i += 1
++        elif star_p >= 0:
++            star_i += 1
++            p, i = star_p + 1, star_i
++        else:
++            return False
++    while p < len(tokens) and tokens[p] is _STAR:
++        p += 1
++    return p == len(tokens)
++
++
++def _path_matches(segments, parts):
++    """Match path components against compiled segments and GLOBSTARs."""
++    reachable = {0}
++    for seg in segments:
++        if seg is _GLOBSTAR:
++            reachable = {i + k for i in reachable for k in range(_GLOBSTAR_MAX + 1)
++                         if i + k <= len(parts)}
++        else:
++            reachable = {i + 1 for i in reachable
++                         if i < len(parts) and _segment_matches(seg, parts[i])}
++        if not reachable:
++            return False
++    return len(parts) in reachable
++
++
++def _compile_glob(glob, anchored):
++    """Anchored globs become a list of compiled path components and GLOBSTARs (`**`)."""
++    if not anchored:
++        return _compile_segment(glob)
++    return [_GLOBSTAR if seg == "**" else _compile_segment(seg) for seg in glob.split("/")]
++
++
++def _rule_matches(globs, anchored, rel):
++    if anchored:
++        return any(_path_matches(g, rel) for g in globs)
++    return any(_segment_matches(g, rel[-1]) for g in globs)
++
++
++def _parse(text):
++    """Return a list of (negate, dir_only, anchored, score, globs) rules."""
++    rules = []
++    for line in text.splitlines():
++        line = line.strip()
++        if not line or line.startswith(";"):
++            continue
++        negate = line.startswith("!")
++        if negate:
++            line = line[1:]
++        dir_only = line.endswith("/")
++        line = line.rstrip("/")
++        anchored = "/" in line
++        line = line.lstrip("/")
++        if not line:
++            continue
++        score = sum(c not in "*?/{}," for c in line)
++        globs = [_compile_glob(g, anchored) for g in dict.fromkeys(_expand_braces(line))]
++        rules.append((negate, dir_only, anchored, score, globs))
++    return rules
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +223,49 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    return _ignored(_walk(root))
++
++
++def _ignored(files):
++    _check_limits(files)
++    tree = _merge(files)
++    texts = {}
++    for path, content in tree.items():
++        parts = tuple(path.split("/"))
++        if parts[-1] == ".packignore":
++            texts[parts[:-1]] = content or ""
++
++    rules_cache = {}
++    status_cache = {}
++
++    def rules_for(d):
++        # .packignore rules in directory `d` (tuple of parts), if it is read.
++        if d not in rules_cache:
++            text = texts.get(d)
++            rules_cache[d] = _parse(text) if text is not None and not (d and status(d, True)) \
++                else []
++        return rules_cache[d]
++
++    def status(parts, is_dir):
++        """True if the path `parts` is excluded."""
++        cache_key = (parts, is_dir)
++        if cache_key in status_cache:
++            return status_cache[cache_key]
++        result = None
++        best = None
++        for depth in range(len(parts)):
++            base = parts[:depth]
++            rel = parts[depth:]
++            for negate, dir_only, anchored, score, globs in rules_for(base):
++                if dir_only and not is_dir:
++                    continue
++                if (best is None or (depth, score) >= best) and \
++                        _rule_matches(globs, anchored, rel):
++                    best = (depth, score)
++                    result = not negate
++        if result is None:
++            result = status(parts[:-1], True) if len(parts) > 1 else False
++        status_cache[cache_key] = result
++        return result
++
++    return sorted(path for path in tree if status(tuple(path.split("/")), False))

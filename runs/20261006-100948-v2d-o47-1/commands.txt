@@ -1,0 +1,213 @@
+$ ls -la /work/repo/
+
+$ ls -la /work/repo/snapshot/ /work/repo/tools/ /work/repo/docs/
+
+$ curl -s http://127.0.0.1:8765/ 2>&1 | head -20; echo "---"; env | grep -i pack
+
+$ cd /tmp && mkdir -p pi_test1 && cd pi_test1 && printf '%s\n' '; comment' '# not a comment?' '*.log' > .packignore && touch a.log b.txt '#not a comment?' && /work/repo/tools/packignore /tmp/pi_test1
+
+$ rm -rf /tmp/pi_test2 && mkdir -p /tmp/pi_test2 && cd /tmp/pi_test2 && printf '%s\n' '#foo' '; bar' > .packignore && touch '#foo' 'bar' && /work/repo/tools/packignore /tmp/pi_test2
+
+$ mkdir -p /tmp/pitests && cd /tmp/pitests && cat > runtest.sh <<'EOF'
+#!/bin/bash
+# Usage: runtest.sh test_name <<<"files_setup_bash"
+# After files are set up, runs packignore and prints result
+set -e
+name="$1"
+dir="/tmp/pitests/$name"
+rm -rf "$dir"
+mkdir -p "$dir"
+EOF
+chmod +x runtest.sh
+echo done
+
+$ cd /tmp/pitests && python3 t01_basics.py
+
+$ cd /tmp/pitests && python3 t02_wild.py
+
+$ cd /tmp/pitests && python3 t02_wild.py
+
+$ cd /tmp/pitests && python3 t02_wild.py
+
+$ cd /tmp/pitests && python3 t03_negation.py && echo "===SPLIT===" && python3 t04_nest.py
+
+$ cd /tmp/pitests && python3 t05_edge.py
+
+$ cd /tmp/pitests && python3 t06_more.py
+
+$ cd /tmp/pitests && python3 t07_dir_reinclude.py
+
+$ cd /tmp/pitests && python3 t08_more.py
+
+$ cd /tmp/pitests && python3 t09_prune.py
+
+$ cd /tmp/pitests && python3 t10_verify.py
+
+$ cd /tmp/pitests && python3 t11_final.py
+
+$ cd /tmp/pitests && python3 t12_dir_match.py
+
+$ cd /tmp/pitests && python3 compare.py 2>&1 | head -100
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch axb aXb aXYZb && ls -la && echo "---" && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch axb aXb aYb aZb aXYb a1b ab a--b 'a b' && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXb && ls -la && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXb aYb aZb && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch axb aXb aYb aZb aXYb a1b ab a--b 'a b' && /work/repo/tools/packignore /tmp/pirepro
+
+$ for i in 1 2 3; do rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch axb aXb aYb aZb aXYb a1b ab a--b 'a b' && echo "=== run $i ==="; /work/repo/tools/packignore /tmp/pirepro; cd /; done
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXb aXYb aXYZb && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch 'a b' aXb && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch 'a b' a--b aXb axb aXYb aYb aZb && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch a--b aXb && /work/repo/tools/packignore /tmp/pirepro; echo ---; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch axb aXb && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch axb aXb aYb && /work/repo/tools/packignore /tmp/pirepro; echo ===; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXb aYb && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXYZb aXYZB && /work/repo/tools/packignore /tmp/pirepro; echo ===; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'FOO\n' > .packignore && touch FOO foo && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXYZb && /work/repo/tools/packignore /tmp/pirepro; echo ===; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXYZB && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a**b\n' > .packignore && touch aXYZb aXYZB && ls -la && echo === && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*\n' > .packignore && touch FOO foo && ls -la; echo ===; /work/repo/tools/packignore /tmp/pirepro
+
+$ python3 -c "import os; print(os.listdir('/tmp/pirepro'))"
+
+$ python3 -c "
+import json
+d = {'FOO': None, '.packignore': 'content', 'foo': None}
+s = json.dumps({'files': d})
+print(s)
+d2 = json.loads(s)
+print(list(d2['files'].keys()))
+"
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*\n' > .packignore && touch foo FOO && python3 -c "import os; print(os.listdir('/tmp/pirepro'))" && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*\n' > .packignore && touch a.txt b.txt && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*\n' > .packignore && touch Foo FOO foo FoO fOO fOo && ls && echo === && /work/repo/tools/packignore /tmp/pirepro
+
+$ python3 -c "import os; print(os.listdir('/tmp/pirepro'))"
+
+$ python3 -c "
+import json, os
+root='/tmp/pirepro'
+files = {}
+for dirpath, dirnames, filenames in os.walk(root):
+    if os.path.samefile(dirpath, root) and '.git' in dirnames:
+        dirnames.remove('.git')
+    for name in filenames:
+        full = os.path.join(dirpath, name)
+        rel = os.path.relpath(full, root).replace(os.sep, '/')
+        files[rel] = open(full, newline='').read() if name == '.packignore' else None
+print(list(files.keys()))
+print(json.dumps({'files': files}))
+"
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'FOO\n' > .packignore && touch foo FOO && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/Sub /tmp/pirepro/sub && cd /tmp/pirepro && printf '*\n' > .packignore && touch Sub/a.txt sub/b.txt && ls Sub sub && echo === && python3 -c "import os; print(list(os.walk('/tmp/pirepro')))" && echo === && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!important.log\n*.log\n' > .packignore && touch a.log important.log && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!important.log\n*.log\nimportant.log\n' > .packignore && touch a.log important.log && /work/repo/tools/packignore /tmp/pirepro; echo ===; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a\na\n' > .packignore && touch a b && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!*.log\na.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo ===; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*.log\n!a.log\n*.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo ===; rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n*.log\n!a.log\n*.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*.log\n!a.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== basic reinclude ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*.log\n!a.log\na.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== specific exclude after neg ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n*.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== neg first (orig neg_order) ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.*\n*.log\n' > .packignore && touch a.log a.txt b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== 1 ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!*.log\na.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== 2 ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.*\na.log\n' > .packignore && touch a.log a.txt && /work/repo/tools/packignore /tmp/pirepro; echo "=== 3: !a.* then a.log (both have 1 wildcard effectively) ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a.log\n!a.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== 4: both specific ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\na.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== 5: both specific reversed ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a?b\n*ab\n' > .packignore && touch aXb ab Xab Yab && /work/repo/tools/packignore /tmp/pirepro; echo "=== !a?b (0W,2L+ 1?) vs *ab (1W,2L) ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*foo*\n!foo?\n' > .packignore && touch foo1 foo23 && /work/repo/tools/packignore /tmp/pirepro; echo "=== *foo* vs !foo? ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!foo?\n*foo*\n' > .packignore && touch foo1 foo23 && /work/repo/tools/packignore /tmp/pirepro; echo "=== reversed ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!important.log\n*.log\n' > .packignore && touch important.log a.log && /work/repo/tools/packignore /tmp/pirepro; echo "===orig==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n*.log\n' > .packignore && touch a.log b.log && /work/repo/tools/packignore /tmp/pirepro; echo "===a.log==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!foo1\n*foo*\n' > .packignore && touch foo1 foo2 foo23 && /work/repo/tools/packignore /tmp/pirepro; echo "===foo1==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!foo1\n*foo*\n' > .packignore && touch foo1 foo2 && /work/repo/tools/packignore /tmp/pirepro; echo "=== !literal foo1 ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!foo?\nfoo?\n' > .packignore && touch foo1 foo2 && /work/repo/tools/packignore /tmp/pirepro; echo "=== !foo? then foo? ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n**/a.log\n' > .packignore && touch a.log sub/a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !literal, then **/ pattern ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\na.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !literal, then same literal ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*foo*\n!foo?\n' > .packignore && touch foo1 foo2 foo23 && /work/repo/tools/packignore /tmp/pirepro; echo "=== B: *foo* then !foo? ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!foo?\n*foo*\n' > .packignore && touch foo1 foo2 foo23 && /work/repo/tools/packignore /tmp/pirepro; echo "=== C: !foo? then *foo* ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!foo\nf??\n' > .packignore && touch foo bar && /work/repo/tools/packignore /tmp/pirepro; echo "=== !lit then wildcard ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\nfoo?\n' > .packignore && touch a.log foox && /work/repo/tools/packignore /tmp/pirepro; echo "=== !unrelated-literal ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n!b.log\n*.log\n' > .packignore && touch a.log b.log c.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== multiple !lit then wildcard ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\na.log\n*.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !lit then lit then wild ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\na.log\n!a.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !lit then lit then !lit ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'a.log\n!a.log\na.log\n*.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== mixed ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n!a.log\n*.log\n' > .packignore && touch a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== 2x !lit then wild ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\nsub/a.log\n' > .packignore && touch sub/a.log a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !lit then specific anchored ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a.log\n/a.log\n' > .packignore && touch a.log sub/a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !unanchored lit then anchored lit ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/sub && cd /tmp/pirepro && printf '!a.log\nsub/a.log\n' > .packignore && touch sub/a.log a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !unanchored lit, then anchored lit (sub/) ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/sub && cd /tmp/pirepro && printf '!a.log\n/a.log\n' > .packignore && touch a.log sub/a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !lit then /a.log (anchored) ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/sub && cd /tmp/pirepro && printf '!/a.log\na.log\n' > .packignore && touch a.log sub/a.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== !/anchored lit, then unanchored lit ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/sub && cd /tmp/pirepro && printf '!a.log\n' > .packignore && printf '*.log\n' > sub/.packignore && touch sub/a.log sub/b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== parent !lit, child wild ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/sub && cd /tmp/pirepro && printf '*.log\n' > .packignore && printf '!a.log\n' > sub/.packignore && touch sub/a.log sub/b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== parent wild, child !lit ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/sub && cd /tmp/pirepro && printf '!a.log\n*.log\n' > .packignore && printf 'a.log\n' > sub/.packignore && touch sub/a.log sub/b.log && /work/repo/tools/packignore /tmp/pirepro; echo "=== parent protects, child overrides ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!a?\n*a\n' > .packignore && touch aa ab ba && /work/repo/tools/packignore /tmp/pirepro; echo "=== !a? wild, *a wild ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '!aa\n*a\n' > .packignore && touch aa ab ba Xa && /work/repo/tools/packignore /tmp/pirepro; echo "=== !aa lit, *a wild ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf 'aa\n!aa\n' > .packignore && touch aa && /work/repo/tools/packignore /tmp/pirepro; echo "=== lit, !lit ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro && cd /tmp/pirepro && printf '*\n' > .packignore && touch 'a' 'ä' 'À' 'à' && python3 -c "import os; print(os.listdir('/tmp/pirepro'))" && /work/repo/tools/packignore /tmp/pirepro
+
+$ cd /tmp/pitests && python3 compare.py 2>&1 | head -50
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/Sub /tmp/pirepro/sub && cd /tmp/pirepro && printf '*\n' > .packignore && touch Sub/a.txt sub/b.txt && python3 -c "
+import os
+files = {}
+for dirpath, dirnames, filenames in os.walk('/tmp/pirepro'):
+    for name in filenames:
+        full = os.path.join(dirpath, name)
+        rel = os.path.relpath(full, '/tmp/pirepro').replace(os.sep, '/')
+        files[rel] = None
+print(list(files.keys()))
+"
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/Sub /tmp/pirepro/sub && cd /tmp/pirepro && printf 'sub/\n' > .packignore && touch Sub/a.txt sub/b.txt && /work/repo/tools/packignore /tmp/pirepro; echo "=== lower pattern vs mixed case dirs ==="
+rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/Sub /tmp/pirepro/sub && cd /tmp/pirepro && printf 'Sub/\n' > .packignore && touch Sub/a.txt sub/b.txt && /work/repo/tools/packignore /tmp/pirepro; echo "=== Upper pattern vs mixed case dirs ==="
+
+$ rm -rf /tmp/pirepro && mkdir -p /tmp/pirepro/Sub /tmp/pirepro/sub && cd /tmp/pirepro && printf '*\n' > .packignore && touch Sub/a.txt sub/a.txt && /work/repo/tools/packignore /tmp/pirepro; echo "=== two case-variant files ==="
+
+$ cd /tmp/pitests && python3 compare.py 2>&1 | tail -20
+
+$ cd /tmp/pitests && python3 fuzz.py 500 2>&1 | tail -30
+
+$ find /tmp/pitests/fuzz/case_342 -type f | sort
+
+$ for f in /tmp/pitests/fuzz/case_342/zrH/Q/XZ/.packignore /tmp/pitests/fuzz/case_342/zrH/Q/.packignore /tmp/pitests/fuzz/case_342/zrH/Q/V/.packignore /tmp/pitests/fuzz/case_342/zrH/.packignore; do echo "=== $f ==="; cat "$f"; done
+
+$ find /tmp/pitests/fuzz/case_488 -name .packignore | xargs -I {} sh -c 'echo "=== {} ==="; cat {}'
+
+$ find /tmp/pitests/fuzz/case_209 | sort
+
+$ for f in /tmp/pitests/fuzz/case_209/.packignore /tmp/pitests/fuzz/case_209/BeJI/.packignore /tmp/pitests/fuzz/case_209/BeJI/gy0q/.packignore /tmp/pitests/fuzz/case_209/BeJI/gy0q/mK/.packignore; do echo "=== $f ==="; cat "$f"; done
+
+$ /work/repo/tools/packignore /tmp/pitests/fuzz/case_209
+
+$ rm -rf /tmp/piX && mkdir -p /tmp/piX && cp -r /tmp/pitests/fuzz/case_209/BeJI /tmp/piX/ && mv /tmp/piX/BeJI/.packignore /tmp/piX/.packignore && mv /tmp/piX/BeJI/* /tmp/piX/ 2>/dev/null; rmdir /tmp/piX/BeJI; ls -la /tmp/piX; /work/repo/tools/packignore /tmp/piX
+
+$ rm -rf /tmp/pitests/piY && mkdir -p /tmp/pitests/piY/sub && cd /tmp/pitests/piY && printf '/*?\n' > .packignore && touch a.b aa cc && touch sub/x && /work/repo/tools/packignore /tmp/pitests/piY

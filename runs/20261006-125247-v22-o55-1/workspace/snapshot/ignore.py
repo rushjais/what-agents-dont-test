@@ -1,0 +1,239 @@
+"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine. docs/PACKIGNORE.md describes the basics; the engine's actual
+behaviour (which this module reproduces) differs in several ways:
+
+Tree
+  - Only regular files are considered (symlinks and special files are
+    skipped), and a `.git` directory directly under the root is skipped.
+  - Names are compared case-insensitively (Unicode canonical caseless
+    matching, per path component). When two paths collide, the first one
+    seen in walk order keeps its name, while the content and mode of the
+    last one win. A file colliding with a directory, or two hard links to
+    the same file, are errors.
+
+Syntax
+  - Lines are split with str.splitlines() and stripped of surrounding
+    whitespace. Blank lines and lines starting with `;` are ignored. `#` is
+    not a comment character.
+  - `!` negates; the rest of the line is used as-is (not stripped again).
+  - `*` matches any run of characters within a segment and `?` exactly one.
+    `[`, `]` and `\\` are literal.
+  - A `**` segment matches zero or more segments: `**/x` matches `x` at any
+    depth, `x/**` matches `x` itself and everything under it, and `x/**/y`
+    matches `x/y`, `x/a/y`, and so on. `**` elsewhere acts like `*`.
+  - Trailing `/`s mark a directory-only pattern. After they are removed, a
+    pattern containing `/` is anchored to the directory holding its
+    .packignore (leading `/`s are dropped); a pattern without `/` matches
+    a name at any depth below that directory.
+
+Matching
+  - Patterns from all applicable .packignore files are checked in order,
+    shallowest file first and in line order within a file.
+  - For each file, the file path is checked first, then each of its parent
+    directories from the deepest up. The first of these levels that some
+    pattern matches decides: the last matching pattern at that level
+    excludes the file, or keeps it if negated.
+  - At the file level, a file is also excluded if no pattern matches it
+    there and it has any execute bit set, or its first line (up to the
+    first b"\\n") contains `@generated`.
+  - A .packignore is not read if its directory is excluded (by the same
+    rules, applied to the directory).
+"""
+
+import os
+import re
+import stat
+import unicodedata
+
+_IGNORE_FILE = ".packignore"
+
+
+def _fold(name):
+    nfd = unicodedata.normalize("NFD", name)
+    return unicodedata.normalize("NFD", nfd.casefold())
+
+
+class _Dir:
+    def __init__(self, name):
+        self.name = name
+        self.children = {}  # folded name -> _Dir or _File
+
+
+class _File:
+    def __init__(self, name, path, mode):
+        self.name = name
+        self.path = path  # file on disk providing content
+        self.mode = mode
+
+
+def _build_tree(root):
+    """Mirror the tree packignore sees: files in walk order, merged case-insensitively."""
+    top = _Dir("")
+    seen_inodes = {}
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            if os.path.islink(full) or not os.path.isfile(full):
+                continue
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            rel.encode("utf-8")  # packignore rejects names that are not valid UTF-8
+            st = os.lstat(full)
+            if st.st_nlink > 1:
+                key = (st.st_dev, st.st_ino)
+                if key in seen_inodes and seen_inodes[key] != rel:
+                    raise ValueError(f"packignore: unsupported entry (hard link): {rel!r}")
+                seen_inodes.setdefault(key, rel)
+            parts = rel.split("/")
+            node = top
+            for part in parts[:-1]:
+                child = node.children.get(_fold(part))
+                if child is None:
+                    child = node.children[_fold(part)] = _Dir(part)
+                elif not isinstance(child, _Dir):
+                    raise ValueError(f"packignore: {rel!r} is both a file and a directory")
+                node = child
+            existing = node.children.get(_fold(parts[-1]))
+            if existing is None:
+                node.children[_fold(parts[-1])] = _File(parts[-1], full, st.st_mode)
+            elif isinstance(existing, _Dir):
+                raise ValueError(f"packignore: {rel!r} is both a file and a directory")
+            else:
+                existing.path = full
+                existing.mode = st.st_mode
+    return top
+
+
+def _segment_regex(seg):
+    return "".join("[^/]*" if c == "*" else "[^/]" if c == "?" else re.escape(c) for c in seg)
+
+
+class _Pattern:
+    def __init__(self, base, negate, regex, dir_only, specificity):
+        self.base = base  # directory holding the .packignore, "" or "a/b/"
+        self.negate = negate
+        self.regex = regex
+        self.dir_only = dir_only
+        self.specificity = specificity
+
+    def matches(self, path, is_dir):
+        if self.dir_only and not is_dir:
+            return False
+        if not path.startswith(self.base) or len(path) == len(self.base):
+            return False
+        return self.regex.fullmatch(path[len(self.base):]) is not None
+
+
+def _compile(line, base):
+    negate = line.startswith("!")
+    if negate:
+        line = line[1:]
+    specificity = sum(c not in "*?/" for c in line)
+    dir_only = line.endswith("/")
+    line = line.rstrip("/")
+    anchored = "/" in line
+    line = line.lstrip("/")
+    if not line:
+        return None
+    if anchored:
+        segs = []
+        for seg in line.split("/"):
+            if not (seg == "**" and segs and segs[-1] == "**"):
+                segs.append(seg)
+        out = ""
+        for i, seg in enumerate(segs):
+            last = i == len(segs) - 1
+            if seg == "**":
+                if len(segs) == 1:
+                    out += ".*"
+                elif i == 0:
+                    out += "(?:.*/)?"
+                elif last:
+                    out += "(?:/.*)?"
+                else:
+                    out += "/(?:.*/)?"
+            else:
+                if i > 0 and segs[i - 1] != "**":
+                    out += "/"
+                out += _segment_regex(seg)
+        regex = out
+    else:
+        regex = "(?:.*/)?" + _segment_regex(line)
+    return _Pattern(base, negate, re.compile(regex, re.DOTALL), dir_only, specificity)
+
+
+def _parse(text, base):
+    patterns = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith(";"):
+            continue
+        pat = _compile(line, base)
+        if pat is not None:
+            patterns.append(pat)
+    return patterns
+
+
+def _builtin_excluded(node):
+    if node.mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
+        return True
+    with open(node.path, "rb") as f:
+        first = f.readline()
+    return b"@generated" in first
+
+
+def _level_decision(patterns, path, is_dir):
+    """True/False if some pattern matches `path`, else None.
+
+    The deepest .packignore with a matching pattern decides. Within it, the
+    most specific matching pattern wins, and among equally specific ones the
+    last one does.
+    """
+    best = None
+    for pat in patterns:  # ordered shallowest file first, then by line
+        if pat.matches(path, is_dir) and (
+                best is None or (len(pat.base), pat.specificity) >= (len(best.base), best.specificity)):
+            best = pat
+    return None if best is None else not best.negate
+
+
+def _excluded(patterns, path, is_dir, file_node=None):
+    parts = path.split("/")
+    for k in range(len(parts), 0, -1):
+        prefix = "/".join(parts[:k])
+        level_is_dir = is_dir or k < len(parts)
+        decision = _level_decision(patterns, prefix, level_is_dir)
+        if decision is not None:
+            return decision
+        if file_node is not None and k == len(parts) and _builtin_excluded(file_node):
+            return True
+    return False
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .packignore files exclude.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. A `.git` directory directly
+    under `root` is skipped.
+    """
+    result = []
+
+    def visit(node, prefix, patterns, load):
+        ign = node.children.get(_fold(_IGNORE_FILE))
+        if load and isinstance(ign, _File) and ign.name == _IGNORE_FILE:
+            with open(ign.path, "rb") as f:
+                text = f.read().decode("utf-8")
+            patterns = patterns + _parse(text, prefix)
+        for child in node.children.values():
+            path = prefix + child.name
+            if isinstance(child, _Dir):
+                visit(child, path + "/", patterns, not _excluded(patterns, path, True))
+            elif _excluded(patterns, path, False, child):
+                result.append(path)
+
+    visit(_build_tree(root), "", [], True)
+    return sorted(result)

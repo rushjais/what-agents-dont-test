@@ -1,0 +1,241 @@
+diff --git a/README.md b/README.md
+index 9841928..298d5c0 100644
+--- a/README.md
++++ b/README.md
+@@ -8,9 +8,5 @@ python3 -m snapshot path/to/project path/to/backup
+ 
+ Requires Python 3.11+, standard library only.
+ 
+-Exclusion rules are decided by the legacy `packignore` engine; see
+-[docs/PACKIGNORE.md](docs/PACKIGNORE.md). To see what it excludes for a tree:
+-
+-```bash
+-tools/packignore path/to/project
+-```
++Exclusion rules follow the legacy `packignore` engine, reimplemented in
++`snapshot/ignore.py`; see [docs/PACKIGNORE.md](docs/PACKIGNORE.md).
+diff --git a/docs/PACKIGNORE.md b/docs/PACKIGNORE.md
+index 671e1e9..8cb8903 100644
+--- a/docs/PACKIGNORE.md
++++ b/docs/PACKIGNORE.md
+@@ -1,31 +1,59 @@
+ # packignore
+ 
+-*Internal build tooling docs. Last updated for packignore 1.4 (2019).*
++*Internal build tooling docs. Originally written for packignore 1.4 (2019);
++corrected to match the engine's actual behaviour, which `snapshot/ignore.py`
++now reimplements in pure Python.*
+ 
+ `packignore` decides which files the packaging step leaves out. It reads
+ `.packignore` files from the project tree.
+ 
+ ## Syntax
+ 
+-- One pattern per line. Blank lines are ignored.
+-- Lines starting with `#` are comments.
++- One pattern per line. Lines are split on any line break Python's
++  `str.splitlines()` recognises (`\n`, `\r\n`, `\r`, `\v`, `\f`, `\x1c`–`\x1e`,
++  `\x85`, ` `, ` `), then stripped of leading and trailing
++  whitespace. Blank lines are ignored.
++- There are **no comments**: `#` is an ordinary character. There are no
++  escapes either: `\` is an ordinary character.
+ - `*` matches any run of characters within a path segment, and `?` matches
+-  exactly one. `**` matches across directories.
+-- A pattern without a `/` matches a file or directory name at any depth.
+-  A pattern containing a `/` is relative to the directory holding the
+-  `.packignore` file. A leading `/` anchors a pattern to that directory.
+-- A trailing `/` matches directories only. Excluding a directory excludes
+-  everything inside it.
+-- `!pattern` re-includes something an earlier pattern excluded.
++  exactly one. `[` and `]` are ordinary characters. `**` inside a segment
++  (e.g. `a**b`) is the same as `*`. A segment that is exactly `**` matches
++  **zero to three** directories (so `**/x` matches `x`, `a/x`, `a/b/x` and
++  `a/b/c/x`, but not `a/b/c/d/x`).
++- A trailing `/` (one or more) matches directories only. Excluding a
++  directory excludes everything inside it, unless re-included (see below).
++- Leading `/`s are removed. A pattern that contains a `/` (other than
++  trailing ones) is relative to the directory holding the `.packignore`
++  file; otherwise it matches a file or directory name at any depth below it.
++- `!pattern` re-includes something. Only the leading `!` is removed;
++  `! x` re-includes `" x"`.
++
++## How a path is decided
++
++Every directory and file is decided on its own, top-down:
++
++1. Collect the rules (from all `.packignore` files in effect) that match the
++   path itself. If none match, the path inherits its parent directory's
++   decision (the root is included).
++2. Otherwise one rule decides, chosen by, in order:
++   - the deepest `.packignore` file wins;
++   - then the pattern with the most literal characters (anything other
++     than `*`, `?` and `/`) wins;
++   - then the later line wins.
++
++So a file can be re-included inside an excluded directory (`build/` then
++`!build/keep`), and `!*` does not override `a` (fewer literal characters).
+ 
+ ## Nested files
+ 
+-A `.packignore` in a subdirectory applies to that subdirectory's contents.
++A `.packignore` in a subdirectory applies to that subdirectory's contents,
++and its rules take precedence over those of its ancestors. It is only read if
++its directory is not excluded. A `.git` directory directly under the root is
++skipped.
+ 
+ ## Examples
+ 
+ ```
+-# build output
+ build/
+ *.tmp
+ !important.tmp
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..6f73dbc 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,108 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. docs/PACKIGNORE.md describes the syntax, but it is incomplete; the
++rules below follow what `packignore` actually did:
++
++- Lines are split with str.splitlines() and stripped of surrounding
++  whitespace. Blank lines are skipped. There are no comments (`#` is
++  literal) and no escapes (`\\` is literal).
++- A leading `!` negates; the rest of the line is used as-is (`! x` negates
++  " x"). A trailing `/` (or several) restricts the pattern to directories.
++  Leading `/`s are dropped. A pattern that still contains a `/` is relative
++  to its .packignore's directory; otherwise it matches a name at any depth.
++- Only `*` and `?` are wildcards; `[` is literal. Within a path segment `**`
++  is just `*`. A segment that is exactly `**` matches 0 to 3 directories.
++- Each directory and file is decided by the rules that match it; if none
++  match, it inherits its parent directory's decision. Among matching rules,
++  the one from the deepest .packignore wins, then the one with the most
++  literal (non-wildcard, non-`/`) characters, then the later line.
++- A directory's own .packignore is read only if the directory itself is not
++  excluded.
+ """
+ 
+ import os
+-import subprocess
+-import sys
++import re
++
++_MAX_DOUBLE_STAR = 3
++
++
++def _compile_segment(seg):
++    parts = []
++    for ch in seg:
++        if ch == "*":
++            if not parts or parts[-1] != "[^/]*":
++                parts.append("[^/]*")
++        elif ch == "?":
++            parts.append("[^/]")
++        else:
++            parts.append(re.escape(ch))
++    return re.compile("".join(parts), re.DOTALL)
++
++
++def _match_segments(segs, parts):
++    """Match compiled segments (None for `**`) against path components."""
++    memo = {}
++
++    def go(i, j):
++        if (i, j) not in memo:
++            if i == len(segs):
++                res = j == len(parts)
++            elif segs[i] is None:
++                res = any(go(i + 1, k) for k in range(j, min(j + _MAX_DOUBLE_STAR, len(parts)) + 1))
++            else:
++                res = j < len(parts) and segs[i].fullmatch(parts[j]) is not None and go(i + 1, j + 1)
++            memo[i, j] = res
++        return memo[i, j]
++
++    return go(0, 0)
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++
++class _Rule:
++    def __init__(self, depth, index, negated, dir_only, anchored, segments):
++        self.depth = depth          # number of path components of the .packignore's directory
++        self.negated = negated
++        self.dir_only = dir_only
++        self.anchored = anchored
++        self.segments = [None if s == "**" else _compile_segment(s) for s in segments]
++        literals = sum(len(s) - s.count("*") - s.count("?") for s in segments)
++        self.priority = (depth, literals, index)
++
++    def matches(self, parts, is_dir):
++        """Whether the rule matches `parts`, a path below its .packignore's directory."""
++        if self.dir_only and not is_dir:
++            return False
++        rel = parts[self.depth:]
++        if not self.anchored:
++            seg = self.segments[0]
++            return seg is None or seg.fullmatch(rel[-1]) is not None
++        return _match_segments(self.segments, rel)
++
++
++def _parse(text, depth):
++    rules = []
++    for line in text.splitlines():
++        line = line.strip()
++        if not line:
++            continue
++        negated = line.startswith("!")
++        if negated:
++            line = line[1:]
++        dir_only = line.endswith("/")
++        line = line.rstrip("/")
++        anchored = "/" in line
++        line = line.lstrip("/")
++        if line:
++            rules.append(_Rule(depth, len(rules), negated, dir_only, anchored, line.split("/")))
++    return rules
++
++
++def _excluded(rules, parts, is_dir, inherited):
++    best = None
++    for rule in rules:
++        if (best is None or rule.priority > best.priority) and rule.matches(parts, is_dir):
++            best = rule
++    return inherited if best is None else not best.negated
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +112,27 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    ignored = []
++
++    def walk(path, parts, rules, excluded):
++        # Like os.walk(followlinks=False): symlinks to directories count as
++        # directories but are not descended into, so they contribute no files.
++        with os.scandir(path) as it:
++            entries = list(it)
++        if not parts:
++            entries = [e for e in entries if not (e.name == ".git" and e.is_dir())]
++        if not excluded:
++            for e in entries:
++                if e.name == ".packignore" and not e.is_dir():
++                    with open(e.path, newline="") as f:
++                        rules = rules + _parse(f.read(), len(parts))
++        for e in entries:
++            child = parts + [e.name]
++            if e.is_dir():
++                if not e.is_symlink():
++                    walk(e.path, child, rules, _excluded(rules, child, True, excluded))
++            elif _excluded(rules, child, False, excluded):
++                ignored.append("/".join(child))
++
++    walk(root, [], [], False)
++    return sorted(ignored)

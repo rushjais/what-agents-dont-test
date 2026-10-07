@@ -1,0 +1,153 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && ls -la tools
+
+$ cat tools/packignore README.md .packignore snapshot/cli.py
+
+$ tools/packignore . ; echo "rc=$?"; env | grep -i packignore
+
+$ mkdir -p /tmp/probe && cat > /tmp/probe/q.py <<'EOF'
+import json, os, sys, urllib.request
+URL = os.environ["PACKIGNORE_URL"]
+def q(files):
+    req = urllib.request.Request(URL + "/ignored", data=json.dumps({"files": files}).encode(),
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)["ignored"]
+    except urllib.error.HTTPError as e:
+        return "ERR %s %s" % (e.code, e.read()[:300])
+def t(pi, paths, extra=None):
+    files = {p: None for p in paths}
+    if isinstance(pi, dict):
+        files.update(pi)
+    else:
+        files[".packignore"] = pi
+    return q(files)
+EOF
+cd /tmp/probe && python3 -c "
+from q import *
+print(t('*.tmp\n!important.tmp\nbuild/\n', ['a.tmp','important.tmp','x/a.tmp','build/x','x/build/y','build']))
+print(q({}))
+print(t(';x\n#y\nx\n', [';x','#y','x']))
+"; curl -s $PACKIGNORE_URL/ | head -20
+
+$ cd /tmp/probe && python3 -c "
+import urllib.request,os
+U=os.environ['PACKIGNORE_URL']
+for p in ['/','/version','/help','/ignored','/docs','/health','/openapi.json']:
+    try:
+        r=urllib.request.urlopen(U+p,timeout=10); print(p,r.status,r.read()[:500])
+    except Exception as e: print(p,e, getattr(e,'read',lambda:b'')()[:300])
+"
+python3 -c "
+from q import *
+print(t('*.tmp\n!important.tmp\nbuild/\n', ['a.tmp','important.tmp','x/a.tmp','build/x','x/build/y','c/build']))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+P=['a','b','#a','!a',';a',' a','a ','x/a','.a','A','a\\\\','ab']
+for pi in ['#a','\\\\#a',' a','a ','  ;a','\\\\!a','!a','a\n!a','!a\na','A','a\r\n','\\\\a',' #a','a #c','a ;c','*','.*','a\\\\ ']:
+    print(repr(pi), t(pi,P))
+"
+
+$ cd /tmp/probe && sed -i 's/timeout=60/timeout=20/' q.py && python3 -c "
+import time
+from q import *
+P=['a','b','#a','!a',';a',' a','a ','x/a','.a','A','a\\\\','ab']
+for pi in ['*','.*','a\\\\ ','a\\\\','a\\\\\\\\']:
+    s=time.time()
+    try: print(repr(pi), t(pi,P), time.time()-s)
+    except Exception as e: print(repr(pi), e)
+"
+
+$ cd /tmp/probe && cat > q.py <<'EOF'
+import json, os, sys, urllib.request, time
+URL = os.environ["PACKIGNORE_URL"]
+def q(files):
+    data = json.dumps({"files": files}).encode()
+    for i in range(6):
+        req = urllib.request.Request(URL + "/ignored", data=data, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.load(r)["ignored"]
+        except urllib.error.HTTPError as e:
+            return "ERR %s %s" % (e.code, e.read()[:300])
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            time.sleep(1)
+    raise RuntimeError("service down")
+def t(pi, paths):
+    files = {p: None for p in paths}
+    if isinstance(pi, dict):
+        files.update(pi)
+    else:
+        files[".packignore"] = pi
+    return q(files)
+EOF
+python3 -c "
+from q import *
+for pi in ['*','a','A','[a]','[A]','?']:
+    print(repr(pi), t(pi,['A','B','c/A']), t(pi,['a','A']), t(pi,['Ab','ab']))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+print(q({'A':None,'a':None,'.packignore':'*'}))
+print(q({'A':None,'a':None,'.packignore':'a'}))
+print(q({'A':None,'a':None,'.packignore':'A'}))
+print(q({'.packignore':'*','A':None,'a':None}))
+print(q({'x/A':None,'X/a':None,'.packignore':'*'}))
+print(q({'x/A':None,'X/a':None,'.packignore':'x/'}))
+print(q({'x/A':None,'X/a':None,'.packignore':'X/'}))
+print(q({'a':None,'A':None,'.packignore':'*','.PACKIGNORE':'!a'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+print(q({'x/A':None,'X/b':None,'.packignore':'*'}))
+print(q({'x/A':None,'X/b':None,'.packignore':'X/'}))
+print(q({'x/A':None,'X/b':None,'.packignore':'x/'}))
+print(q({'B':None,'b/x':None,'.packignore':'*'}))
+print(q({'ß':None,'ss':None,'.packignore':'*'}))
+print(q({'é':None,'é':None,'.packignore':'*'}))
+print(q({'K':None,'K':None,'.packignore':'*'}))
+print(q({'ǅ':None,'ǆ':None,'.packignore':'*'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+tests=[{'b/x':None,'B':None},{'B':None,'b/x':None},{'b':None,'b/x':None},{'b/x':None,'b':None},{'/a':None},{'a//b':None},{'../a':None},{'./a':None},{'a/':None},{'':None},{'a':1},{'.packignore':None},{'x/.packignore':None,'x/y':None}, {'ｆ':None,'f':None,'.packignore':'*'},{'①':None,'1':None,'.packignore':'*'},{'Å':None,'Å':None,'.packignore':'*'}]
+for f in tests: print(f, q(f))
+print(q([]), q({'files':1}))
+import json,urllib.request,os
+for body in [b'{}', b'notjson', b'{\"files\":[]}']:
+  try: print(urllib.request.urlopen(urllib.request.Request(os.environ['PACKIGNORE_URL']+'/ignored',data=body),timeout=10).read())
+  except Exception as e: print(e, e.read())
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+P=['a','b','c','ab','abc','[a]','a]','[ab]','-','a-c','.a','x/a','x/y/a','x/ab','a.b','a*','a?','*','?']
+for pi in ['[a]','[ab]','[!a]','[^a]','[a-c]','a[bc]','\\\\[a]','a*','a**','**','*a','a?','a\\\\*','a\\\\?','?*','[]a]','[a','a]']:
+    print(repr(pi), t(pi,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+P=['a','b','ab','axb','a.b','{a,b}','a|b','a+','aa','(a)','^a','a$','\$','a{2}','.','x/.','%','a%','a_b','a b']
+for pi in ['{a,b}','a|b','a+','(a)','^a','a\$','a.b','a{2}','.','a%','a_b','a b','a  b','a\tb','%']:
+    print(repr(pi), t(pi,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+P=['a','b','ab','axb','a.b','{a,b}','a|b','a+','aa','(a)','^a','a\$','\$','a{2}','%','a%','a_b','a b','a  b','a\tb','A.B','a..b','x/a/b']
+for pi in ['{a,b}','a|b','a+','(a)','^a','a\$','a.b','a{2}','.','a%','a_b','a b','a  b','a\tb','%','a/./b','a/../a','./a','x/./a/b','x//a/b','x/a/','/']:
+    print(repr(pi), t(pi,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from q import *
+P=['a','b','c','a2','a{2}','ab','ac','abc','a{b','a}','{a','{}','a,b','{a,b','x/a','x/b','y/a','ad','a{}','a{,}',',','{','}','{,}']
+for pi in ['a{2}','a{b,c}','a{,b}','a{b,}','{a,{b,c}}','a{b,{c,d}}','{a','a}','{}','a{}','{,}','a{b','{a,b','a,b','{x,y}/a','{x/a,b}','a{b,c}{,d}','{{a,b}}','{a}','{a,a}','{*}','{a,b*}','{a,}','{,a}','a{b}c']:
+    print(repr(pi), t(pi,P))
+"

@@ -1,0 +1,1359 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && head -c 600 tools/packignore
+
+$ cat tools/packignore; cat .packignore README.md snapshot/cli.py snapshot/_build_info.py tools/release.sh
+
+$ mkdir -p /tmp/w && cd /tmp/w && cat > t.py <<'EOF'
+import os,sys,subprocess,tempfile,json
+def run(files, ign):
+    """files: list of paths; ign: dict dir->content"""
+    d=tempfile.mkdtemp(dir='/tmp/w')
+    for f in files:
+        p=os.path.join(d,f); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write('x')
+    for k,v in ign.items():
+        p=os.path.join(d,k,'.packignore'); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write(v)
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True)
+    return r.stdout.split() if r.returncode==0 else 'ERR '+r.stderr
+if __name__=='__main__':
+    files=sys.argv[1].split(','); ign=json.loads(sys.argv[2])
+    print(run(files,ign))
+EOF
+python3 t.py a.tmp,b/c.tmp,important.tmp,build/x,b/build/y,c '{"":"# c\nbuild/\n*.tmp\n!important.tmp\n"}'
+
+$ cd /tmp/w && cat > p1.py <<'EOF'
+from t import run
+F=['a.tmp','.a.tmp','A.TMP','sub/a.tmp','sub/deep/b.txt','x y','#c','!n',';s','a b ','tab\t','sub/.packignore2']
+cases=[
+ "*.tmp", "#c", "\\#c", "\\!n", "!n", ";s", "\;s", " *.tmp", "*.tmp ", "*.tmp\\ ", "x y", "a b\\ ", "a b ",
+ "*.TMP", "?.tmp", "[ab].tmp", "[!b].tmp", "[^b].tmp", "[a-c].tmp","[", "a[", "*.tmp\r\n", "sub", "sub/", "/sub/", "sub/*", "sub/**", "**/a.tmp", "**", "*", "**/", "sub/**/b.txt","sub/deep", "deep/b.txt", "/a.tmp", "sub/a.tmp", "**/deep/", "s*b/", "s**", "*/a.tmp", "*/*",
+]
+for c in cases:
+    print(repr(c), run(F,{"":c}))
+EOF
+python3 p1.py
+
+$ cd /tmp/w && touch CaseT caset && ls; df /tmp /work/repo; python3 --version
+
+$ cd /tmp/w && rm -rf tmp* && cat > t.py <<'EOF'
+import os,sys,subprocess,tempfile,json,shutil
+def run(files, ign, keep=False):
+    d=tempfile.mkdtemp(dir='/tmp/w')
+    for f in files:
+        p=os.path.join(d,f); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write('x')
+    for k,v in ign.items():
+        p=os.path.join(d,k,'.packignore'); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w',newline='').write(v)
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True)
+    if not keep: shutil.rmtree(d)
+    return r.stdout.splitlines() if r.returncode==0 else 'ERR '+r.stderr.strip()
+EOF
+python3 -c "
+from t import run
+print(run(['A.TMP','b.TMP','a.tmp','Z'],{'':'**'}))
+print(run(['A.TMP','b.TMP','Z'],{'':'**'}))
+"
+
+$ cd /tmp/w && python3 -c "
+from t import run
+F=['A.TMP','b.tmp','Sub/x','c.Tmp']
+for c in ['*.tmp','*.TMP','a.tmp','sub/','SUB/x','/sub']: print(repr(c),run(F,{'':c}))
+print(run(['a.tmp','A.TMP'],{'':'**'}))
+print(run(['A.TMP','a.tmp'],{'':'**'}))
+print(run(['d/x','D/y'],{'':'**'}))
+"
+
+$ cd /tmp/w && python3 -c "
+from t import run
+import os,tempfile
+def order(F):
+    d=tempfile.mkdtemp(dir='/tmp/w')
+    for f in F:
+        p=os.path.join(d,f); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write('x')
+    print([ (dp[len(d):],fs) for dp,ds,fs in os.walk(d)])
+for F in [['a.tmp','A.TMP'],['d/x','D/y'],['Q','q','e/f','E/g','E/h']]:
+    order(F); print(run(F,{'':'**'}))
+print(run(['a.tmp','A.TMP'],{'':'*.TMP'}))
+print(run(['d/x','D/y'],{'':'D/'}))
+print(run(['d/x','D/y'],{'':'d/'}))
+print(run(['d/x','D/y'],{'':'y'}))
+print(run(['d/x','D/y'],{'':'/D/y'}))
+"; rm -rf /tmp/w/tmp*
+
+$ cd /tmp/w && python3 p1.py
+
+$ cd /tmp/w && cat > p2.py <<'EOF'
+from t import run
+import sys
+F=['a.tmp','.a.tmp','[ab].tmp','a\\b','sub/a.tmp','sub/deep/b.txt','sub/deep/c.tmp','x/sub/q','important.tmp','sub/important.tmp','abc']
+cases=[l for l in sys.stdin.read().split('\n====\n')]
+for c in cases:
+    print(repr(c), run(F,{"":c}))
+EOF
+python3 p2.py <<'EOF'
+[ab].tmp
+====
+a\b
+====
+a\\b
+====
+?a.tmp
+====
+sub*b.txt
+====
+sub**b.txt
+====
+sub/**b.txt
+====
+sub/**/
+====
+**/b.txt
+====
+**b.txt
+====
+sub/**/**/b.txt
+====
+a/**/b
+====
+**/sub
+====
+**/sub/
+====
+sub/deep/b.txt/
+====
+abc ;x
+====
+  ;x
+====
+abc;x
+====
+*.tmp
+!important.tmp
+====
+!important.tmp
+*.tmp
+====
+sub/
+!sub/important.tmp
+====
+sub/
+!important.tmp
+====
+sub/*
+!sub/deep
+====
+sub/*
+!sub/deep/
+====
+*.tmp
+! important.tmp
+====
+*.tmp
+!!important.tmp
+====
+!
+====
+*.tmp
+!*
+====
+/
+====
+//
+====
+sub//a.tmp
+====
+./a.tmp
+====
+sub/./a.tmp
+====
+sub/../a.tmp
+====
+***
+====
+a*c
+====
+a*b*c
+====
+*a.tmp
+====
+.*
+EOF
+
+$ cd /tmp/w && cat > p3.py <<'EOF'
+from t import run
+import sys
+F=['a.tmp','ab.tmp','b.txt','sub/a.tmp','sub/b.txt','sub/deep/a.tmp']
+cases=[l for l in sys.stdin.read().split('\n====\n')]
+for c in cases:
+    print(repr(c), run(F,{"":c}))
+EOF
+python3 p3.py <<'EOF'
+a.tmp
+!*.tmp
+====
+!*.tmp
+a.tmp
+====
+a.tmp
+!a.tmp
+====
+!a.tmp
+a.tmp
+====
+*.tmp
+!?.tmp
+====
+!?.tmp
+*.tmp
+====
+*
+!*.tmp
+====
+*.tmp
+!*
+====
+*.tmp
+!**
+====
+*.tmp
+!*.*
+====
+*.tmp
+!*.t*
+====
+*.tmp
+!a*
+====
+*.tmp
+!ab*
+====
+**/a.tmp
+!a.tmp
+====
+a.tmp
+!/a.tmp
+====
+/a.tmp
+!a.tmp
+====
+sub/
+!a.tmp
+====
+sub
+!a.tmp
+====
+sub
+!sub/a.tmp
+====
+sub/a.tmp
+!sub
+====
+sub/a.tmp
+!sub/
+====
+*.tmp
+!sub/*.tmp
+====
+sub/*.tmp
+!*.tmp
+====
+sub/*
+!*.tmp
+====
+sub/*
+!a.tmp
+====
+sub/**
+!a.tmp
+====
+sub/**
+!a.tmpx
+====
+*.tmp
+!a.tm?
+====
+*.tmp
+!a.tm*
+====
+*.tmp
+!a?tmp
+====
+a.tmp
+!a.tmp
+a.tmp
+EOF
+
+$ cd /tmp/w && cat > cmp.py <<'EOF'
+from t import run
+import sys
+def cmp(P,Q,files,target):
+    r1 = target in run(files,{"":P+"\n!"+Q})
+    r2 = target in run(files,{"":"!"+Q+"\n"+P})
+    m1 = target in run(files,{"":P}); m2 = target in run(files,{"":"*\n!"+Q})
+    tag = {(True,True):'P>Q',(False,False):'P<Q',(False,True):'EQ',(True,False):'EARLIER?'}[(r1,r2)]
+    return tag + ('' if m1 and not m2 else f' [match P={m1} Q={not m2}]')
+if __name__=='__main__':
+    target=sys.argv[1]; files=[target]+sys.argv[2:]
+    for line in sys.stdin:
+        line=line.rstrip('\n')
+        if not line: continue
+        P,Q=line.split(' || ')
+        print(f'{P!r:20} {Q!r:20}', cmp(P,Q,files,target))
+EOF
+python3 cmp.py sub/a.tmp <<'EOF'
+*.tmp || a*****
+*.tmp || a.tm*
+*.tmp || a.t**
+sub/* || *.tmp
+sub/* || a.tm
+sub/* || a.t*
+sub/* || a.*
+sub/* || a*
+sub || a*
+sub || *
+sub/ || a*
+**/a.tmp || a.tmp
+**/a.tmp || /sub/a.tmp
+sub/a.tmp || sub/a.tm?
+sub/a.tmp || */a.tmp
+sub/a.tmp || **/a.tmp
+sub/a.tmp || a.tmp
+sub/a.tmp || /sub/a.tmp
+*/a.tmp || a.tmp
+*/a.tmp || ?.tmp
+*/*.tmp || *.tmp
+*/* || *
+*/* || **
+* || **
+* || ***
+? || *
+sub || s*
+sub || su?
+sub || ???
+sub || sub/
+**/sub || sub
+EOF
+
+$ cd /tmp/w && cat > p4.py <<'EOF'
+from t import run
+F=['a.tmp','sub/a.tmp','sub/b.txt','sub/deep/a.tmp','sub/deep/b.txt','other/a.tmp']
+tests=[
+ {'sub':'*.tmp'},
+ {'sub':'/a.tmp'},
+ {'sub':'deep/a.tmp'},
+ {'sub':'sub/a.tmp'},
+ {'sub':'**'},
+ {'sub':'../a.tmp'},
+ {'':'*.tmp','sub':'!a.tmp'},
+ {'':'*.tmp','sub':'!*.tmp'},
+ {'':'*.tmp','sub':'!*'},
+ {'':'!*.tmp','sub':'*'},
+ {'':'!a.tmp','sub':'*.tmp'},
+ {'':'!sub/a.tmp','sub':'a.tmp'},
+ {'':'sub/a.tmp','sub':'!a.tmp'},
+ {'':'sub/a.tmp','sub':'!/a.tmp'},
+ {'':'sub/','sub':'!a.tmp'},
+ {'':'sub/','sub':'!*'},
+ {'':'!sub/deep/a.tmp','sub':'deep'},
+ {'':'sub','sub':'!deep'},
+ {'':'!sub','sub':'deep'},
+ {'':'sub/','sub/deep':'!*'},
+ {'':'sub/deep','sub/deep':'!*'},
+ {'':'sub/deep/','sub/deep':'!b.txt'},
+ {'':'sub/deep/*','sub/deep':'!b.txt'},
+ {'':'sub/deep/b.txt','sub/deep':'!b.txt'},
+ {'':'sub/deep/b.txt','sub':'!deep/b.txt'},
+ {'':'deep/','sub':'!deep/'},
+ {'':'.packignore'},
+ {'':'.packignore','sub':'*.tmp'},
+ {'':'sub/.packignore','sub':'*.tmp'},
+ {'':'sub/','sub':'*.tmp'},
+]
+for t in tests: print(t, run(F,t))
+EOF
+python3 p4.py
+
+$ cd /tmp/w && cat > p5.py <<'EOF'
+from t import run
+F=['a.tmp','sub/a.tmp','sub/b.txt','sub/deep/a.tmp','sub/deep/b.txt','other/a.tmp']
+tests=[
+ {'':'sub/deep/b.txt','sub':'!*'},
+ {'':'sub/deep/b.txt','sub':'!deep'},
+ {'':'sub/deep/b.txt','sub/deep':'!*'},
+ {'':'!sub/deep/b.txt','sub/deep':'*'},
+ {'':'sub/deep/b.txt','sub':'!deep/'},
+ {'':'sub/\n!sub','sub':'*.tmp'},
+ {'':'!sub\nsub/','sub':'*.tmp'},
+ {'':'sub/\n!sub/.packignore','sub':'!*.tmp'},
+ {'':'s*\n!sub','sub':'*.tmp'},
+ {'':'sub\n!s*','sub':'*.tmp'},
+ {'':'*\n!*.tmp'},
+ {'':'sub/*\n!sub/deep','sub':'*.tmp'},
+ {'':'sub/**'},
+ {'':'sub/**\n!sub/deep'},
+ {'':'sub/**\n!deep'},
+ {'':'sub/**\n!*.tmp'},
+ {'':'sub/**\n!sub'},
+ {'':'sub/**/\n!*.tmp'},
+ {'':'sub/**/*\n!*.tmp'},
+ {'':'**/deep/**\n!*.tmp'},
+ {'':'sub/deep/**/\n!*.tmp'},
+]
+for t in tests: print(t, run(F,t))
+EOF
+python3 p5.py
+
+$ cd /tmp/w && cat > p6.py <<'EOF'
+from t import run
+import os,tempfile,subprocess,sys,shutil
+F=['a.tmp','b.tmp','c.tmp','é.tmp']
+tests=['a.tmp\rb.tmp','a.tmp\x0bb.tmp','a.tmp\x0cb.tmp','a.tmp\x1cb.tmp','a.tmp\x85b.tmp','a.tmp b.tmp','\ta.tmp\t','\xa0a.tmp\xa0','　a.tmp','﻿a.tmp','﻿;x\nb.tmp','\x00a.tmp','a.tmp\x00', '\x1fa.tmp','é.tmp','é.tmp','?.tmp']
+for t in tests: print(repr(t), run(F,{'':t}))
+def raw(b):
+    d=tempfile.mkdtemp(dir='/tmp/w')
+    for f in F: open(os.path.join(d,f),'w').write('x')
+    open(os.path.join(d,'.packignore'),'wb').write(b)
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True); shutil.rmtree(d)
+    return r.stdout.splitlines() if r.returncode==0 else 'ERR '+r.stderr.strip()
+for b in [b'a.tmp\n\xff\nb.tmp', b'\xe9.tmp\nb.tmp', 'é.tmp'.encode('latin-1'), b'\xef\xbb\xbfa.tmp', 'a.tmp\nb.tmp'.encode('utf-16')]:
+    print(b, raw(b))
+EOF
+python3 p6.py
+
+$ ps aux 2>/dev/null | head -30; ls /proc | head -50 | tr '\n' ' '
+
+$ cd /tmp/w && cat > p7.py <<'EOF'
+from t import run
+F=['a.tmp','sub/a.tmp','sub/b.txt','sub/deep/a.tmp','sub/deep/b.txt']
+tests=[
+ (F,{'':'sub/\n!sub/deep/','sub/deep':'!*'}),
+ (F,{'':'sub/\n!sub/deep/','sub/deep':'*.tmp'}),
+ (F,{'':'sub/\n!sub/deep/','sub':'*.tmp'}),
+ (F+['sub/.PACKIGNORE'],{}),
+ (F+['.Packignore'],{}),
+ (['ß','ss','K','K','k','İ','i̇','ǅ','ǆ','Ǆ','σ','ς','Σ'],{'':'**'}),
+ (['x','X/y'],{'':'**'}),
+ (['X/y','x'],{'':'**'}),
+]
+for f,t in tests: print(f,t, run(f,t))
+EOF
+python3 p7.py
+
+$ cd /tmp/w && cat > p8.py <<'EOF'
+from t import run
+import os,tempfile,shutil
+def order(F):
+    d=tempfile.mkdtemp(dir='/tmp/w')
+    for f in F:
+        p=os.path.join(d,f); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write('x')
+    r=[(dp[len(d):],fs,ds) for dp,ds,fs in os.walk(d)]; shutil.rmtree(d); return r
+for F in [['ß','ss','K','K','k','İ','i̇','ǅ','ǆ','Ǆ','σ','ς','Σ'], ['A','a','B','b','c','C'],['d/A','D/a','D/b','d/B','dd/x','DD/y','Dd/z']]:
+    print(order(F)); print(run(F,{'':'**'}))
+EOF
+python3 p8.py
+
+$ cd /tmp/w && python3 -c "
+from t import run
+import os
+# write a .PACKIGNORE via file list trick: files content is 'x', so make a file named x
+print(run(['x','sub/x','sub/.PACKIGNORE','y'],{}))
+print(run(['x','sub/x','.Packignore','y'],{}))
+print(run(['x','sub/x','y','sub/.PACKIGNORE'],{'sub':'y'}))
+"
+
+$ mkdir -p /tmp/fz && cd /tmp/fz && cat > fuzz.py <<'EOF'
+import os,sys,random,subprocess,tempfile,shutil,json
+sys.path.insert(0,'/work/repo')
+import importlib, snapshot.ignore as ig
+NAMES=['a','b','ab','a.tmp','b.tmp','x.txt','.h','sub','deep','build','A','c d']
+SEGS=['a','b','ab','*','**','?','a*','*.tmp','.h','sub','deep','build','?.tmp','a?','*b','x.txt','.*','A','c d','*.*','b.tmp','a.tmp']
+def rand_tree(rng):
+    files=set()
+    for _ in range(rng.randint(1,14)):
+        depth=rng.choice([1,1,2,2,3,4])
+        files.add('/'.join(rng.choice(NAMES) for _ in range(depth)))
+    return sorted(files)
+def rand_pat(rng):
+    n=rng.choice([1,1,1,2,2,3])
+    p='/'.join(rng.choice(SEGS) for _ in range(n))
+    if rng.random()<.25: p='/'+p
+    if rng.random()<.25: p=p+'/'
+    if rng.random()<.3: p='!'+p
+    if rng.random()<.05: p=';'+p
+    if rng.random()<.05: p=' '+p+' '
+    return p
+def build(rng,d):
+    files=rand_tree(rng)
+    dirs={''}
+    for f in files:
+        parts=f.split('/')
+        for i in range(1,len(parts)): dirs.add('/'.join(parts[:i]))
+    made=[]
+    for f in files:
+        p=os.path.join(d,f)
+        try:
+            os.makedirs(os.path.dirname(p),exist_ok=True)
+            if os.path.isdir(p): continue
+            open(p,'w').write('x')
+        except (IsADirectoryError,NotADirectoryError,FileExistsError): pass
+    ign={}
+    for dd in rng.sample(sorted(dirs),k=min(len(dirs),rng.randint(1,3))):
+        if not os.path.isdir(os.path.join(d,dd)): continue
+        txt='\n'.join(rand_pat(rng) for _ in range(rng.randint(1,5)))
+        ign[dd]=txt
+        open(os.path.join(d,dd,'.packignore'),'w').write(txt)
+    return ign
+def service(d):
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True)
+    return sorted(l for l in r.stdout.splitlines() if l) if r.returncode==0 else 'ERR'
+def mine(d):
+    try: return ig.ignored_files(d)
+    except Exception as e: return 'ERR'
+seed0=int(sys.argv[1]); N=int(sys.argv[2])
+bad=0
+for s in range(seed0,seed0+N):
+    rng=random.Random(s); d=tempfile.mkdtemp(dir='/tmp/fz')
+    ign=build(rng,d)
+    a,b=service(d),mine(d)
+    if a!=b:
+        bad+=1
+        files=[os.path.relpath(os.path.join(dp,f),d) for dp,_,fs in os.walk(d) for f in fs]
+        print('SEED',s,json.dumps(ign),sorted(files)); print('  svc ',a); print('  mine',b)
+    shutil.rmtree(d)
+print('bad',bad,'of',N)
+EOF
+python3 fuzz.py 0 200 2>&1 | tail -40
+
+$ cd /tmp/fz && sed -i 's/^    if a!=b:/    stats[(a=="ERR", bool(a) and a!="ERR")]=stats.get((a=="ERR", bool(a) and a!="ERR"),0)+1\n    if a!=b:/; s/^bad=0/bad=0; stats={}/; s/^print(.bad.,bad,.of.,N)/print("bad",bad,"of",N,stats)/' fuzz.py && for i in 0 1 2 3 4 5 6 7; do python3 fuzz.py $((1000+i*250)) 250 > out$i.txt 2>&1 & done; wait; tail -n1 out*.txt; grep -h -A2 SEED out*.txt | head -60
+
+$ cd /tmp/w && python3 -c "
+from t import run
+F=['a','b/c','x.y/z']
+for p in ['sub/*.*','.*/x.txt','/a','*.*/a','a/*.*','/*/*.tmp/*.tmp','/*/*.tmp','*/*.tmp/*','a/.*','a/.b','.b/a','a/b.c','a.b/c','a/b/c.d','*.d/x','a.*/x','a.*','.*','x.txt/a*','!x.txt/a*','x.y/z','x.y/','a.b/']: print(repr(p), run(F,{'':p}))
+"
+
+$ cd /tmp/fz && for i in 1 2 3; do python3 fuzz.py 1810 1; python3 fuzz.py 2890 1; done 2>&1 | grep -v '^  '
+
+$ cd /tmp/fz && python3 - <<'EOF'
+s=open('fuzz.py').read()
+s=s.replace("    if a!=b:\n","    tries=0\n    while a!=b and tries<3:\n        import time; time.sleep(0.5); a=service(d); tries+=1\n    if a!=b:\n",1)
+s=s.replace("SEGS=[","SEGS=['**a','a**','*a*','[a]','a\\\\b','','..','.','#a','ß','SUB','a.TMP','b ','**.tmp','?*','*?',")
+s=s.replace("NAMES=[","NAMES=['[a]','a\\\\b','#a','ss','SUB','a.TMP','b ',';x','!a',")
+s=s.replace("    if rng.random()<.05: p=' '+p+' '\n","    if rng.random()<.05: p=' '+p+' '\n    if rng.random()<.05: p='! '+p\n    if rng.random()<.05: p=p+'//'\n    if rng.random()<.05: p='//'+p\n")
+s=s.replace("txt='\\n'.join(","txt=rng.choice(['\\n','\\r\\n','\\r','\\n\\n']).join(")
+open('fuzz.py','w').write(s)
+EOF
+grep -n "SEGS\|NAMES=\|txt=\|tries" fuzz.py | head; for i in 0 1 2 3 4 5; do python3 fuzz.py $((5000+i*300)) 300 > out$i.txt 2>&1 & done; wait; tail -qn1 out[0-5].txt; grep -h -A2 SEED out[0-5].txt | head -60
+
+$ python3 - <<'EOF'
+p='snapshot/ignore.py'; s=open(p).read()
+s=s.replace('''        dir_only = line.endswith("/")
+        if dir_only:
+            line = line[:-1]
+        anchored = "/" in line
+        if line.startswith("/"):
+            line = line[1:]
+''','''        dir_only = line.endswith("/")
+        line = line.rstrip("/")
+        anchored = "/" in line
+        line = line.lstrip("/")
+''')
+open(p,'w').write(s)
+EOF
+cd /tmp/fz && grep -h SEED out*.txt | awk '{print $2}' > seeds.txt; wc -l < seeds.txt; for s in $(cat seeds.txt); do python3 fuzz.py $s 1 | grep -A2 SEED; done; python3 -c "
+import sys; sys.path.insert(0,'/tmp/w'); from t import run
+print(run(['sub/deep/x','deep/y'],{'':'deep//'}))"
+
+$ cd /tmp/w && python3 -c "
+from t import run
+F=['x.t/y/ab','x.t/ab','ab','q/ab']
+for p in ['/**','**','///**','/**\n!*.*','**\n!*.*','*\n!*.*','/*\n!*.*','/**/*\n!*.*','**/*\n!*.*','/**\n!*.t','**/ab\n!*.*','ab\n!*.*','**/a?\n!*.t', '**/ab\n!*.t', 'ab\n!*.t']: print(repr(p), run(F,{'':p}))
+"
+
+$ cd /tmp/fz && cat > mini.py <<'EOF'
+import os,sys,json,tempfile,shutil,subprocess
+sys.path.insert(0,'/work/repo'); import snapshot.ignore as ig
+def mk(files,ign):
+    d=tempfile.mkdtemp(dir='/tmp/fz')
+    for f in files:
+        p=os.path.join(d,f); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write('x')
+    for k,v in ign.items():
+        p=os.path.join(d,k,'.packignore'); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w',newline='').write(v)
+    return d
+def both(files,ign):
+    d=mk(files,ign)
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True)
+    a=sorted(l for l in r.stdout.splitlines() if l) if r.returncode==0 else 'ERR'
+    try: b=ig.ignored_files(d)
+    except Exception: b='ERR'
+    shutil.rmtree(d); return a,b
+def bad(files,ign):
+    a,b=both(files,ign); return a!=b and a!='ERR'
+def minimize(files,ign):
+    files=[f for f in files if not f.endswith('.packignore')]
+    changed=True
+    while changed:
+        changed=False
+        for i in range(len(files)):
+            t=files[:i]+files[i+1:]
+            if bad(t,ign): files=t; changed=True; break
+        for k in list(ign):
+            lines=ign[k].splitlines()
+            for i in range(len(lines)):
+                t=dict(ign); t[k]='\n'.join(lines[:i]+lines[i+1:])
+                if bad(files,t): ign=t; changed=True; break
+            t=dict(ign); del t[k]
+            if bad(files,t): ign=t; changed=True
+    return files,ign
+if __name__=='__main__':
+    ign=json.loads(sys.argv[1]); files=json.loads(sys.argv[2])
+    f,i=minimize(files,ign); print(f,i); print(both(f,i))
+EOF
+python3 mini.py '{"": "///**\r\n!*.*\r\n!A/.h/b\r\ndeep\r\nSUB/**/", "b.tmp/b.tmp": "! /x.txt\r\n![a]\r\n!**/sub/\r\n;a\\b/\r\n/.h/"}' '["!a/SUB", "#a", ".packignore", ";x/sub", "ab/b /!a", "ab/build", "b.tmp/b.tmp/.packignore", "b.tmp/b.tmp/b.tmp", "ss/ss", "sub/x.txt/x.txt/ab", "x.txt/deep"]'
+
+$ cd /tmp/w && python3 -c "
+from t import run
+for F in [['s/x.t/x.t/ab'],['x.t/x.t/ab'],['s/x.t/ab'],['s/x.t/y.t/ab'],['s/x.t/y/ab'],['x.t/y.t/ab'],['a.b/c.d/e.f/g'],['a.b/c/e.f/g']]:
+    print(F,[run(F,{'':p}) for p in ['**\n!*.*','*\n!*.*']])
+"
+
+$ cd /tmp/w && python3 -c "
+from t import run
+for F in [['sub/x.txt/x.txt/ab'],['sub/x.txt/x.txt/ab'],['s/x.txt/x.txt/ab'],['sub/x.t/x.t/ab'],['sub/x.txt/ab'],['x.txt/x.txt/ab'],['sub/x.txt/x.txt/ab','other']]:
+    print(F,[run(F,{'':p}) for p in ['///**\n!*.*','**\n!*.*']])
+"
+
+$ cd /tmp/w && cat > lv.py <<'EOF'
+from t import run
+import sys
+def fmatch(P, path):
+    parts=path.split('/')
+    neg=['!/'+'/'.join(parts[:i])+'/' for i in range(1,len(parts))]
+    return path in run([path],{'':'\n'.join([P]+neg)})
+if __name__=='__main__':
+    paths=sys.argv[1].split(',')
+    for P in sys.stdin.read().split('\n'):
+        if P: print(f'{P!r:15}', ' '.join(f'{p}:{int(fmatch(P,p))}' for p in paths))
+EOF
+python3 lv.py a,a/b,a/b/c,a/b/c/d,a/b/c/d/e <<'EOF'
+**
+/**
+//**
+///**
+////**
+a/**
+a//**
+a///**
+//a
+///a
+/**/a
+**/c
+**/**/c
+EOF
+
+$ cd /tmp/w && python3 lv.py c,a/c,a/b/c,a/b/d/c,a/b/d/e/c,a/b/d/e/f/c,a/b/d/e/f/g/c,a/b/d/e/f/g/h/c <<'EOF'
+**/c
+/**/c
+**/**/c
+a/**/c
+a/**/**/c
+*/**/c
+**/*/c
+EOF
+
+$ python3 - <<'EOF'
+p='snapshot/ignore.py'; s=open(p).read()
+s=s.replace('''        if rx is None:  # "**": zero or more segments
+            return any(_match_segments(regexes, i + 1, parts, k) for k in range(j, len(parts) + 1))''','''        if rx is None:  # "**": zero to _MAX_GLOBSTAR segments
+            last = min(len(parts), j + _MAX_GLOBSTAR)
+            return any(_match_segments(regexes, i + 1, parts, k) for k in range(j, last + 1))''')
+s=s.replace('''class PackignoreError''','''# packignore's "**" never spans more than this many path segments.
+_MAX_GLOBSTAR = 3
+
+
+class PackignoreError''')
+s=s.replace('''A segment that is exactly `**` matches zero
+    or more segments; elsewhere `**` behaves like `*`.''','''A segment that is exactly `**` matches zero
+    to three segments (never more); elsewhere `**` behaves like `*`.''')
+open(p,'w').write(s)
+EOF
+grep -n "MAX_GLOBSTAR\|three" snapshot/ignore.py; cd /tmp/fz && for s in $(cat seeds.txt); do python3 fuzz.py $s 1 | grep -A2 SEED; done
+
+$ cd /tmp/fz && python3 - <<'EOF'
+s=open('fuzz.py').read()
+s=s.replace("depth=rng.choice([1,1,2,2,3,4])","depth=rng.choice([1,1,2,2,3,4,5,6,7])")
+s=s.replace("n=rng.choice([1,1,1,2,2,3])","n=rng.choice([1,1,1,2,2,3,4,5])")
+s=s.replace("SEGS=[","SEGS=['**','**','**/**',")
+open('fuzz.py','w').write(s)
+EOF
+for i in 0 1 2 3 4 5; do python3 fuzz.py $((20000+i*400)) 400 > out$i.txt 2>&1 & done; wait; tail -qn1 out[0-5].txt; grep -h -A2 SEED out[0-5].txt | head -40
+
+$ cd /tmp/w && python3 /tmp/w/cmp.py 'ab' <<'EOF'
+ab || a?
+a? || ?b
+ab || *ab
+*b || ?b
+a* || a?
+EOF
+python3 /tmp/w/cmp.py 'éé.t' <<'EOF'
+éé.t || ??.t
+é* || ?é.t
+é* || ?.t
+EOF
+python3 /tmp/w/cmp.py 'a b\c' <<'EOF'
+a b\c || ????c
+a* || ??
+a b\c || a b*
+a b* || a ?\c
+EOF
+
+$ cd /tmp/w && python3 /tmp/w/cmp.py 'éé.txt' <<'EOF'
+éé* || *.tx?
+éé* || *.t*
+EOF
+
+$ mkdir -p /tmp/fz/e && cd /tmp/fz && cat > edge.py <<'EOF'
+import os,sys,subprocess,shutil,tempfile
+sys.path.insert(0,'/work/repo'); import snapshot.ignore as ig
+def cmpdir(d,label):
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True)
+    a=sorted(l for l in r.stdout.splitlines() if l) if r.returncode==0 else 'ERR '+r.stderr.strip()
+    try: b=ig.ignored_files(d)
+    except Exception as e: b='ERR '+repr(e)
+    print(label, 'OK' if a==b else 'DIFF', a, b if a!=b else '')
+def new():
+    return tempfile.mkdtemp(dir='/tmp/fz/e')
+def w(d,p,c='x'):
+    p=os.path.join(d,p); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write(c)
+# NFC/NFD
+d=new(); w(d,'é'); w(d,'é'); w(d,'.packignore','**'); cmpdir(d,'nfc/nfd')
+d=new(); w(d,'é/x'); w(d,'.packignore','é/'); cmpdir(d,'nfd dir pattern nfc')
+# hardlink
+d=new(); w(d,'a'); os.link(os.path.join(d,'a'),os.path.join(d,'b')); w(d,'.packignore','b'); cmpdir(d,'hardlink')
+d=new(); w(d,'a','zz'); os.link(os.path.join(d,'a'),os.path.join(d,'.packignore')); w(d,'zz'); cmpdir(d,'hardlink packignore')
+d=new(); w(d,'x','a'); w(d,'a'); os.link(os.path.join(d,'x'),os.path.join(d,'.packignore')); cmpdir(d,'hardlink packignore2')
+# symlinks
+d=new(); w(d,'real','a'); w(d,'a'); os.symlink('real',os.path.join(d,'.packignore')); cmpdir(d,'symlink packignore')
+d=new(); w(d,'sub/a'); os.symlink('sub',os.path.join(d,'lnk')); w(d,'.packignore','a'); cmpdir(d,'symlink dir')
+# .packignore as dir
+d=new(); w(d,'.packignore/a'); cmpdir(d,'packignore dir')
+# .git
+d=new(); w(d,'.git/a'); w(d,'s/.git/a'); w(d,'.packignore','a'); cmpdir(d,'.git')
+d=new(); w(d,'.git','x'); w(d,'.packignore','.git'); cmpdir(d,'.git file')
+d=new(); w(d,'.GIT/x'); w(d,'.packignore','x'); cmpdir(d,'.GIT dir')
+# empty
+d=new(); cmpdir(d,'empty')
+d=new(); w(d,'.packignore',''); cmpdir(d,'empty pi')
+# names with newline etc
+d=new(); w(d,'a\nb'); w(d,'c\rd'); w(d,'e\x85f'); w(d,'.packignore','a?b\nc?d\ne?f'); cmpdir(d,'newline names')
+d=new(); w(d,'a\nb'); w(d,'.packignore','*'); cmpdir(d,'newline names star')
+# non-utf8 filename
+d=new(); open(os.path.join(d.encode(),b'\xff\xfe'),'w').write('x'); w(d,'.packignore','*'); cmpdir(d,'nonutf8 name')
+# BOM
+d=new(); w(d,'a'); open(os.path.join(d,'.packignore'),'wb').write(b'\xef\xbb\xbfa'); cmpdir(d,'bom')
+d=new(); w(d,'﻿a'); open(os.path.join(d,'.packignore'),'wb').write(b'\xef\xbb\xbfa'); cmpdir(d,'bom2')
+# invalid utf8
+d=new(); w(d,'a'); open(os.path.join(d,'.packignore'),'wb').write(b'a\n\xff'); cmpdir(d,'bad utf8')
+d=new(); w(d,'a'); w(d,'sub/.packignore','!a'); open(os.path.join(d,'.packignore'),'wb').write(b'sub/'); os.makedirs(os.path.join(d,'x')); open(os.path.join(d,'x','.packignore'),'wb').write(b'\xff'); w(d,'.packignore','x/'); cmpdir(d,'bad utf8 in excluded dir')
+# file named .packignore in excluded dir with collision
+d=new(); w(d,'A/x'); w(d,'a/.packignore','x'); cmpdir(d,'collide dir pi')
+# empty file names unicode case
+d=new(); w(d,'ﬁ'); w(d,'fi'); w(d,'.packignore','*'); cmpdir(d,'fi ligature')
+d=new(); w(d,'ǰ'); w(d,'ǰ'); w(d,'.packignore','*'); cmpdir(d,'j caron')
+EOF
+python3 edge.py; rm -rf /tmp/fz/e
+
+$ mkdir -p /tmp/fz/e && cd /tmp/fz && cat > edge2.py <<'EOF'
+import os,sys,subprocess,shutil,tempfile
+def svc(d):
+    r=subprocess.run([sys.executable,'/work/repo/tools/packignore',d],capture_output=True,text=True)
+    return sorted(l for l in r.stdout.splitlines() if l) if r.returncode==0 else 'ERR '+r.stderr.strip()
+def new(): return tempfile.mkdtemp(dir='/tmp/fz/e')
+def w(d,p,c='x'):
+    p=os.path.join(d,p); os.makedirs(os.path.dirname(p),exist_ok=True); open(p,'w').write(c)
+def t(label, files, pi='*'):
+    d=new()
+    for f in files: w(d,f)
+    w(d,'.packignore',pi); print(label, svc(d))
+t('.git file', ['.git'], '.git')
+t('.git file star', ['.git','b'], '*')
+t('s/.git file', ['s/.git'], '.git')
+t('.GIT file', ['.GIT'], '.GIT')
+t('.git dir nested pat', ['s/.git/a'], '.git/')
+t('pi dir in excluded', ['x/.packignore/a'], 'x/')
+t('pi dir nested', ['x/.packignore/a'], 'a')
+t('PI dir', ['.PACKIGNORE/a'], 'a')
+for a,b in [('①','1'),('ｆ','f'),('ª','a'),('Å','Å'),('Å','Å'),('ſ','s'),('ﬀ','ff'),('ᾳ','ᾼ'),('ᾈ','ἀι'),('ΐ','ΐ'),('ͅ','ι')]:
+    for o in [(a,b),(b,a)]:
+        t(f'{o!r}', list(o))
+EOF
+python3 edge2.py; rm -rf /tmp/fz/e
+
+$ python3 - <<'EOF'
+p='snapshot/ignore.py'; s=open(p).read()
+old_scan=s[s.index('class _Dir:'):s.index('def _verdict')]
+new_scan='''class _Dir:
+    __slots__ = ("name", "dirs", "files")
+
+    def __init__(self, name):
+        self.name = name
+        self.dirs = {}  # _key(name) -> _Dir
+        self.files = {}  # _key(name) -> [canonical name, full path of the last copy]
+
+
+def _key(name):
+    """Names packignore treats as the same: canonical caseless matching."""
+    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
+
+
+def _scan(root):
+    """Build the tree packignore sees: regular files only, names merged case-insensitively."""
+    top = _Dir("")
+    inodes = set()
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            if os.path.islink(full) or not os.path.isfile(full):
+                continue
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            try:
+                rel.encode("utf-8")
+            except UnicodeEncodeError:
+                raise PackignoreError(f"{full}: file name is not valid UTF-8") from None
+            # Further hard links to an already-seen file reach packignore as
+            # link entries, which it rejects.
+            st = os.stat(full)
+            if st.st_nlink > 1:
+                if (st.st_ino, st.st_dev) in inodes:
+                    raise PackignoreError(f"{full}: hard links are not supported")
+                inodes.add((st.st_ino, st.st_dev))
+            parts = rel.split("/")
+            node = top
+            for part in parts[:-1]:
+                key = _key(part)
+                if key in node.files:
+                    raise PackignoreError(f"{full}: file and directory names collide")
+                node = node.dirs.setdefault(key, _Dir(part))
+            key = _key(parts[-1])
+            if key in node.dirs:
+                raise PackignoreError(f"{full}: file and directory names collide")
+            entry = node.files.setdefault(key, [parts[-1], full])
+            entry[1] = full
+    # packignore skips a top-level .git even when it is a file.
+    if top.files.get(_key(".git"), [None])[0] == ".git":
+        del top.files[_key(".git")]
+    return top
+
+
+'''
+s=s.replace(old_scan,new_scan)
+s=s.replace('''import re
+''','''import re
+import unicodedata
+''')
+s=s.replace('''        if not excluded:
+            entry = node.files.get(".packignore")
+            if entry is not None and entry[0] == ".packignore":''','''        if not excluded:
+            child = node.dirs.get(_key(".packignore"))
+            if child is not None and child.name == ".packignore":
+                raise PackignoreError(f"{'/'.join(parts + [child.name])} is a directory")
+            entry = node.files.get(_key(".packignore"))
+            if entry is not None and entry[0] == ".packignore":''')
+open(p,'w').write(s)
+EOF
+cd /tmp/fz && python3 edge.py 2>&1; rm -rf /tmp/fz/e; mkdir -p /tmp/fz/e; python3 -c "
+import sys; sys.path.insert(0,'/tmp/w'); from t import run
+print(run(['.PACKIGNORE/a','b'],{}))
+print(run(['s/.PACKIGNORE/a','b'],{'s':'zz'}))
+print(run(['x/.packignore/a','b'],{'':'x/\n!x/.packignore/'}))
+print(run(['.git','.packignore'],{}))
+"
+
+$ mkdir -p /tmp/fz/e; cd /tmp/fz && python3 edge.py 2>&1; rm -rf /tmp/fz/e
+
+$ cd /tmp/fz && python3 - <<'EOF'
+s=open('fuzz.py').read()
+s=s.replace("SEGS=[","SEGS=['[a-c]','{a,b}','\\\\*','a\\\\','\\\\#a','#*',';*','!*','**.*','*.*.*','[!a]*','a-c','\\t','é','e\\u0301',")
+s=s.replace("NAMES=[","NAMES=['{a,b}','a-c','\\\\*','b','.PACKIGNORE','!x','é','e\\u0301','E\\u0301',")
+s=s.replace("            open(p,'w').write('x')","            open(p,'w').write('x' if not p.endswith('.PACKIGNORE') else rand_pat(rng))")
+open('fuzz.py','w').write(s)
+EOF
+for i in 0 1 2 3 4 5; do python3 fuzz.py $((40000+i*400)) 400 > out$i.txt 2>&1 & done; wait; tail -qn1 out[0-5].txt; grep -h -A2 SEED out[0-5].txt | head -40
+
+$ cd /tmp/w && python3 - <<'EOF'
+from t import run
+F=['a','b','c','ab','{a,b}','{a}','a,b','{','}','x/a','x/b','y/c','a.t','b.t','{a','b}','','ac','abc','aXc']
+F=[f for f in F if f]
+for p in ['{a,b}','{a}','{,a}','{a,}','{a,b}*','*{a,b}','{a,b}.t','{a,{b,c}}','{x/a,y/c}','x/{a,b}','{x,y}/*','{','{a','a}','{}','{,}','a{b,X}c','{a,b','a,b','{a,b}}','{{a,b}','\\{a,b}','{a\\,b}','{a..c}','{a,b}{c,}','{*,?}','{a/,b}']:
+    print(repr(p), run(F,{'':p}))
+EOF
+
+$ cd /tmp/w && python3 - <<'EOF'
+from t import run
+F=['a','b','!a',' b','x/a','x/b','d/q','e/q',';a']
+for p in ['{!a,b}','*\n!{a,b}','{a, b}','{a,b/}','{d/,b}','{/a,b}','{;a,b}','{ a,b}','{a,b }',' {a,b} ','{a,b}/','{/d,e}/q','{d,/e}/q','{d/q,a}']:
+    print(repr(p), run(F,{'':p}))
+EOF
+python3 /tmp/w/cmp.py 'abc' <<'EOF'
+{abc,z} || ab?
+{abc,z} || abc
+{abc,zzzzz} || abc
+{abc,zzzzz} || {abc,y}
+{a,zzzzz}bc || abc
+{a,zzzzz}bc || ab?
+{a,z}bc || abc
+{a,zz}bc || abc
+{a,z}bc || *bc
+{a,z}bc || *c
+{a,z}?? || a??
+{a}bc || abc
+{}abc || abc
+EOF
+
+$ cd /tmp/w && python3 /tmp/w/cmp.py 'abcdefghij' <<'EOF'
+{a,z}bc* || abcde*
+{a,z}bc* || abcdef*
+{a,b}{c,d}* || abcdef*
+{a,b}{c,d}* || abcdefg*
+{a,b}{c,d}* || abcdefgh*
+{,a}bc* || abcd*
+{,a}bc* || abcde*
+{a,,}* || abc*
+{a,,}* || abcd*
+{a,zz,yyy}b* || abcdefgh*
+{a,zz,yyy}b* || abcdefghi*
+{a,zz,yyy}b* || abcdefg*
+{a,z}{b,y}{c,x}* || abcdefgh*
+{a,z}{b,y}{c,x}* || abcdefghi*
+{a,z}{b,y}{c,x}* || abcdefg*
+EOF
+
+$ cd /tmp/w && python3 /tmp/w/cmp.py 'a,bcdef' <<'EOF'
+a,b* || *bcd*
+EOF
+python3 /tmp/w/cmp.py '{abcd' <<'EOF'
+{a* || *bc*
+EOF
+python3 /tmp/w/cmp.py 'ab}cd' <<'EOF'
+*}c* || *cd
+EOF
+python3 /tmp/w/cmp.py 'ab' <<'EOF'
+{a,b}{b,c} || ab
+{a,b}{b,c} || {a}{b}
+EOF
+
+$ cd /tmp/w && python3 - <<'EOF'
+from t import run
+F=['ac}','{bc}','bc','a','{b}c','p/q/c','x/c','c','a}b','b/c','m/a','b','q}','qa','{a','a}']
+for p in ['{a,{b}c}','{**,x}/c','a}{b,c}','{a,b/c}','}{a,b}','{q},a}','{q{,a}','{{a}}','{{q,a}}','{a}}{','{a\n}']:
+    print(repr(p), run(F,{'':p}))
+EOF
+
+$ cd /tmp/w && python3 - <<'EOF'
+from t import run
+F=['ac}','{bc}','bc','a','{b}c','p/q/c','x/c','c','a}b','b/c','m/a','q}','qa','{a','a}']
+for p in ['{a,{b}c}','{**,x}/c','a}{b,c}','{a,b/c}','}{a,b}','{q},a}','{q{,a}','{{a}}','{{q,a}}','{a}}{']:
+    print(repr(p), run(F,{'':p}))
+EOF
+
+$ python3 - <<'EOF'
+p='snapshot/ignore.py'; s=open(p).read()
+old=s[s.index('class _Rule:'):s.index('@functools.lru_cache')]
+new='''class _Rule:
+    __slots__ = ("negate", "dir_only", "anchored", "specificity", "_alternatives")
+
+    def __init__(self, negate, dir_only, anchored, body):
+        self.negate = negate
+        self.dir_only = dir_only
+        self.anchored = anchored
+        self.specificity = sum(1 for c in body if c not in "*?/{},")
+        self._alternatives = []
+        for alt in dict.fromkeys(_expand_braces(body)):
+            if anchored:
+                self._alternatives.append(tuple(None if s == "**" else _segment_regex(s)
+                                                for s in alt.split("/")))
+            elif alt:
+                self._alternatives.append(_segment_regex(alt))
+
+    def matches(self, parts, is_dir):
+        """Does this rule match the path `parts`, relative to its .packignore?"""
+        if self.dir_only and not is_dir:
+            return False
+        if not self.anchored:
+            return any(rx.fullmatch(parts[-1]) for rx in self._alternatives)
+        parts = tuple(parts)
+        return any(_match_segments(alt, 0, parts, 0) for alt in self._alternatives)
+
+
+def _expand_braces(text):
+    """Expand `{a,b}` groups left to right. A group runs from the first `{`
+    to the next `}`; its alternatives are taken literally, and an unclosed `{`
+    is an ordinary character."""
+    start = text.find("{")
+    end = text.find("}", start + 1) if start >= 0 else -1
+    if end < 0:
+        return [text]
+    head = text[:start]
+    tails = _expand_braces(text[end + 1:])
+    return [head + alt + tail for alt in text[start + 1:end].split(",") for tail in tails]
+
+
+'''
+s=s.replace(old,new)
+open(p,'w').write(s)
+EOF
+cd /tmp/fz && grep -h SEED out*.txt | awk '{print $2}' > seeds2.txt; for s in $(cat seeds2.txt); do python3 fuzz.py $s 1 | grep -A2 SEED; done
+
+$ cd /tmp/fz && python3 - <<'EOF'
+s=open('fuzz.py').read()
+s=s.replace("SEGS=[","SEGS=['{a,b}*','{,a}','{a,{b}c}','{**,x}','{a/b,c}','{/a,b}','{a.tmp,sub}','{.h,deep/}','*{b,.tmp}','{','}',',',")
+open('fuzz.py','w').write(s)
+EOF
+for i in 0 1 2 3 4 5; do python3 fuzz.py $((60000+i*500)) 500 > out$i.txt 2>&1 & done; wait; tail -qn1 out[0-5].txt; grep -h -A2 SEED out[0-5].txt | head -40
+
+$ cd /tmp/w && python3 - <<'EOF'
+from t import run
+F=['a','b','ab','abc','aab','x','a.txt','HOME','~','$HOME','^a','a$','(a|b)','a|b','+(a)','@(a|b)','re:a.*','regex:a','glob:a','path:a','syntax: regexp','include:x','x\\','y','a b','%a','abc/d','A']
+for p in ['re:a.*','regex:a','regexp:a','glob:a','path:a','syntax: regexp\na.*','syntax:regexp\nab?','^a','a$','(a|b)','a|b','+(a)','@(a|b)','!(a)','~','$HOME','%a','include:x','x\\\ny','a.+','a*?','a**b','a?*','(?i)a','i:a','a#b','ab{1,2}','a{2}b','a\\*','\\a']:
+    r=run(F,{'':p})
+    print(repr(p), r)
+EOF
+
+$ cd /tmp/fz && python3 - <<'EOF'
+from mini import both
+F=['a','b','ab','abcd','aab','x','a.txt','HOME','~','$HOME','^a','a$','(a|b)','a|b','+(a)','@(a|b)','re:a.x','regex:a','glob:a','path:a','syntax: regexp','include:x','x\\','y','a b','%a','abc/d','A','a#b','aa']
+for p in ['re:a.*','regex:a','regexp:a','glob:a','path:a','syntax: regexp\na.*','syntax:regexp\nab?','syntax: glob\na','^a','a$','(a|b)','a|b','+(a)','@(a|b)','!(a)','~','$HOME','%a','include:x','x\\\ny','a.+','a*?','a**b','a?*','(?i)a','i:a','a#b','ab{1,2}','a{2}b','a\\*','\\a','a?\nA','*\n!a\n!a\n','a  b']:
+    a,b=both(F,{'':p})
+    print('OK ' if a==b else 'DIFF', repr(p), a, '' if a==b else b)
+EOF
+
+$ cd /tmp/fz && time python3 -c "
+from mini import both
+import time
+for n in [8,12,16,18]:
+    t=time.time(); a,b=both(['a'*n,'b'*n,'ab'*(n//2)],{'':'{a,b}'*n}); print(n, a==b, a, round(time.time()-t,2))
+"
+
+$ cd /tmp/w && time python3 -c "
+from t import run
+print(run(['a'*20],{'':'{a,b}'*20}))" ; time python3 -c "
+from t import run
+print(run(['a'*22],{'':'{a,b}'*22}))"
+
+$ python3 - <<'EOF'
+p='snapshot/ignore.py'; s=open(p).read()
+old=s[s.index('class _Rule:'):s.index('def _parse')]
+new='''class _Rule:
+    __slots__ = ("negate", "dir_only", "anchored", "specificity", "_regexes")
+
+    def __init__(self, negate, dir_only, anchored, body):
+        self.negate = negate
+        self.dir_only = dir_only
+        self.anchored = anchored
+        self.specificity = sum(1 for c in body if c not in "*?/{},")
+        self._regexes = _compile(body, anchored)
+
+    def matches(self, parts, is_dir):
+        """Does this rule match the path `parts`, relative to its .packignore?"""
+        if self.dir_only and not is_dir:
+            return False
+        # Anchored patterns match the whole path, written with a leading "/"
+        # so that every segment is "/" + name; others match just the name.
+        subject = "/" + "/".join(parts) if self.anchored else parts[-1]
+        return any(rx.fullmatch(subject) for rx in self._regexes)
+
+
+def _expand_braces(text):
+    """Expand `{a,b}` groups left to right. A group runs from the first `{`
+    to the next `}`; its alternatives are taken literally, and an unclosed `{`
+    is an ordinary character."""
+    start = text.find("{")
+    end = text.find("}", start + 1) if start >= 0 else -1
+    if end < 0:
+        return [text]
+    head = text[:start]
+    tails = _expand_braces(text[end + 1:])
+    return [head + alt + tail for alt in text[start + 1:end].split(",") for tail in tails]
+
+
+def _glob(segment):
+    out = []
+    for c in segment:
+        if c == "*":
+            if not out or out[-1] != "[^/]*":
+                out.append("[^/]*")
+        elif c == "?":
+            out.append("[^/]")
+        else:
+            out.append(re.escape(c))
+    return "".join(out)
+
+
+_GLOBSTAR = "(?:/[^/]+){0,%d}" % _MAX_GLOBSTAR
+_CHUNK = 500  # alternatives per compiled regex
+
+
+@functools.lru_cache(maxsize=4096)
+def _compile(body, anchored):
+    alternatives = []
+    for alt in _expand_braces(body):
+        if anchored:
+            alternatives.append("".join(_GLOBSTAR if seg == "**" else "/" + _glob(seg)
+                                        for seg in alt.split("/")))
+        elif alt:
+            alternatives.append(_glob(alt))
+    alternatives = list(dict.fromkeys(alternatives))
+    return tuple(re.compile("|".join(alternatives[i:i + _CHUNK]), re.DOTALL)
+                 for i in range(0, len(alternatives), _CHUNK))
+
+
+'''
+s=s.replace(old,new)
+s=s.replace("import functools\n","import functools\n") 
+open(p,'w').write(s)
+EOF
+grep -n "_match_segments\|_segment_regex" snapshot/ignore.py; cd /tmp/fz && time python3 -c "
+from mini import both
+import time,sys
+sys.path.insert(0,'/work/repo')
+for n in [8,16,18]:
+    t=time.time(); a,b=both(['a'*n,'b'*n,'ab'*(n//2)],{'':'{a,b}'*n}); print(n, a==b, round(time.time()-t,2))
+    t=time.time(); a,b=both(['a'*n+'/x','b/'*n+'x','ab'*(n//2)],{'':'{a,b/}'*n+'x'}); print(n, a==b, a, round(time.time()-t,2))
+"
+
+$ cd /tmp/fz && python3 -c "
+import sys,time,shutil
+sys.path.insert(0,'/work/repo')
+from mini import mk
+import snapshot.ignore as ig
+for n in [16,18]:
+  for files,pat in [(['a'*n,'b'*n],'{a,b}'*n),(['b/'*n+'x'],'{a,b/}'*n+'x')]:
+    d=mk(files,{'':pat}); t=time.time(); ig.ignored_files(d); print(n,round(time.time()-t,2)); shutil.rmtree(d)
+"
+
+$ python3 - <<'EOF'
+p='snapshot/ignore.py'; s=open(p).read()
+doc_end=s.index('"""\n\nimport functools')+4
+s='''"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine, and returns exactly what it returned. docs/PACKIGNORE.md describes the
+original 1.4 behaviour; the rules below are what packignore actually does, and
+differ from the docs in several places.
+
+Reading .packignore files
+  - Files are decoded as strict UTF-8 and split with str.splitlines(). Each
+    line is stripped of leading and trailing whitespace (str.strip()).
+  - Blank lines are ignored. Lines starting with `;` are comments; `#` is an
+    ordinary character. There is no backslash escaping.
+  - A leading `!` negates the pattern (re-includes). Nothing after the `!` is
+    stripped, so `! foo` is the pattern " foo".
+  - Trailing slashes make the pattern match directories only.
+  - A pattern containing a `/` (other than trailing ones) is anchored to the
+    directory holding the .packignore, and its leading slashes are dropped.
+    Otherwise it matches a file or directory name at any depth below that
+    directory.
+  - `{a,b}` expands to alternatives, after the steps above (so `{x,y/z}` is
+    anchored as a whole). A group runs from the first `{` to the next `}`;
+    the alternatives are literal text, so groups do not nest.
+  - `*` matches any run of characters within a path segment (including a
+    leading dot), `?` exactly one. A segment that is exactly `**` matches zero
+    to three segments (never more); elsewhere `**` behaves like `*`. `[`, `]`
+    and `\\\\` are ordinary characters. Matching is case-sensitive.
+
+Deciding whether a path is excluded
+  - Every file and directory gets a verdict. The .packignore files that apply
+    are those in the path's ancestor directories that are not themselves
+    excluded (a .packignore inside an excluded directory is never read).
+  - The deepest such .packignore with a pattern matching the path itself
+    decides. Within it the most specific matching pattern wins: the one with
+    the most characters other than `*?/{},`. On a tie the later line wins.
+  - If no pattern matches the path itself, it inherits its parent
+    directory's verdict. So a pattern naming a file overrides a pattern that
+    excluded or re-included its directory.
+
+The tree
+  - Only regular files are considered (no symlinks), and `.git` directly
+    under the root is skipped, whether it is a directory or a file.
+  - packignore treats names case- and normalization-insensitively (canonical
+    caseless matching) but keeps the first spelling seen, in os.walk order:
+    `a.txt` and `A.TXT` are one file named after whichever came first, and
+    `d/x` and `D/y` are reported as `d/x` and `d/y`. For a merged .packignore
+    the content of the last one seen is used.
+  - packignore fails, and so does ignored_files() with PackignoreError, when
+    a file and a directory name collide that way, when a file is a hard link
+    to one seen earlier, when a name is not valid UTF-8, when a .packignore
+    that would be read is a directory or is not valid UTF-8.
+"""''' + s[doc_end:]
+s=s.replace('''def _parse(data):
+    rules = []
+    for line in data.decode("utf-8").splitlines():''','''def _parse(path):
+    with open(path, "rb") as f:
+        data = f.read()
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as e:
+        raise PackignoreError(f"{path}: {e}") from None
+    rules = []
+    for line in text.splitlines():''')
+old=s[s.index('    out = []\n\n    def visit'):s.index('    # packignore prints one path')]
+new='''    out = []
+    stack = [(_scan(root), [], False, [])]
+    while stack:
+        node, parts, excluded, sources = stack.pop()
+        if not excluded:
+            child = node.dirs.get(_key(".packignore"))
+            if child is not None and child.name == ".packignore":
+                raise PackignoreError(f"{'/'.join(parts + [child.name])}: is a directory")
+            entry = node.files.get(_key(".packignore"))
+            if entry is not None and entry[0] == ".packignore":
+                rules = _parse(entry[1])
+                if rules:
+                    sources = sources + [(len(parts), rules)]
+        for name, _ in node.files.values():
+            path = parts + [name]
+            if _verdict(path, False, sources, excluded):
+                out.append("/".join(path))
+        for child in node.dirs.values():
+            path = parts + [child.name]
+            stack.append((child, path, _verdict(path, True, sources, excluded), sources))
+
+'''
+s=s.replace(old,new)
+open(p,'w').write(s)
+EOF
+sed -n 1,60p snapshot/ignore.py | grep -n '\\\\'; python3 -c "import snapshot.ignore as i; print(i.__doc__[1200:1500])"
+
+$ sed -i 's/    to one seen earlier, when a name is not valid UTF-8, when a .packignore/    to one seen earlier, when a name is not valid UTF-8, or when a .packignore/' snapshot/ignore.py && grep -n "or when a" snapshot/ignore.py && mkdir -p /tmp/fz/e && cd /tmp/fz && python3 edge.py && rm -rf /tmp/fz/e && for i in 0 1 2 3 4 5; do python3 fuzz.py $((90000+i*500)) 500 > out$i.txt 2>&1 & done; wait; tail -qn1 out[0-5].txt; grep -h -A2 SEED out[0-5].txt | head -30
+
+$ cd /tmp/fz && cat > fuzz2.py <<'EOF'
+import os,sys,random,tempfile,shutil,json
+from mini import both
+DIRS=['src','lib','build','dist','node_modules','docs','tests','tmp','cache','.cache','pkg','vendor','out','assets','img','sub','deep','a','b','c']
+FILES=['main.py','util.py','x.pyc','README.md','notes.txt','a.tmp','b.tmp','important.tmp','data.json','.env','.gitignore','Makefile','index.js','app.min.js','log.log','debug.log','core','x','y.o','lib.so','keep.me','#x','!y',';z','sp ace.txt','b{1}.txt','[a].txt']
+PSEG=DIRS+FILES+['*','**','?','*.py','*.pyc','*.tmp','*.log','*.js','*.min.js','.*','*.{py,js}','{src,lib}','{build,dist}','b*','?ib','*cache*','**.log','te?ts','[a].txt','*.o','*.so','#x','!y','{a,b,c}','x*','*e*']
+def pat(rng):
+    n=rng.choices([1,2,3,4,5],[5,4,2,1,1])[0]
+    p='/'.join(rng.choice(PSEG) for _ in range(n))
+    r=rng.random()
+    if r<.2: p='/'+p
+    elif r<.3: p='**/'+p
+    if rng.random()<.2: p+='/'
+    if rng.random()<.35: p='!'+p
+    q=rng.random()
+    if q<.05: p='# '+p
+    elif q<.1: p='; '+p
+    elif q<.13: p=p+'   '
+    elif q<.15: p='\t'+p
+    return p
+def gen(rng,d):
+    files=set()
+    for _ in range(rng.randint(3,30)):
+        depth=rng.choices([0,1,2,3,4,5,6],[3,4,4,3,2,1,1])[0]
+        files.add('/'.join([rng.choice(DIRS) for _ in range(depth)]+[rng.choice(FILES)]))
+    # drop file/dir conflicts
+    dirs={'/'.join(f.split('/')[:i]) for f in files for i in range(1,len(f.split('/')))}
+    files=sorted(f for f in files if f not in dirs)
+    dirs=sorted({''}|{'/'.join(f.split('/')[:i]) for f in files for i in range(1,len(f.split('/')))})
+    ign={}
+    for dd in rng.sample(dirs,k=min(len(dirs),rng.choice([1,1,2,3,4]))):
+        ign[dd]=rng.choice(['\n','\r\n']).join(pat(rng) for _ in range(rng.randint(1,8)))+rng.choice(['','\n'])
+    return files,ign
+s0,N=int(sys.argv[1]),int(sys.argv[2]); bad=0; st={}
+for s in range(s0,s0+N):
+    rng=random.Random(s); files,ign=gen(rng,None)
+    a,b=both(files,ign)
+    if a!=b:
+        a,b=both(files,ign)
+    k=('err' if a=='ERR' else 'nonempty' if a else 'empty'); st[k]=st.get(k,0)+1
+    if a!=b:
+        bad+=1; print('SEED',s,json.dumps(ign),json.dumps(files)); print('  svc ',a); print('  mine',b)
+print('bad',bad,'of',N,st)
+EOF
+for i in 0 1 2 3 4 5; do python3 fuzz2.py $((i*500)) 500 > o2_$i.txt 2>&1 & done; wait; tail -qn1 o2_*.txt; grep -h -A2 SEED o2_*.txt | head -30
+
+$ cd /tmp/fz && python3 -c "
+import random,sys; sys.argv=['x','0','0']
+exec(open('fuzz2.py').read().split('s0,N=')[0])
+from mini import both
+for s in range(3):
+    rng=random.Random(s); files,ign=gen(rng,None); print(ign); print(files[:8]); print(both(files,ign))
+"
+
+$ cd /tmp/fz && python3 - <<'EOF'
+s=open('fuzz2.py').read()
+s=s.replace('''def pat(rng):
+    n=rng.choices([1,2,3,4,5],[5,4,2,1,1])[0]
+    p='/'.join(rng.choice(PSEG) for _ in range(n))''','''def wild(rng,seg):
+    r=rng.random()
+    if r<.5: return seg
+    if r<.6: return '*'
+    if r<.65: return '**'
+    if r<.75 and '.' in seg: return '*'+seg[seg.index('.'):]
+    if r<.85 and len(seg)>1: return seg[0]+'*'
+    if r<.9: return '?'*len(seg)
+    return rng.choice(PSEG)
+def pat(rng,files=None,base=''):
+    cands=[f[len(base)+1 if base else 0:] for f in (files or []) if not base or f.startswith(base+'/')]
+    if cands and rng.random()<.8:
+        segs=rng.choice(cands).split('/')
+        i=rng.randrange(len(segs)); j=rng.randint(i+1,len(segs))
+        if rng.random()<.5: i=0
+        p='/'.join(wild(rng,x) for x in segs[i:j])
+    else:
+        n=rng.choices([1,2,3,4,5],[5,4,2,1,1])[0]
+        p='/'.join(rng.choice(PSEG) for _ in range(n))''')
+s=s.replace('''    for dd in rng.sample(dirs,k=min(len(dirs),rng.choice([1,1,2,3,4]))):
+        ign[dd]=rng.choice(['\\n','\\r\\n']).join(pat(rng) for _ in range(rng.randint(1,8)))+rng.choice(['','\\n'])''','''    chosen=set(rng.sample(dirs,k=min(len(dirs),rng.choice([0,1,1,2,3,4]))))|{''}
+    for dd in chosen:
+        ign[dd]=rng.choice(['\\n','\\r\\n']).join(pat(rng,files,dd) for _ in range(rng.randint(1,8)))+rng.choice(['','\\n'])''')
+open('fuzz2.py','w').write(s)
+EOF
+for i in 0 1 2 3 4 5; do python3 fuzz2.py $((10000+i*500)) 500 > o2_$i.txt 2>&1 & done; wait; tail -qn1 o2_*.txt; grep -h -A2 SEED o2_*.txt | head -30
+
+$ cd /tmp/fz && cat > replay.py <<'EOF'
+import sys,re
+from mini import both
+bad=0;n=0
+def chk(F,ign):
+    global bad,n
+    n+=1; a,b=both(F,ign)
+    if a!=b: bad+=1; print('DIFF',ign,F,a,b)
+F2=['a.tmp','.a.tmp','[ab].tmp','a\\b','sub/a.tmp','sub/deep/b.txt','sub/deep/c.tmp','x/sub/q','important.tmp','sub/important.tmp','abc']
+for c in open('/tmp/w/p2.in').read().split('\n====\n'): chk(F2,{'':c})
+F3=['a.tmp','ab.tmp','b.txt','sub/a.tmp','sub/b.txt','sub/deep/a.tmp']
+for c in open('/tmp/w/p3.in').read().split('\n====\n'): chk(F3,{'':c})
+src=open('/tmp/w/p4.py').read()+open('/tmp/w/p5.py').read()
+F=['a.tmp','sub/a.tmp','sub/b.txt','sub/deep/a.tmp','sub/deep/b.txt','other/a.tmp']
+for m in re.finditer(r"^ (\{.*\}),$", src, re.M): chk(F,eval(m.group(1)))
+print('bad',bad,'of',n)
+EOF
+python3 - <<'EOF'
+import re
+for name in ['p2','p3']:
+    s=open(f'/tmp/w/{name}.py').read() if False else None
+EOF
+history_p2=$(cat <<'X'
+X
+); echo skip
+
+$ cd /tmp/fz && cat > replay.py <<'EOF'
+import re
+from mini import both
+bad=0;n=0
+def chk(F,ign):
+    global bad,n
+    n+=1; a,b=both(F,ign)
+    if a!=b: bad+=1; print('DIFF',ign,F,a,b)
+F2=['a.tmp','.a.tmp','[ab].tmp','a\\b','sub/a.tmp','sub/deep/b.txt','sub/deep/c.tmp','x/sub/q','important.tmp','sub/important.tmp','abc','#c','!n',';s','x y','a b ','tab\t']
+for c in ["*.tmp","#c","\\#c","\\!n","!n",";s"," *.tmp","*.tmp\\ ","x y","a b ","?a.tmp","sub*b.txt","sub/**b.txt","sub/**/","**b.txt","a/**/b","**/sub/","sub/deep/b.txt/","abc ;x","*.tmp\n!important.tmp","!important.tmp\n*.tmp","sub/\n!sub/important.tmp","sub/*\n!sub/deep","*.tmp\n! important.tmp","*.tmp\n!!important.tmp","!","*.tmp\n!*","/","//","sub//a.tmp","./a.tmp","***","a*b*c",".*","a.tmp\n!*.tmp","*.tmp\n!?.tmp","**/a.tmp\n!a.tmp","/a.tmp\n!a.tmp","sub\n!a.tmp","sub/**\n!a.tmp","*.tmp\n!a.tm*","*.tmp\n!a.t**"]:
+    chk(F2,{'':c})
+src=open('/tmp/w/p4.py').read()+open('/tmp/w/p5.py').read()+open('/tmp/w/p7.py').read()
+F=['a.tmp','sub/a.tmp','sub/b.txt','sub/deep/a.tmp','sub/deep/b.txt','other/a.tmp']
+for m in re.finditer(r"^ (\{.*\}),$", src, re.M): chk(F,eval(m.group(1)))
+print('bad',bad,'of',n)
+EOF
+python3 replay.py
+
+$ rm -rf /tmp/e2e && mkdir -p /tmp/e2e/src/build /tmp/e2e/src/lib && cd /tmp/e2e/src && touch a.py a.pyc build/x lib/keep.tmp lib/b.tmp && printf 'build/\n*.tmp\n;comment\n!keep.tmp\n' > .packignore && cd /work/repo && PACKIGNORE_URL=http://127.0.0.1:1 python3 -I -m snapshot /tmp/e2e/src /tmp/e2e/out && find /tmp/e2e/out -type f | sort && python3 tools/packignore /tmp/e2e/src && python3 -c "import snapshot.ignore as i; print(i.ignored_files('/tmp/e2e/src'))" && grep -n "subprocess\|urllib\|socket" snapshot/*.py; git status --short
+
+$ PACKIGNORE_URL=http://127.0.0.1:1 python3 -m snapshot /tmp/e2e/src /tmp/e2e/out && find /tmp/e2e/out -type f | sort && echo '--- service:' && python3 tools/packignore /tmp/e2e/src && echo '--- mine:' && python3 -c "import snapshot.ignore as i; print(i.ignored_files('/tmp/e2e/src'))"; grep -n "subprocess\|urllib\|socket" snapshot/*.py; rm -rf snapshot/__pycache__; git status --short

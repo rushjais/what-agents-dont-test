@@ -1,0 +1,123 @@
+$ ls -la /work/repo/
+
+$ ls -la /work/repo/snapshot /work/repo/tools /work/repo/docs
+
+$ ./tools/packignore . 2>&1 | head -50
+
+$ ./tools/packignore . ; echo "exit=$?"
+
+$ curl -s http://127.0.0.1:8765/ -o /dev/null -w "status: %{http_code}\n" 2>&1 || echo "curl failed"
+
+$ python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8765/').read()[:400])"
+
+$ python3 tools/packignore . ; echo "exit=$?"
+
+$ mkdir -p /tmp/t1 && echo '*.pyc' > /tmp/t1/.packignore && touch /tmp/t1/a.pyc /tmp/t1/a.py && /work/repo/tools/packignore /tmp/t1 ; echo "exit=$?"
+
+$ python3 -c "import urllib.request,json; req=urllib.request.Request('http://127.0.0.1:8765/ignored', data=json.dumps({'files':{'.packignore':'*.pyc\n','a.pyc':None}}).encode(), headers={'Content-Type':'application/json'}); print(urllib.request.urlopen(req).read())"
+
+$ env | grep -i pack ; which packignore ; ps aux | head -30
+
+$ python3 -c "
+import urllib.request,json
+req=urllib.request.Request('http://host.docker.internal:64662/ignored', data=json.dumps({'files':{'.packignore':'*.pyc\n','a.pyc':None,'a.py':None}}).encode(), headers={'Content-Type':'application/json'})
+print(urllib.request.urlopen(req).read())
+"
+
+$ mkdir -p /tmp/probe && cat > /tmp/probe/probe.py <<'EOF'
+"""Probe the packignore service directly. Takes a dict {path: content or None}."""
+import json, urllib.request, os, sys
+URL = os.environ["PACKIGNORE_URL"]
+
+def probe(files):
+    req = urllib.request.Request(URL + "/ignored", data=json.dumps({"files": files}).encode(), headers={"Content-Type":"application/json"})
+    with urllib.request.urlopen(req) as r:
+        return json.load(r)["ignored"]
+
+if __name__ == "__main__":
+    files = json.load(sys.stdin)
+    print(json.dumps(probe(files), indent=2))
+EOF
+echo done
+
+$ cat > /tmp/probe/cases.py <<'EOF'
+"""Probe many patterns at once and show results."""
+import json, urllib.request, os
+URL = os.environ["PACKIGNORE_URL"]
+
+def probe(files):
+    req = urllib.request.Request(URL + "/ignored",
+        data=json.dumps({"files": files}).encode(),
+        headers={"Content-Type":"application/json"})
+    with urllib.request.urlopen(req) as r:
+        return json.load(r)["ignored"]
+
+def run(name, files):
+    print(f"=== {name} ===")
+    print(sorted(probe(files)))
+
+# Comment characters
+run("comments-#", {".packignore": "# comment\n*.pyc\n", "a.pyc": None, "a.py": None, "#": None, "#x": None})
+run("comments-;", {".packignore": "; comment\n*.pyc\n", "a.pyc": None, "a.py": None, ";": None, ";x": None})
+run("comment-leading-space-#", {".packignore": "  # not a comment?\n", "  # not a comment?": None, "x": None})
+run("blank-line-handling", {".packignore": "\n\n*.pyc\n\n", "a.pyc": None, "a.py": None})
+
+# Pattern types
+run("glob-star", {".packignore": "*.pyc\n", "a.pyc": None, "sub/b.pyc": None, "a.py": None})
+run("star-matches-slash", {".packignore": "*.pyc\n", "a.pyc": None, "sub/b.pyc": None, "a/b/c.pyc": None})
+run("question-mark", {".packignore": "?.pyc\n", "a.pyc": None, "ab.pyc": None, "sub/b.pyc": None})
+run("double-star-mid", {".packignore": "a/**/b\n", "a/b": None, "a/x/b": None, "a/x/y/b": None, "x/a/b": None, "x/a/y/b":None})
+run("double-star-end", {".packignore": "a/**\n", "a/b": None, "a/x/b": None, "x/b": None})
+run("double-star-start", {".packignore": "**/b\n", "b": None, "x/b": None, "x/y/b": None})
+run("double-star-just", {".packignore": "**\n", "a": None, "x/b": None})
+EOF
+cd /tmp/probe && python3 cases.py
+
+$ cat > /tmp/probe/cases2.py <<'EOF'
+import json, urllib.request, os
+URL = os.environ["PACKIGNORE_URL"]
+def probe(files):
+    req = urllib.request.Request(URL + "/ignored",
+        data=json.dumps({"files": files}).encode(),
+        headers={"Content-Type":"application/json"})
+    with urllib.request.urlopen(req) as r:
+        return json.load(r)["ignored"]
+def run(name, files):
+    print(f"=== {name} ===")
+    print(sorted(probe(files)))
+
+# Trailing/leading whitespace
+run("trailing-space-ignored?", {".packignore": "a.pyc   \n", "a.pyc": None, "a.pyc   ": None})
+run("leading-space-ignored?", {".packignore": "   a.pyc\n", "a.pyc": None, "   a.pyc": None})
+run("tabs", {".packignore": "\ta.pyc\n", "a.pyc": None})
+run("CRLF-handling", {".packignore": "a.pyc\r\nb.txt\r\n", "a.pyc": None, "b.txt": None})
+
+# . files
+run("dot-match-basename", {".packignore": ".git\n", ".git/x": None, "a/.git/x": None, "a.git": None})
+run("star-dot", {".packignore": "*.log\n", "a.log": None, ".log": None})
+
+# Trailing slash
+run("trailing-slash", {".packignore": "tmp/\n", "tmp": None, "tmp/x": None, "a/tmp/x": None})
+run("trailing-slash-file-only", {".packignore": "tmp/\n", "tmp": None, "a/tmp": None})
+run("no-trailing-slash-dir", {".packignore": "tmp\n", "tmp/x": None, "a/tmp/x": None})
+
+# Leading slash anchoring
+run("leading-slash-anchor", {".packignore": "/a.pyc\n", "a.pyc": None, "sub/a.pyc": None})
+run("mid-slash-relative-root", {".packignore": "sub/a.pyc\n", "sub/a.pyc": None, "x/sub/a.pyc": None})
+
+# Negation
+run("negation-simple", {".packignore": "*.pyc\n!important.pyc\n", "a.pyc": None, "important.pyc": None})
+run("negation-dir-excluded", {".packignore": "tmp/\n!tmp/keep.txt\n", "tmp/keep.txt": None, "tmp/drop.txt": None})
+run("negation-order", {".packignore": "!important.pyc\n*.pyc\n", "a.pyc": None, "important.pyc": None})
+
+# Character classes
+run("char-class", {".packignore": "[ab].pyc\n", "a.pyc": None, "b.pyc": None, "c.pyc": None})
+run("char-class-range", {".packignore": "[a-c].pyc\n", "a.pyc": None, "b.pyc": None, "d.pyc": None})
+run("char-class-negate", {".packignore": "[!ab].pyc\n", "a.pyc": None, "c.pyc": None})
+
+# Escapes
+run("escape-star", {".packignore": "a\\*.pyc\n", "a*.pyc": None, "ab.pyc": None})
+run("escape-hash-at-start", {".packignore": "\\#not-comment\n", "#not-comment": None})
+run("escape-bang", {".packignore": "*.pyc\n\\!keep.pyc\n", "a.pyc": None, "!keep.pyc": None, "keep.pyc": None})
+EOF
+python3 /tmp/probe/cases2.py

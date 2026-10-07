@@ -1,0 +1,253 @@
+"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine, and returns exactly what it returned. docs/PACKIGNORE.md describes the
+original 1.4 behaviour; the rules below are what packignore actually does, and
+differ from the docs in several places.
+
+Reading .packignore files
+  - Files are decoded as strict UTF-8 and split with str.splitlines(). Each
+    line is stripped of leading and trailing whitespace (str.strip()).
+  - Blank lines are ignored. Lines starting with `;` are comments; `#` is an
+    ordinary character. There is no backslash escaping.
+  - A leading `!` negates the pattern (re-includes). Nothing after the `!` is
+    stripped, so `! foo` is the pattern " foo".
+  - Trailing slashes make the pattern match directories only.
+  - A pattern containing a `/` (other than trailing ones) is anchored to the
+    directory holding the .packignore, and its leading slashes are dropped.
+    Otherwise it matches a file or directory name at any depth below that
+    directory.
+  - `{a,b}` expands to alternatives, after the steps above (so `{x,y/z}` is
+    anchored as a whole). A group runs from the first `{` to the next `}`;
+    the alternatives are literal text, so groups do not nest.
+  - `*` matches any run of characters within a path segment (including a
+    leading dot), `?` exactly one. A segment that is exactly `**` matches zero
+    to three segments (never more); elsewhere `**` behaves like `*`. `[`, `]`
+    and `\\` are ordinary characters. Matching is case-sensitive.
+
+Deciding whether a path is excluded
+  - Every file and directory gets a verdict. The .packignore files that apply
+    are those in the path's ancestor directories that are not themselves
+    excluded (a .packignore inside an excluded directory is never read).
+  - The deepest such .packignore with a pattern matching the path itself
+    decides. Within it the most specific matching pattern wins: the one with
+    the most characters other than `*?/{},`. On a tie the later line wins.
+  - If no pattern matches the path itself, it inherits its parent
+    directory's verdict. So a pattern naming a file overrides a pattern that
+    excluded or re-included its directory.
+
+The tree
+  - Only regular files are considered (no symlinks), and `.git` directly
+    under the root is skipped, whether it is a directory or a file.
+  - packignore treats names case- and normalization-insensitively (canonical
+    caseless matching) but keeps the first spelling seen, in os.walk order:
+    `a.txt` and `A.TXT` are one file named after whichever came first, and
+    `d/x` and `D/y` are reported as `d/x` and `d/y`. For a merged .packignore
+    the content of the last one seen is used.
+  - packignore fails, and so does ignored_files() with PackignoreError, when
+    a file and a directory name collide that way, when a file is a hard link
+    to one seen earlier, when a name is not valid UTF-8, or when a .packignore
+    that would be read is a directory or is not valid UTF-8.
+"""
+import functools
+import os
+import re
+import unicodedata
+
+
+# packignore's "**" never spans more than this many path segments.
+_MAX_GLOBSTAR = 3
+
+
+class PackignoreError(Exception):
+    """The tree cannot be processed (packignore reports an internal error)."""
+
+
+class _Rule:
+    __slots__ = ("negate", "dir_only", "anchored", "specificity", "_regexes")
+
+    def __init__(self, negate, dir_only, anchored, body):
+        self.negate = negate
+        self.dir_only = dir_only
+        self.anchored = anchored
+        self.specificity = sum(1 for c in body if c not in "*?/{},")
+        self._regexes = _compile(body, anchored)
+
+    def matches(self, parts, is_dir):
+        """Does this rule match the path `parts`, relative to its .packignore?"""
+        if self.dir_only and not is_dir:
+            return False
+        # Anchored patterns match the whole path, written with a leading "/"
+        # so that every segment is "/" + name; others match just the name.
+        subject = "/" + "/".join(parts) if self.anchored else parts[-1]
+        return any(rx.fullmatch(subject) for rx in self._regexes)
+
+
+def _expand_braces(text):
+    """Expand `{a,b}` groups left to right. A group runs from the first `{`
+    to the next `}`; its alternatives are taken literally, and an unclosed `{`
+    is an ordinary character."""
+    start = text.find("{")
+    end = text.find("}", start + 1) if start >= 0 else -1
+    if end < 0:
+        return [text]
+    head = text[:start]
+    tails = _expand_braces(text[end + 1:])
+    return [head + alt + tail for alt in text[start + 1:end].split(",") for tail in tails]
+
+
+def _glob(segment):
+    out = []
+    for c in segment:
+        if c == "*":
+            if not out or out[-1] != "[^/]*":
+                out.append("[^/]*")
+        elif c == "?":
+            out.append("[^/]")
+        else:
+            out.append(re.escape(c))
+    return "".join(out)
+
+
+_GLOBSTAR = "(?:/[^/]+){0,%d}" % _MAX_GLOBSTAR
+_CHUNK = 500  # alternatives per compiled regex
+
+
+@functools.lru_cache(maxsize=4096)
+def _compile(body, anchored):
+    alternatives = []
+    for alt in _expand_braces(body):
+        if anchored:
+            alternatives.append("".join(_GLOBSTAR if seg == "**" else "/" + _glob(seg)
+                                        for seg in alt.split("/")))
+        elif alt:
+            alternatives.append(_glob(alt))
+    alternatives = list(dict.fromkeys(alternatives))
+    return tuple(re.compile("|".join(alternatives[i:i + _CHUNK]), re.DOTALL)
+                 for i in range(0, len(alternatives), _CHUNK))
+
+
+def _parse(path):
+    with open(path, "rb") as f:
+        data = f.read()
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as e:
+        raise PackignoreError(f"{path}: {e}") from None
+    rules = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith(";"):
+            continue
+        negate = line.startswith("!")
+        if negate:
+            line = line[1:]
+        dir_only = line.endswith("/")
+        line = line.rstrip("/")
+        anchored = "/" in line
+        line = line.lstrip("/")
+        if not line:
+            continue
+        rules.append(_Rule(negate, dir_only, anchored, line))
+    return rules
+
+
+class _Dir:
+    __slots__ = ("name", "dirs", "files")
+
+    def __init__(self, name):
+        self.name = name
+        self.dirs = {}  # _key(name) -> _Dir
+        self.files = {}  # _key(name) -> [canonical name, full path of the last copy]
+
+
+def _key(name):
+    """Names packignore treats as the same: canonical caseless matching."""
+    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
+
+
+def _scan(root):
+    """Build the tree packignore sees: regular files only, names merged case-insensitively."""
+    top = _Dir("")
+    inodes = set()
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            if os.path.islink(full) or not os.path.isfile(full):
+                continue
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            try:
+                rel.encode("utf-8")
+            except UnicodeEncodeError:
+                raise PackignoreError(f"{full}: file name is not valid UTF-8") from None
+            # Further hard links to an already-seen file reach packignore as
+            # link entries, which it rejects.
+            st = os.stat(full)
+            if st.st_nlink > 1:
+                if (st.st_ino, st.st_dev) in inodes:
+                    raise PackignoreError(f"{full}: hard links are not supported")
+                inodes.add((st.st_ino, st.st_dev))
+            parts = rel.split("/")
+            node = top
+            for part in parts[:-1]:
+                key = _key(part)
+                if key in node.files:
+                    raise PackignoreError(f"{full}: file and directory names collide")
+                node = node.dirs.setdefault(key, _Dir(part))
+            key = _key(parts[-1])
+            if key in node.dirs:
+                raise PackignoreError(f"{full}: file and directory names collide")
+            entry = node.files.setdefault(key, [parts[-1], full])
+            entry[1] = full
+    # packignore skips a top-level .git even when it is a file.
+    if top.files.get(_key(".git"), [None])[0] == ".git":
+        del top.files[_key(".git")]
+    return top
+
+
+def _verdict(parts, is_dir, sources, inherited):
+    for depth, rules in reversed(sources):
+        rel = parts[depth:]
+        best = None
+        for index, rule in enumerate(rules):
+            if rule.matches(rel, is_dir):
+                if best is None or (rule.specificity, index) >= (best[0].specificity, best[1]):
+                    best = (rule, index)
+        if best is not None:
+            return not best[0].negate
+    return inherited
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .packignore files exclude.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. A `.git` directory directly
+    under `root` is skipped.
+    """
+    out = []
+    stack = [(_scan(root), [], False, [])]
+    while stack:
+        node, parts, excluded, sources = stack.pop()
+        if not excluded:
+            child = node.dirs.get(_key(".packignore"))
+            if child is not None and child.name == ".packignore":
+                raise PackignoreError(f"{'/'.join(parts + [child.name])}: is a directory")
+            entry = node.files.get(_key(".packignore"))
+            if entry is not None and entry[0] == ".packignore":
+                rules = _parse(entry[1])
+                if rules:
+                    sources = sources + [(len(parts), rules)]
+        for name, _ in node.files.values():
+            path = parts + [name]
+            if _verdict(path, False, sources, excluded):
+                out.append("/".join(path))
+        for child in node.dirs.values():
+            path = parts + [child.name]
+            stack.append((child, path, _verdict(path, True, sources, excluded), sources))
+
+    # packignore prints one path per line; names containing line breaks come
+    # out split, exactly as its output was always read.
+    return sorted(line for line in "\n".join(out).splitlines() if line)

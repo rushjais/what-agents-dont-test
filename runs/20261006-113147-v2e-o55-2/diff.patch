@@ -1,0 +1,241 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..482a884 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,109 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. docs/PACKIGNORE.md describes the old engine, but several of its rules
++differ from what the engine actually did; the behaviour implemented here is
++the engine's:
++
++- Lines are split with `str.splitlines()` and stripped with `str.strip()`.
++  Empty lines and lines starting with `;` are skipped. `#` is NOT a comment.
++- A leading `!` negates the pattern. Nothing after it is stripped again.
++- Leading `/`s anchor the pattern; trailing `/`s make it match directories
++  only. Both are removed. A pattern that still contains a `/` is anchored too.
++  Anchored patterns match the whole path relative to the directory holding
++  the .packignore; others match the last path component at any depth.
++- `{a,b}` groups are expanded (first `{` to the next `}`, split on `,`, no
++  nesting), after the flags above are decided for the whole line.
++- `*` and `?` match within a path component. A component that is exactly
++  `**` matches zero to three components (no more). There is no escaping and
++  `[` is literal.
++- Within one .packignore, the matching pattern with the highest priority
++  decides; on a tie, the later one does. A pattern's priority is the number
++  of its characters other than `*?{},/` (so `{ab,c}` counts 3).
++  A .packignore in a deeper directory overrides its ancestors' files.
++- Each path (directory or file) gets its own verdict that way. A file is
++  excluded if the deepest path from it upwards that has a verdict says
++  "exclude". So a negation can re-include a file inside an excluded
++  directory, but re-including a directory does not undo patterns that match
++  the file (or a deeper directory) itself.
++- Patterns in a .packignore apply to paths below its directory. A .packignore
++  inside an excluded directory is not read.
++- Names are compared case-insensitively; see `_ignored_entries`.
++
++On trees packignore rejected, this raises PackignoreError.
+ """
+ 
+ import os
+-import subprocess
+-import sys
++import re
++import unicodedata
++
++_NAME = ".packignore"
++
++
++def _expand(s):
++    i = s.find("{")
++    if i < 0:
++        return [s]
++    j = s.find("}", i + 1)
++    if j < 0:
++        return [s]
++    rest = _expand(s[j + 1:])
++    return list(dict.fromkeys(s[:i] + alt + r for alt in s[i + 1:j].split(",") for r in rest))
++
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++def _segment_regex(seg):
++    if seg == "**":
++        return "(?:[^/]*/){0,3}"
++    out = []
++    for c in seg:
++        if c == "*":
++            if not out or out[-1] != "[^/]*":
++                out.append("[^/]*")
++        elif c == "?":
++            out.append("[^/]")
++        else:
++            out.append(re.escape(c))
++    return "".join(out) + "/"
++
++
++def _compile(text):
++    """Parse .packignore contents into a list of
++    (negate, dir_only, anchored, priority, regex)."""
++    rules = []
++    for line in text.splitlines():
++        line = line.strip()
++        if not line or line.startswith(";"):
++            continue
++        negate = line.startswith("!")
++        if negate:
++            line = line[1:]
++        stripped = line.lstrip("/")
++        anchored = stripped != line
++        line = stripped.rstrip("/")
++        dir_only = line != stripped
++        anchored = anchored or "/" in line
++        alts = "|".join("".join(_segment_regex(seg) for seg in pat.split("/"))
++                        for pat in _expand(line))
++        priority = sum(c not in "*?{},/" for c in line)
++        rules.append((negate, dir_only, anchored, priority, re.compile("(?:%s)" % alts)))
++    return rules
++
++
++def _verdict(rules, rel, is_dir):
++    """Verdict of `rules` for `rel`: True (exclude), False, or None if no rule
++    matches. The matching rule with the highest priority wins; on a tie, the
++    later one."""
++    name = rel.rsplit("/", 1)[-1] + "/"
++    rel = rel + "/"
++    verdict = None
++    best = -1
++    for negate, dir_only, anchored, priority, rx in rules:
++        if dir_only and not is_dir:
++            continue
++        if priority >= best and rx.fullmatch(rel if anchored else name):
++            verdict = not negate
++            best = priority
++    return verdict
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +113,118 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    entries = []
++    for dirpath, dirnames, filenames in os.walk(root):
++        if os.path.samefile(dirpath, root) and ".git" in dirnames:
++            dirnames.remove(".git")
++        for name in filenames:
++            full = os.path.join(dirpath, name)
++            rel = os.path.relpath(full, root).replace(os.sep, "/")
++            content = None
++            if name == _NAME:
++                with open(full, newline="") as f:
++                    content = f.read()
++            entries.append((rel, content))
++    return _ignored_entries(entries)
++
++
++class PackignoreError(Exception):
++    """The tree is one packignore refused (e.g. a file and a directory whose
++    names differ only in case)."""
++
++
++def _key(name):
++    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
++
++
++def _ignored_entries(entries):
++    """`entries` is a list of (relative path, contents or None) in walk order.
++
++    packignore treats names case-insensitively (and Unicode-canonically
++    equivalent names as equal), like a case-insensitive filesystem: paths that
++    collide are merged, the first spelling seen is the one used for matching
++    and output, and the contents seen last win. Only a file whose (first)
++    spelling is exactly ".packignore" is read as an ignore file; if its
++    contents are missing because a differently-cased file overwrote them, it
++    acts as if it contained the single pattern "x".
++    """
++    nodes = {}    # key path -> [display path, is_dir, content]
++    order = []
++    for rel, content in entries:
++        parts = rel.split("/")
++        if any(p in ("", ".", "..") for p in parts):
++            raise PackignoreError(f"invalid path: {rel!r}")
++        keyp = ()
++        display = ""
++        for i, part in enumerate(parts):
++            is_dir = i < len(parts) - 1
++            keyp += (_key(part),)
++            node = nodes.get(keyp)
++            if node is None:
++                display = display + "/" + part if display else part
++                node = nodes[keyp] = [display, is_dir, None]
++                if not is_dir:
++                    order.append(keyp)
++            elif node[1] != is_dir:
++                raise PackignoreError(f"invalid tree: {node[0]!r} is both a file and a directory")
++            display = node[0]
++        node[2] = content
++    files = []
++    ignore_text = {}
++    for keyp in order:
++        display, _, content = nodes[keyp]
++        files.append(display)
++        if display.rpartition("/")[2] == _NAME:
++            ignore_text[display] = "x" if content is None else content
++    return _ignored(files, ignore_text)
++
++
++def _ignored(files, ignore_text):
++    """Core of ignored_files: `files` are relative paths, `ignore_text` maps the
++    .packignore ones to their contents."""
++    # Per directory ("" is root): the rules of the .packignore files that are
++    # read, as (dir, rules) from the outermost directory inwards.
++    chain_cache = {}
++    excluded_cache = {}
++    # Directories named .packignore: packignore fails if it looks for an
++    # ignore file and finds one of these instead.
++    ignore_dirs = set()
++    for f in files:
++        parts = f.split("/")
++        for i, part in enumerate(parts[:-1]):
++            if part == _NAME:
++                ignore_dirs.add("/".join(parts[:i + 1]))
++
++    def chain(d):
++        if d not in chain_cache:
++            if d == "":
++                parent_chain = []
++            else:
++                parent_chain = chain(d.rpartition("/")[0])
++            own = d + "/" + _NAME if d else _NAME
++            chain_cache[d] = parent_chain
++            if (own in ignore_text or own in ignore_dirs) and (d == "" or not excluded(d, True)):
++                if own in ignore_dirs:
++                    raise PackignoreError(f"{own!r} is a directory")
++                chain_cache[d] = parent_chain + [(d, _compile(ignore_text[own]))]
++        return chain_cache[d]
++
++    def verdict(path, is_dir):
++        v = None
++        for d, rules in chain(path.rpartition("/")[0]):
++            r = _verdict(rules, path[len(d) + 1:] if d else path, is_dir)
++            if r is not None:
++                v = r
++        return v
++
++    def excluded(path, is_dir):
++        key = (path, is_dir)
++        if key not in excluded_cache:
++            v = verdict(path, is_dir)
++            if v is None:
++                parent = path.rpartition("/")[0]
++                v = excluded(parent, True) if parent else False
++            excluded_cache[key] = v
++        return excluded_cache[key]
++
++    return sorted(f for f in files if excluded(f, False))

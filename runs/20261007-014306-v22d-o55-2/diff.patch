@@ -1,0 +1,297 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..1c3271a 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,49 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. It reproduces packignore's actual behaviour, which differs from
++docs/PACKIGNORE.md in several places:
++
++- Lines are split with str.splitlines() and stripped of surrounding
++  whitespace. Lines starting with ";" are comments; "#" is not special.
++- "!" negates; whatever follows it is used verbatim (no further stripping).
++- Only "*", "?" and "**" are wildcards. "[", "]" and "\\" are literal.
++  "**" is special only as a whole path segment, where it matches zero to
++  three segments (so "a/**" also matches "a" itself, but not "a/b/c/d/e");
++  elsewhere it acts like "*".
++- A file's verdict is decided by the deepest path level (the file itself,
++  then each enclosing directory, innermost first) matched by any pattern.
++  At that level, patterns from the innermost .packignore win; within one
++  file, the pattern with the most non-wildcard characters ("*", "?" and "/"
++  don't count) wins, and the later pattern breaks ties.
++- A .packignore inside an excluded directory is not read.
++- Files with any execute bit set, or with "@generated" in their first line,
++  are excluded unless a pattern matches the file itself (a pattern matching
++  only an enclosing directory doesn't override this).
++
++packignore extracted the tree onto a case-insensitive, normalization-
++insensitive filesystem before evaluating it, so this module simulates that
++too: paths that differ only by case or Unicode normalization are merged (the
++first name seen is kept, the last file's contents win), and the same inputs
++that made packignore fail (including hard links and unreadable files, which
++its upload couldn't send) raise PackignoreError here.
+ """
+ 
+ import os
+-import subprocess
+-import sys
++import unicodedata
++
++PACKIGNORE = ".packignore"
++MAX_FILES = 5000
++MAX_PATH_BYTES = 955
++MAX_DEPTH = 64
++MAX_LINES = 2000
++MAX_LINE_CHARS = 1000
++GENERATED_MARKER = b"@generated"
++_GLOBSTAR_SPAN = 3  # packignore's "**" never matches more than 3 segments
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++
++class PackignoreError(Exception):
++    """The tree is one packignore refused to (or could not) evaluate."""
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +53,230 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    tree = _load_tree(root)
++    ignored = []
++    _walk(tree, (), [], ignored)
++    return sorted(ignored)
++
++
++# --- Tree loading -----------------------------------------------------------
++
++class _Dir:
++    __slots__ = ("children",)
++
++    def __init__(self):
++        self.children = {}  # fold key -> (stored name, _Dir or _File)
++
++
++class _File:
++    __slots__ = ("source", "auto_excluded")
++
++    def __init__(self, source):
++        self.source = source
++        try:
++            st = os.lstat(source)
++            with open(source, "rb") as f:
++                first_line = f.readline()
++        except OSError as e:
++            raise PackignoreError(f"cannot read {source}: {e}") from None
++        self.auto_excluded = bool(st.st_mode & 0o111) or GENERATED_MARKER in first_line
++
++
++def _fold(name):
++    nfd = unicodedata.normalize
++    return nfd("NFD", nfd("NFD", name).casefold())
++
++
++def _load_tree(root):
++    files = []
++    for dirpath, dirnames, filenames in os.walk(root):
++        if os.path.samefile(dirpath, root) and ".git" in dirnames:
++            dirnames.remove(".git")
++        for name in filenames:
++            full = os.path.join(dirpath, name)
++            if os.path.islink(full) or not os.path.isfile(full):
++                continue
++            files.append((os.path.relpath(full, root).replace(os.sep, "/"), full))
++    if len(files) > MAX_FILES:
++        raise PackignoreError(f"too many files (limit {MAX_FILES})")
++
++    top = _Dir()
++    inodes = set()
++    for rel, full in files:
++        try:
++            size = len(rel.encode("utf-8"))
++        except UnicodeEncodeError:
++            raise PackignoreError(f"file name is not valid UTF-8: {rel!r}") from None
++        if size > MAX_PATH_BYTES:
++            raise PackignoreError(f"path too long: {rel!r}")
++        *dirs, base = rel.split("/")
++        if len(dirs) >= MAX_DEPTH:
++            raise PackignoreError(f"path too deep (limit {MAX_DEPTH} levels): {rel!r}")
++        st = os.lstat(full)
++        if st.st_nlink > 1:
++            if (st.st_ino, st.st_dev) in inodes:
++                raise PackignoreError(f"unsupported entry (hard link): {rel!r}")
++            inodes.add((st.st_ino, st.st_dev))
++        node = top
++        for part in dirs:
++            entry = node.children.get(_fold(part))
++            if entry is None:
++                entry = node.children[_fold(part)] = (part, _Dir())
++            elif not isinstance(entry[1], _Dir):
++                raise PackignoreError(f"file/directory name clash: {rel!r}")
++            node = entry[1]
++        key = _fold(base)
++        entry = node.children.get(key)
++        if entry is not None and isinstance(entry[1], _Dir):
++            raise PackignoreError(f"file/directory name clash: {rel!r}")
++        # A clashing file keeps the first name but takes the new contents and mode.
++        node.children[key] = (base if entry is None else entry[0], _File(full))
++    _check_ignore_files(top)
++    return top
++
++
++def _check_ignore_files(node):
++    """Enforce packignore's size limits on every .packignore, read or not."""
++    for name, child in node.children.values():
++        if isinstance(child, _Dir):
++            _check_ignore_files(child)
++        elif name == PACKIGNORE:
++            with open(child.source, "rb") as f:
++                lines = f.read().decode("utf-8", "replace").splitlines()
++            if len(lines) > MAX_LINES or any(len(line) > MAX_LINE_CHARS for line in lines):
++                raise PackignoreError(f"ignore file too large (limits: {MAX_LINES} lines, "
++                                      f"{MAX_LINE_CHARS} characters per line): {child.source}")
++
++
++# --- Patterns ---------------------------------------------------------------
++
++class _Pattern:
++    __slots__ = ("negate", "dir_only", "anchored", "segments", "score")
++
++    def __init__(self, negate, dir_only, anchored, segments, score):
++        self.negate = negate
++        self.dir_only = dir_only
++        self.anchored = anchored
++        self.segments = segments  # glob strings, or None for a "**" segment
++        self.score = score
++
++
++def _glob(pat, name):
++    """fnmatch-style match where only "*" and "?" are special.
++
++    Greedy with single-star backtracking, so it can't blow up on patterns
++    like "*?*?*?..." the way a backtracking regex does.
++    """
++    p = i = 0
++    star = -1
++    mark = 0
++    while i < len(name):
++        if p < len(pat) and pat[p] == "*":
++            star, mark = p, i
++            p += 1
++        elif p < len(pat) and (pat[p] == "?" or pat[p] == name[i]):
++            p += 1
++            i += 1
++        elif star >= 0:
++            mark += 1
++            p, i = star + 1, mark
++        else:
++            return False
++    while p < len(pat) and pat[p] == "*":
++        p += 1
++    return p == len(pat)
++
++
++def _parse_line(line):
++    line = line.strip()
++    if not line or line.startswith(";"):
++        return None
++    negate = line.startswith("!")
++    if negate:
++        line = line[1:]
++    score = sum(1 for ch in line if ch not in "*?/")
++    dir_only = line.endswith("/")
++    line = line.rstrip("/")
++    anchored = "/" in line
++    line = line.lstrip("/")
++    if not line:
++        return None
++    segments = [None if seg == "**" else seg for seg in line.split("/")]
++    return _Pattern(negate, dir_only, anchored, segments, score)
++
++
++def _read_patterns(source):
++    with open(source, "rb") as f:
++        data = f.read()
++    try:
++        text = data.decode("utf-8")
++    except UnicodeDecodeError:
++        raise PackignoreError(f"{PACKIGNORE} is not valid UTF-8: {source}") from None
++    patterns = [p for p in map(_parse_line, text.splitlines()) if p is not None]
++    # Highest score first, later lines first among equals: the first match wins.
++    return [p for _, p in sorted(enumerate(patterns), key=lambda e: (-e[1].score, -e[0]))]
++
++
++def _match_segments(segs, parts):
++    """Match pattern segments against path segments; "**" spans 0 to 3 of them."""
++    memo = {}
++
++    def go(i, j):
++        key = (i, j)
++        if key in memo:
++            return memo[key]
++        if i == len(segs):
++            res = j == len(parts)
++        elif segs[i] is None:
++            res = any(go(i + 1, k) for k in range(j, min(j + _GLOBSTAR_SPAN, len(parts)) + 1))
++        else:
++            res = j < len(parts) and _glob(segs[i], parts[j]) and go(i + 1, j + 1)
++        memo[key] = res
++        return res
++
++    return go(0, 0)
++
++
++def _matches(pat, parts, is_dir):
++    if pat.dir_only and not is_dir:
++        return False
++    if pat.anchored:
++        return _match_segments(pat.segments, parts)
++    return _match_segments(pat.segments, parts[-1:])
++
++
++# --- Evaluation -------------------------------------------------------------
++
++def _level_verdict(rules, path, is_dir):
++    """Verdict for one path level: True/False, or None if no pattern matches.
++
++    `rules` lists (base depth, patterns) for each .packignore in effect,
++    outermost first, with each file's patterns in priority order.
++    """
++    for base, patterns in reversed(rules):
++        for pat in patterns:
++            if _matches(pat, path[base:], is_dir):
++                return not pat.negate
++    return None
++
++
++def _walk(node, path, rules, ignored, excluded=False):
++    """Collect the ignored files below `node`, whose own verdict is `excluded`.
++
++    That verdict also applies to anything below that no deeper level decides.
++    A .packignore in an excluded directory is not read.
++    """
++    entry = node.children.get(_fold(PACKIGNORE))
++    if not excluded and entry is not None and entry[0] == PACKIGNORE and not isinstance(entry[1], _Dir):
++        rules = rules + [(len(path), _read_patterns(entry[1].source))]
++    for name, child in node.children.values():
++        child_path = path + (name,)
++        is_dir = isinstance(child, _Dir)
++        verdict = _level_verdict(rules, child_path, is_dir)
++        if verdict is None and not is_dir and child.auto_excluded:
++            verdict = True
++        child_excluded = excluded if verdict is None else verdict
++        if is_dir:
++            _walk(child, child_path, rules, ignored, child_excluded)
++        elif child_excluded:
++            ignored.append("/".join(child_path))
+
+# untracked files:
+snapshot/__pycache__/__init__.cpython-311.pyc
+snapshot/__pycache__/ignore.cpython-311.pyc

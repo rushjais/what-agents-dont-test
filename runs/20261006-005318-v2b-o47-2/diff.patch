@@ -1,0 +1,196 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..6e50293 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,7 @@
+-"""Decide which files in a project tree are excluded by its .packignore files.
+-
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
+-"""
++"""Decide which files in a project tree are excluded by its .packignore files."""
+ 
+ import os
+-import subprocess
+-import sys
+-
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++import re
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +11,167 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    files = []
++    rules_by_dir = {}
++    for dirpath, dirnames, filenames in os.walk(root):
++        rel = os.path.relpath(dirpath, root).replace(os.sep, "/")
++        if rel == ".":
++            rel = ""
++        if rel == "" and ".git" in dirnames:
++            dirnames.remove(".git")
++        if ".packignore" in filenames:
++            with open(os.path.join(dirpath, ".packignore"), newline="") as f:
++                content = f.read()
++            rules_by_dir[rel] = _parse(content)
++        for name in filenames:
++            files.append(f"{rel}/{name}" if rel else name)
++
++    level_excluded = {}
++
++    def level_dir_excluded(level_dir):
++        if level_dir == "":
++            return False
++        if level_dir in level_excluded:
++            return level_excluded[level_dir]
++        level_excluded[level_dir] = False  # tentative, to prevent recursion
++        parts = level_dir.split("/")
++        for i in range(len(parts) - 1, -1, -1):
++            shallow = "" if i == 0 else "/".join(parts[:i])
++            if shallow not in rules_by_dir:
++                continue
++            if shallow and level_dir_excluded(shallow):
++                continue
++            local = level_dir if shallow == "" else level_dir[len(shallow) + 1:]
++            if _dir_excluded_here(rules_by_dir[shallow], local):
++                level_excluded[level_dir] = True
++                return True
++        return False
++
++    def file_is_ignored(path):
++        parts = path.split("/")
++        for i in range(len(parts) - 1, -1, -1):
++            level = "" if i == 0 else "/".join(parts[:i])
++            if level not in rules_by_dir:
++                continue
++            if level and level_dir_excluded(level):
++                continue
++            local = path if level == "" else path[len(level) + 1:]
++            rules = rules_by_dir[level]
++            direct = []
++            for idx, rule in enumerate(rules):
++                if _match(rule, local, False):
++                    direct.append((rule.spec, idx, rule))
++            if direct:
++                direct.sort()
++                return not direct[-1][2].negated
++            local_parts = local.split("/")
++            for j in range(1, len(local_parts)):
++                anc = "/".join(local_parts[:j])
++                if _dir_excluded_here(rules, anc):
++                    return True
++        return False
++
++    return sorted(p for p in files if file_is_ignored(p))
++
++
++def _dir_excluded_here(rules, dir_local):
++    """Within one .packignore's rules, is `dir_local` excluded (as a dir)?"""
++    direct = []
++    for idx, rule in enumerate(rules):
++        if _match(rule, dir_local, True):
++            direct.append((rule.spec, idx, rule))
++    if direct:
++        direct.sort()
++        return not direct[-1][2].negated
++    parts = dir_local.split("/")
++    for j in range(1, len(parts)):
++        anc = "/".join(parts[:j])
++        if _dir_excluded_here(rules, anc):
++            return True
++    return False
++
++
++class _Rule:
++    __slots__ = ("negated", "dir_only", "regex", "spec")
++
++    def __init__(self, negated, dir_only, regex, spec):
++        self.negated = negated
++        self.dir_only = dir_only
++        self.regex = regex
++        self.spec = spec
++
++
++def _parse(content):
++    rules = []
++    for line in content.splitlines():
++        rule = _parse_line(line)
++        if rule is not None:
++            rules.append(rule)
++    return rules
++
++
++def _parse_line(line):
++    s = line
++    while s and s[-1] in " \t\r":
++        s = s[:-1]
++    if not s or s[0] == "#":
++        return None
++    negated = False
++    if s[0] == "!":
++        negated = True
++        s = s[1:]
++    if not s:
++        return None
++    dir_only = False
++    if s.endswith("/"):
++        dir_only = True
++        s = s[:-1]
++    if not s:
++        return None
++    anchored = "/" in s
++    if s.startswith("/"):
++        s = s[1:]
++    if not s:
++        return None
++    body = _translate(s)
++    full = (r"\A" if anchored else r"(?:\A|/)") + body + r"\Z"
++    spec = sum(1 for c in s if c not in "*?/")
++    return _Rule(negated, dir_only, re.compile(full), spec)
++
++
++def _translate(pattern):
++    i = 0
++    n = len(pattern)
++    out = []
++    while i < n:
++        c = pattern[i]
++        if c == "*":
++            if i + 1 < n and pattern[i + 1] == "*":
++                prev_slash = (i == 0) or (pattern[i - 1] == "/")
++                at_end = (i + 2 == n)
++                next_slash = (i + 2 < n and pattern[i + 2] == "/")
++                if prev_slash and at_end:
++                    out.append(".*")
++                    i += 2
++                elif prev_slash and next_slash:
++                    out.append("(?:.*/)?")
++                    i += 3
++                else:
++                    out.append("[^/]*")
++                    i += 2
++            else:
++                out.append("[^/]*")
++                i += 1
++        elif c == "?":
++            out.append("[^/]")
++            i += 1
++        else:
++            out.append(re.escape(c))
++            i += 1
++    return "".join(out)
++
++
++def _match(rule, path, is_dir):
++    if rule.dir_only and not is_dir:
++        return False
++    return bool(rule.regex.search(path))
+
+# untracked files:
+snapshot/__pycache__/__init__.cpython-311.pyc
+snapshot/__pycache__/ignore.cpython-311.pyc

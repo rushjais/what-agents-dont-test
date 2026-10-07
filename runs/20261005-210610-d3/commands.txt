@@ -1,0 +1,175 @@
+$ find /work/repo -type f -not -path '*/\.*' | head -50 && echo "---" && ls -la /work/repo
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/build/sub && cd gittest && echo "build/" > .gitignore && echo "x" > build/a.txt && echo "y" > build/sub/b.txt && echo "z" > main.py && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo && cd gittest && echo "foo" > .gitignore && echo "x" > foo/a.txt && echo "y" > main.py && touch bar_foo && touch foo_bar && git -c core.ignorecase=false init -q --template= && echo "=== ls-files ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== check-ignore ===" && for f in foo foo/a.txt main.py bar_foo foo_bar; do echo "$f:"; git -c core.ignorecase=false check-ignore -v -- "$f" || echo "NOT ignored"; done
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && echo "foo" > .gitignore && touch sub/foo && touch sub/foobar && mkdir -p sub/foo_dir/inner && touch sub/foo_dir/inner/x && git -c core.ignorecase=false init -q --template= && echo "=== ls-files ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a/foo/b && cd gittest && echo "foo" > .gitignore && touch a/foo/b/x.txt && touch a/foo/y.txt && touch a/other.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo && cd gittest && printf "foo/\n!foo/keep.txt\n" > .gitignore && touch foo/a.txt && touch foo/keep.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo && mkdir -p gittest/sub/foo && cd gittest && echo "foo/" > .gitignore && touch foo/x && touch sub/foo/y && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub/.git && cd gittest && touch sub/.git/stuff && touch sub/.git/HEAD && echo "x" > sub/file.txt && touch a.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "--- not ignored ---" && git -c core.ignorecase=false ls-files -z --others --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && touch sub/.git && echo "x" > sub/file.txt && touch a.txt && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== others ===" && git -c core.ignorecase=false ls-files -z --others --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && touch .git && echo "x" > file.txt && cd /tmp && rm -rf gitrepo && cp -r gittest gitrepo && cd gitrepo && rm -f .git && git -c core.ignorecase=false init -q --template= && cp /tmp/gittest/.git ./.git_dot_file && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'  && echo "=== others ===" && git -c core.ignorecase=false ls-files -z --others --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo/sub && mkdir -p gittest/bar/foo && cd gittest && echo "foo/**" > .gitignore && touch foo/a && touch foo/sub/b && touch bar/foo/c && touch other.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && echo "**" > .gitignore && touch a.txt && touch sub/b.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && echo "*" > .gitignore && touch a.txt && touch sub/b.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf "   foo\n" > .gitignore && touch "   foo" && touch "foo" && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf "   foo\n" > .gitignore && touch "foo" && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v -- "   foo" 2>&1 ; echo "---" ; git -c core.ignorecase=false check-ignore -v -- "foo"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf "   foo\n" > .gitignore && touch '   foo' && touch 'foo' && ls -la && echo "---" && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf "foo   \n" > .gitignore && touch 'foo   ' && touch 'foo' && git -c core.ignorecase=false init -q --template= && echo "=== ls-files ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf 'foo\\ \n' > .gitignore && cat .gitignore && echo "---" && touch 'foo ' && touch 'foo' && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf 'foo\\ \n' > .gitignore && touch 'foo ' && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v 'foo ' 2>&1 ; echo "---" ; git -c core.ignorecase=false ls-files -z --others | tr '\0' '\n' ; echo "---" ; ls -la
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf "   # comment\n" > .gitignore && touch '   # comment' && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf '\\#foo\n' > .gitignore && cat .gitignore && echo "---" && touch '#foo' && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf "foo\\\\\n" > .gitignore && cat .gitignore && echo "---" && touch 'foo\' && touch 'foo' && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo && cd gittest && echo "foo/" > .gitignore && echo "something" > foo/.gitignore && touch foo/a && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && echo "*" > .gitignore && touch .hidden && touch regular && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && echo "*/" > .gitignore && touch sub/a && touch top && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && echo "*.log" > .gitignore && echo "!foo.log" > sub/.gitignore && touch sub/foo.log && touch sub/other.log && touch top.log && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ python3 -m unittest -v 2>&1
+
+$ python3 tests/fuzz_compare.py 50 2>&1 | head -200
+
+$ python3 tests/fuzz_compare.py 500 2>&1 | tail -200
+
+$ python3 tests/fuzz_compare.py 500 2>&1 | head -200
+
+$ python3 tests/fuzz_compare.py 1000 2>&1 | head -100
+
+$ python3 tests/fuzz_compare.py 2000 2>&1 | head -200
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo && cd gittest && echo "//foo" > .gitignore && touch foo/x && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/i/foo/file && cd gittest && echo "foo***/bar" > i/.gitignore && touch i/foo/file/bar && touch i/foo/bar && touch i/fooxyz/bar && mkdir -p i/foo && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v -- "i/foo/file/bar" "i/foo/bar" "i/fooxyz/bar" ; echo "---" ; git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/i/foo/file && mkdir -p gittest/i/fooxyz && cd gittest && echo "foo***/bar" > i/.gitignore && touch i/foo/file/bar && touch i/foo/bar && touch i/fooxyz/bar && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v -- "i/foo/file/bar" "i/foo/bar" "i/fooxyz/bar" 2>&1 ; echo "---" ; git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && for pat in "foo*/bar" "foo**/bar" "foo***/bar" "foo****/bar"; do rm -rf test; mkdir -p test/foo/a/b test/foox test/foo; touch test/foo/bar test/foo/a/bar test/foo/a/b/bar test/foox/bar; echo "=== pattern: $pat ===" ; echo "$pat" > test/.gitignore ; cd test && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'; cd ..; done
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && for pat in "a**/b" "**b" "a**b" "a/**b" "a**" "a**/"; do rm -rf test; mkdir -p test/a/x/y test/ab test/ac/x test/ab/x test/axyz test/axyz/b; touch test/a/b test/a/x/b test/a/x/y/b test/ab/x/b test/ab/b test/axyz/b test/axyz test/aXb test/ac/x/b 2>/dev/null; echo "=== pattern: $pat ===" ; echo "$pat" > test/.gitignore ; cd test && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'; cd ..; done
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && mkdir -p a/x/y ab/x && touch a/b a/x/b a/x/y/b ab/b ab/x/b && echo "a**/b" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v -- "a/b" "a/x/b" "a/x/y/b" "ab/b" "ab/x/b"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && mkdir -p ab aXYZ a && touch ab/b aXYZ/b a/b ac && echo "a**/b" > .gitignore && git -c core.ignorecase=false init -q --template= && echo "---" && git -c core.ignorecase=false check-ignore -v -- "ac" "ab/b" "aXYZ/b" "a/b" 2>&1 ; echo "---" ; git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && mkdir -p foo foox fooz/sub && touch foo/x foo/y foox foo/sub/z fooz/sub/w && echo "foo**" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo/sub gittest/foox gittest/fooz/sub && cd gittest && touch foo/x foo/y foox foo/sub/z fooz/sub/w && echo "foo**" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "---" && git -c core.ignorecase=false check-ignore -v -- "foo/x" "foo/sub/z" "fooz/sub/w" "foox"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && touch ab && echo "a**/b" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v -- "ab" "a_b" 2>&1 ; echo "---" ; mkdir -p xyz && touch xyz/ab && git -c core.ignorecase=false check-ignore -v -- "xyz/ab" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && mkdir -p sub && touch foo xfoo sub/foo sub/xfoo && echo "**foo" > .gitignore && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/aXb && cd gittest && touch aXb/x aXYZXb && echo "**X" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' ; echo "---" ; mkdir -p sub && touch sub/aXYZXb && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && touch foo foox fooXYZx sub/foo sub/foox fooX && echo "**x" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "---" && git -c core.ignorecase=false check-ignore -v -- "foo" "foox" "fooXYZx" "sub/foo" "sub/foox" "fooX" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && touch foox sub/foox && echo "/**x" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && touch a sub/b && echo "/**" > .gitignore && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ python3 -m unittest 2>&1 | tail -10 && echo "===" && python3 tests/fuzz_compare.py 2000 2>&1 | tail -20
+
+$ python3 tests/fuzz_compare.py 3000 2>&1 | tail -200
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf '!\n[!ab]\na**\nsrc/*.py\n!/a\n' > .gitignore && touch a/test a/y.log a/ynhw && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== check-ignore ===" && git -c core.ignorecase=false check-ignore -v -- "a/test" "a/y.log" "a/ynhw" "a" "a/" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf '!\n' > .gitignore && touch a/test topfile && git -c core.ignorecase=false init -q --template= && echo "=== check-ignore ===" && git -c core.ignorecase=false check-ignore -v -- "topfile" "a" "a/" "a/test" 2>&1 ; echo "---" ; git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf '!\n[!ab]\na**\nsrc/*.py\n!/a\n' > .gitignore && touch a/test && git -c core.ignorecase=false init -q --template= && echo "=== check-ignore all ===" && git -c core.ignorecase=false check-ignore -v --non-matching -- "a/test" "a" "a/" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf 'a**\n' > .gitignore && touch a/test ab atest && git -c core.ignorecase=false init -q --template= && echo "=== check-ignore ===" && git -c core.ignorecase=false check-ignore -v --non-matching -- "a/test" "atest" "ab" "a" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf 'a**\n!/a\n' > .gitignore && touch a/test && git -c core.ignorecase=false init -q --template= && echo "=== check-ignore ===" && git -c core.ignorecase=false check-ignore -v --non-matching -- "a/test" "a" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf 'a**\n' > .gitignore && touch a/test && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v --non-matching -- "a/test" "a"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf 'a**\n!/a\n' > .gitignore && touch a/test && git -c core.ignorecase=false init -q --template= && echo "=== ls-files ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== status ===" && git -c core.ignorecase=false status --ignored --porcelain
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && printf 'a*\n' > .gitignore && touch sub/apple top_apple && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false check-ignore -v -- "sub/apple" "top_apple" 2>&1
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && printf 'a*\n' > .gitignore && touch sub/apple top_apple sub/other && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/a && cd gittest && printf 'a**\n' > .gitignore && touch a/test && git -c core.ignorecase=false init -q --template= && echo "=== ls-files ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo gittest/fooz/sub gittest/sub && cd gittest && touch foo/x fooz/sub/w sub/other sub/foo_file foox && echo "foo**" > .gitignore && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && printf 'foo\n' > .gitignore && mkdir sub/foo && touch sub/foo/x && git -c core.ignorecase=false init -q --template= && echo "=== ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ python3 -m unittest 2>&1 | tail -10 && echo "===" && python3 tests/fuzz_compare.py 3000 2>&1 | tail -5
+
+$ python3 tests/fuzz_compare.py 10000 2>&1 | tail -5
+
+$ tail -5 /tmp/claude-501/-work-repo/0108bd7f-174a-404c-ba39-fe6b8f4b2ba2/tasks/bpaw17ujl.output 2>/dev/null
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf '\xef\xbb\xbf*.log\n' > .gitignore && touch a.log b.txt && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ python3 -c "
+import tempfile, os
+from snapshot.ignore import ignored_files
+with tempfile.TemporaryDirectory() as root:
+    with open(os.path.join(root, '.gitignore'), 'wb') as f:
+        f.write(b'\xef\xbb\xbf*.log\n')
+    open(os.path.join(root, 'a.log'), 'w').write('x')
+    open(os.path.join(root, 'b.txt'), 'w').write('x')
+    print(ignored_files(root))
+"
+
+$ tail -5 /tmp/claude-501/-work-repo/0108bd7f-174a-404c-ba39-fe6b8f4b2ba2/tasks/bpaw17ujl.output
+
+$ python3 -c "import re; print(repr(re.escape(' ')), repr(re.escape('!')), repr(re.escape('a')))"
+
+$ python3 -m unittest 2>&1 | tail -5 && echo "---" && python3 tests/fuzz_compare.py 500 2>&1 | tail -3
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/sub && cd gittest && printf '*.log\r\nkeep.log\r\n' > .gitignore && touch a.log keep.log && git -c core.ignorecase=false init -q --template= && echo "=== git ignored ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== my code ===" && cd /work/repo && python3 -c "
+from snapshot.ignore import ignored_files
+print(ignored_files('/tmp/gittest'))
+"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf '\\!bang\n' > .gitignore && touch '!bang' && touch 'bang' && git -c core.ignorecase=false init -q --template= && echo "=== git ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== mine ===" && cd /work/repo && python3 -c "from snapshot.ignore import ignored_files; print(ignored_files('/tmp/gittest'))"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/.hidden gittest/sub && cd gittest && printf '.hidden\n' > .gitignore && touch .hidden/x sub/.hidden && mkdir -p sub/.hidden && touch sub/.hidden/y && git -c core.ignorecase=false init -q --template= && echo "=== git ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== mine ===" && cd /work/repo && python3 -c "from snapshot.ignore import ignored_files; print(sorted(ignored_files('/tmp/gittest')))"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/.hidden gittest/sub/.hidden && cd gittest && printf '.hidden\n' > .gitignore && touch .hidden/x sub/.hidden/y && git -c core.ignorecase=false init -q --template= && echo "=== git ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== mine ===" && cd /work/repo && python3 -c "from snapshot.ignore import ignored_files; print(sorted(ignored_files('/tmp/gittest')))"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest/foo gittest/sub/foo && cd gittest && printf '/foo/\n' > .gitignore && touch foo/x sub/foo/y && git -c core.ignorecase=false init -q --template= && echo "=== git ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== mine ===" && cd /work/repo && python3 -c "from snapshot.ignore import ignored_files; print(sorted(ignored_files('/tmp/gittest')))"
+
+$ python3 tests/fuzz_compare.py 5000 2>&1 | tail -3
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf '[abc\n' > .gitignore && touch '[abc' 'a' 'b' && git -c core.ignorecase=false init -q --template= && echo "=== git ===" && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' && echo "=== mine ===" && cd /work/repo && python3 -c "from snapshot.ignore import ignored_files; print(sorted(ignored_files('/tmp/gittest')))"
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && printf 'foo[abc\n' > .gitignore && touch 'foo' 'fooa' 'foo[abc' && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n'
+
+$ python3 -m unittest 2>&1 | tail -3 && echo "---" && python3 tests/fuzz_compare.py 3000 2>&1 | tail -3
+
+$ python3 tests/fuzz_compare.py 3000 2>&1 | tail -3
+
+$ rm /work/repo/tests/fuzz_compare.py && cd /work/repo && python3 -m unittest 2>&1 | tail -5
+
+$ cd /tmp && rm -rf gittest && mkdir -p gittest && cd gittest && touch .gitignore a.log && git -c core.ignorecase=false init -q --template= && git -c core.ignorecase=false ls-files -z --others --ignored --exclude-standard | tr '\0' '\n' ; echo "===" ; cd /work/repo && python3 -c "from snapshot.ignore import ignored_files; print(ignored_files('/tmp/gittest'))"
+
+$ python3 -m unittest 2>&1 | tail -5

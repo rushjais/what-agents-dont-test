@@ -1,0 +1,533 @@
+$ ls -la /work/repo/
+
+$ ls -la /work/repo/snapshot/ /work/repo/tools/ /work/repo/docs/
+
+$ curl -s http://127.0.0.1:8765/ -m 3 || echo "NOT RUNNING"; echo "---"; ls -la /tmp/
+
+$ python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8765/', timeout=3).read()[:200])" 2>&1 | head -5
+
+$ python3 -c "
+import urllib.request
+try:
+    print(urllib.request.urlopen('http://127.0.0.1:8765/', timeout=3).read()[:200])
+except Exception as e:
+    print('ERROR:', type(e).__name__, e)
+"
+
+$ ls -la /work/repo/.git/ 2>/dev/null | head; echo "---"; env | grep -i pack; echo "---"; ps auxf 2>/dev/null | grep -v grep | head -20
+
+$ python3 -c "
+import urllib.request, os
+try:
+    print(urllib.request.urlopen(os.environ['PACKIGNORE_URL'] + '/', timeout=3).read()[:200])
+except Exception as e:
+    print('ERROR:', type(e).__name__, e)
+"
+
+$ mkdir -p /tmp/sandbox && cd /tmp/sandbox && mkdir -p t1/sub && echo "*.tmp" > t1/.packignore && touch t1/a.tmp t1/b.txt t1/sub/c.tmp t1/sub/d.txt && /work/repo/tools/packignore /tmp/sandbox/t1
+
+$ mkdir -p /tmp/sandbox /tmp/work
+
+$ cd /tmp/work && python3 difftest.py
+
+$ cd /tmp/work && python3 tests.py 2>&1
+
+$ cd /tmp && rm -rf xx && mkdir xx && echo -e "!keep.tmp\n*.tmp" > xx/.packignore && touch xx/a.tmp xx/keep.tmp && /work/repo/tools/packignore /tmp/xx
+echo "---"
+echo -e "*.tmp\n!keep.tmp" > xx/.packignore && /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && echo -e "!keep.tmp\n*.tmp\nkeep.tmp" > xx/.packignore && touch xx/a.tmp xx/keep.tmp && /work/repo/tools/packignore /tmp/xx
+echo "---"
+echo -e "keep.tmp\n!keep.tmp\nkeep.tmp" > xx/.packignore && /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/a.tmp xx/keep.tmp
+
+# Test 1: *.tmp alone
+echo "*.tmp" > xx/.packignore
+echo "Test *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# Test 2: *.tmp then !keep.tmp
+echo -e "*.tmp\n!keep.tmp" > xx/.packignore
+echo "Test *.tmp then !keep.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# Test 3: !keep.tmp then *.tmp
+echo -e "!keep.tmp\n*.tmp" > xx/.packignore
+echo "Test !keep.tmp then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# Test 4: *.tmp then !keep.tmp then *.tmp
+echo -e "*.tmp\n!keep.tmp\n*.tmp" > xx/.packignore
+echo "Test *.tmp, !keep.tmp, *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/a.tmp xx/keep.tmp
+
+echo -e "keep.tmp\n!keep.tmp\nkeep.tmp" > xx/.packignore
+echo "Test keep.tmp, !keep.tmp, keep.tmp (exact):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!keep.tmp\n*.tmp\nkeep.tmp" > xx/.packignore
+echo "Test !keep.tmp, *.tmp, keep.tmp (exact):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!keep.tmp\n*.tmp\n*e*.tmp" > xx/.packignore
+echo "Test !keep.tmp, *.tmp, *e*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!*.tmp\n*.tmp" > xx/.packignore
+echo "Test !*.tmp then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/a.tmp xx/keep.tmp xx/keep.log
+
+# !specific then general
+echo -e "!keep.tmp\n*" > xx/.packignore
+echo "Test !keep.tmp, *:"; /work/repo/tools/packignore /tmp/xx
+
+# !specific then specific-other
+echo -e "!keep.tmp\nkeep.log" > xx/.packignore
+echo "Test !keep.tmp, keep.log:"; /work/repo/tools/packignore /tmp/xx
+
+# general then !general then !specific
+echo -e "*.tmp\n*.tmp\n!keep.tmp" > xx/.packignore
+echo "Test *.tmp twice, !keep.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# !general then general-same
+echo -e "!*.tmp\n*.tmp" > xx/.packignore
+echo "Test !*.tmp then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# multi-level: !keep.tmp then *.tmp then !keep.tmp then *.tmp
+echo -e "!keep.tmp\n*.tmp\n!keep.tmp\n*.tmp" > xx/.packignore
+echo "Test alternating:"; /work/repo/tools/packignore /tmp/xx
+
+# only !pattern (nothing to re-include)
+echo -e "!keep.tmp" > xx/.packignore
+echo "Test !keep.tmp only:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/keep.tmp xx/a.tmp
+
+# Test my hypothesis
+echo -e "keep.tmp\n!keep.tmp\nkeep.tmp\n!keep.tmp" > xx/.packignore
+echo "Test 1 (expect not ignored):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!keep.tmp\nkeep.tmp\n!keep.tmp\nkeep.tmp" > xx/.packignore
+echo "Test 2 (expect ignored):"; /work/repo/tools/packignore /tmp/xx
+
+# Different pattern text that matches same file
+echo -e "k*.tmp\n!keep.tmp\nkeep.tmp" > xx/.packignore
+echo "Test 3 (expect ignored - 'keep.tmp' pos exists after !keep.tmp):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "keep.tmp\n!keep.tmp\nk*.tmp" > xx/.packignore
+echo "Test 4 (no exact text match after !keep.tmp, expect not ignored):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!keep.tmp\nkeep.tmp\n!keep.tmp" > xx/.packignore
+echo "Test 5 (expect not ignored):"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx -p xx/dir && touch xx/keep.tmp xx/dir/x
+
+# Trailing slash variants
+echo -e "!dir\ndir/" > xx/.packignore
+echo "Test !dir then dir/ (different texts):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!dir/\ndir" > xx/.packignore
+echo "Test !dir/ then dir:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!dir/\ndir/" > xx/.packignore
+echo "Test !dir/ then dir/ (identical texts):"; /work/repo/tools/packignore /tmp/xx
+
+# Leading slash
+echo -e "!/keep.tmp\nkeep.tmp" > xx/.packignore
+echo "Test !/keep.tmp then keep.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!/keep.tmp\n/keep.tmp" > xx/.packignore
+echo "Test !/keep.tmp then /keep.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/keep.tmp xx/a.tmp xx/kiss.tmp
+
+echo -e "!keep.tmp\nk*.tmp" > xx/.packignore
+echo "Test !keep.tmp then k*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!k*.tmp\nkeep.tmp" > xx/.packignore
+echo "Test !k*.tmp then keep.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!k*.tmp\n*.tmp" > xx/.packignore
+echo "Test !k*.tmp then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!keep.tmp\nkeep.tmp" > xx/.packignore
+echo "Test !keep.tmp then keep.tmp (identical):"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!*.tmp\n*.tm?" > xx/.packignore
+echo "Test !*.tmp then *.tm?:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/keep.tmp xx/a.tmp
+
+# Incomparable patterns
+echo -e "!k*\n*.tmp" > xx/.packignore
+echo "Test !k* then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!*.tmp\nk*" > xx/.packignore
+echo "Test !*.tmp then k*:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "k*\n!*.tmp" > xx/.packignore
+echo "Test k* then !*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "*.tmp\n!k*" > xx/.packignore
+echo "Test *.tmp then !k*:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "k*\n!*.tmp\n*.tmp" > xx/.packignore
+echo "Test k*, !*.tmp, *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/dir && touch xx/dir/x xx/a
+
+# Does slash count as literal char?
+echo -e "!dir/\n/dir" > xx/.packignore
+echo "Test !dir/ then /dir:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "/dir\n!dir/" > xx/.packignore
+echo "Test /dir then !dir/:"; /work/repo/tools/packignore /tmp/xx
+
+# ? vs *
+echo -e "!a?\na*" > xx/.packignore
+echo "Test !a? then a*:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!a*\na?" > xx/.packignore
+echo "Test !a* then a?:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/keep.tmp xx/a.tmp
+
+echo -e "!k*.tmp\n*.tmp" > xx/.packignore
+echo "Test !k*.tmp then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+echo -e "!*.tmp\nk*.tmp" > xx/.packignore
+echo "Test !*.tmp then k*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# What about something ambiguous
+echo -e "!ab\naa" > xx/.packignore
+touch xx/ab xx/aa
+echo "Test !ab then aa (incomparable):"; /work/repo/tools/packignore /tmp/xx
+
+# Equal literal count, different patterns
+echo -e "!a?c\nab?" > xx/.packignore
+rm -f xx/* xx/.packignore; echo -e "!a?c\nab?" > xx/.packignore
+touch xx/abc xx/abd
+echo "Test !a?c then ab?:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/keep.tmp xx/a.tmp
+
+printf "!k*.tmp\n*.tmp\n" > xx/.packignore
+echo "Test !k*.tmp then *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+printf "!*.tmp\nk*.tmp\n" > xx/.packignore
+echo "Test !*.tmp then k*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/sub && touch xx/sub/a.log xx/sub/b.tmp xx/a.log xx/b.tmp
+
+# Nested with negation
+printf "*.log\n" > xx/.packignore
+printf "!*.log\n" > xx/sub/.packignore
+echo "Test parent *.log, sub !*.log:"; /work/repo/tools/packignore /tmp/xx
+
+printf "*.log\n" > xx/.packignore
+printf "*.log\n" > xx/sub/.packignore
+echo "Test parent *.log, sub *.log:"; /work/repo/tools/packignore /tmp/xx
+
+printf "!*.log\n" > xx/.packignore
+printf "*.log\n" > xx/sub/.packignore
+echo "Test parent !*.log, sub *.log:"; /work/repo/tools/packignore /tmp/xx
+
+# Different patterns in nested
+printf "*.log\n" > xx/.packignore
+printf "!a.log\n" > xx/sub/.packignore
+echo "Test parent *.log, sub !a.log:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/sub && touch xx/sub/a.log xx/sub/b.log xx/sub/c.log
+
+# Parent very specific, sub less specific - who wins?
+printf "!a.log\n" > xx/.packignore
+printf "*.log\n" > xx/sub/.packignore
+echo "Test parent !a.log, sub *.log:"; /work/repo/tools/packignore /tmp/xx
+
+printf "a.log\n" > xx/.packignore
+printf "!*.log\n" > xx/sub/.packignore
+echo "Test parent a.log, sub !*.log:"; /work/repo/tools/packignore /tmp/xx
+
+# Parent anchored to /sub/, sub ignores
+printf "/sub/a.log\n" > xx/.packignore
+printf "!a.log\n" > xx/sub/.packignore
+echo "Test parent /sub/a.log, sub !a.log:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/sub && touch xx/sub/a.log xx/sub/b.tmp
+
+# Sub has no matching rules, parent should still apply
+printf "*.log\n" > xx/.packignore
+printf "*.other\n" > xx/sub/.packignore
+echo "Test parent *.log, sub *.other (no overlap):"; /work/repo/tools/packignore /tmp/xx
+
+# Sub has empty .packignore
+printf "*.log\n" > xx/.packignore
+printf "" > xx/sub/.packignore
+echo "Test parent *.log, sub empty:"; /work/repo/tools/packignore /tmp/xx
+
+# Sub has NO .packignore
+printf "*.log\n" > xx/.packignore
+rm -f xx/sub/.packignore
+echo "Test parent *.log, no sub .packignore:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/dir && touch xx/dir/a xx/dir/b.log
+
+# Dir excluded by parent, sub re-includes a specific file
+printf "dir/\n" > xx/.packignore
+printf "!a\n" > xx/dir/.packignore
+echo "Test parent dir/, sub !a:"; /work/repo/tools/packignore /tmp/xx
+
+# Alternative
+printf "dir\n" > xx/.packignore
+printf "!a\n" > xx/dir/.packignore
+echo "Test parent 'dir', sub !a:"; /work/repo/tools/packignore /tmp/xx
+
+# dir not excluded as dir, just by name - re-include?
+printf "a\n" > xx/.packignore
+printf "!a\n" > xx/dir/.packignore
+echo "Test parent 'a', sub !a:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/keep.tmp xx/a.tmp
+
+printf "*.tmp\n!*.tmp\n*.tmp\n" > xx/.packignore
+echo "Test *.tmp, !*.tmp, *.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+printf "*.tmp\n!*.tmp\n" > xx/.packignore
+echo "Test *.tmp, !*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+printf "!*.tmp\n*.tmp\n!*.tmp\n" > xx/.packignore
+echo "Test !*.tmp, *.tmp, !*.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# Does specificity use leading /?
+printf "!/a\na\n" > xx/.packignore
+touch xx/a
+echo "Test !/a then a:"; /work/repo/tools/packignore /tmp/xx
+
+printf "!a\n/a\n" > xx/.packignore
+echo "Test !a then /a:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/abc xx/abd xx/abe xx/axc
+
+printf "!a?c\nab?\n" > xx/.packignore
+echo "Test !a?c then ab?:"; /work/repo/tools/packignore /tmp/xx
+
+# Reverse order
+printf "!ab?\na?c\n" > xx/.packignore
+echo "Test !ab? then a?c:"; /work/repo/tools/packignore /tmp/xx
+
+# What about literal counting with leading /
+printf "!/a\na\nb\n" > xx/.packignore
+touch xx/a xx/b
+printf "!/a\na\nb\n" > xx/.packignore
+echo "Test !/a + a + b:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch xx/a.tmp xx/b.tmp xx/c.tmp
+
+# Character class
+printf "[ab].tmp\n" > xx/.packignore
+echo "Test [ab].tmp:"; /work/repo/tools/packignore /tmp/xx
+
+printf "[!a].tmp\n" > xx/.packignore
+echo "Test [!a].tmp:"; /work/repo/tools/packignore /tmp/xx
+
+printf "[^a].tmp\n" > xx/.packignore
+echo "Test [^a].tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# Backslash escape
+printf "a\\\\.tmp\n" > xx/.packignore
+cat xx/.packignore
+echo "Test a\\.tmp:"; /work/repo/tools/packignore /tmp/xx
+
+# Backslash before special
+printf "\\\\*\n" > xx/.packignore
+touch 'xx/*'
+cat xx/.packignore
+echo "Test backslash-star:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx 
+
+# Escape tests  
+touch xx/foo
+printf "\\\\!foo\n" > xx/.packignore
+cat xx/.packignore
+echo "Test \\!foo (literal !foo?):"; /work/repo/tools/packignore /tmp/xx
+touch 'xx/!foo'
+echo "Now with !foo file:"; /work/repo/tools/packignore /tmp/xx
+
+rm -rf xx && mkdir xx
+touch 'xx/*'
+touch 'xx/a'
+printf "\\\\*\n" > xx/.packignore
+cat xx/.packignore
+echo "Test \\* (should match literal '*'):"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir xx && touch 'xx/foo!bar'
+
+printf "foo!bar\n" > xx/.packignore
+echo "Test foo!bar:"; /work/repo/tools/packignore /tmp/xx
+
+# ! only special at start
+printf "!!bar\n" > xx/.packignore
+touch 'xx/!bar'
+echo "Test !!bar:"; /work/repo/tools/packignore /tmp/xx
+echo "files: $(ls xx)"
+
+$ cd /tmp && rm -rf xx && mkdir xx
+touch 'xx/foo' 'xx/foo '  # file with trailing space
+
+printf "foo \n" > xx/.packignore
+echo "Test 'foo ' with trailing space (expect foo matched or 'foo '?):"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+printf 'foo\t\n' > xx/.packignore
+echo "Test 'foo' with trailing tab:"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+printf "foo\r\n" > xx/.packignore
+echo "Test 'foo' with CRLF:"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+$ cd /tmp && rm -rf xx && mkdir xx
+touch 'xx/foo ' 
+printf "foo\n" > xx/.packignore
+echo "Pattern 'foo', file 'foo ':"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+# What about pattern 'foo\ ' (escaped trailing space)?
+printf 'foo\\ \n' > xx/.packignore
+cat xx/.packignore | cat -A
+echo "Pattern 'foo\\ ', file 'foo ':"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+$ cd /tmp && rm -rf xx && mkdir xx
+touch 'xx/foo ' 
+ls -la xx | cat -A
+printf "foo\n" > xx/.packignore
+echo "Pattern 'foo', file 'foo ':"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+# Really explicit
+rm -rf xx && mkdir xx
+touch 'xx/x '
+touch 'xx/x'
+ls xx | cat -A
+printf "x\n" > xx/.packignore
+echo "Pattern 'x', files 'x' and 'x ':"
+/work/repo/tools/packignore /tmp/xx | cat -A
+
+$ cd /tmp && rm -rf xx && mkdir xx
+touch "xx/x " "xx/x"
+printf "x\n" > xx/.packignore
+echo "Pattern 'x', files 'x' and 'x ':"
+/work/repo/tools/packignore /tmp/xx 
+echo "---"
+python3 -c "import os; print(sorted(os.listdir('/tmp/xx')))"
+
+$ cd /tmp && rm -rf xx && mkdir xx
+touch "xx/foo "
+printf "foo\n" > xx/.packignore
+echo "Pattern 'foo', only file 'foo ':"
+/work/repo/tools/packignore /tmp/xx
+echo "---"
+python3 -c "import os; print(sorted(os.listdir('/tmp/xx')))"
+
+$ cd /tmp/work && python3 tests.py 2>&1 | tail -60
+
+$ cd /tmp/work && python3 tests.py 2>&1 | tail -60
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/foo && touch xx/foo/keep xx/foo/x
+
+printf "foo/\n!foo/keep\n" > xx/.packignore
+echo "Test foo/ then !foo/keep:"; /work/repo/tools/packignore /tmp/xx
+
+printf "foo/\n!keep\n" > xx/.packignore
+echo "Test foo/ then !keep (unanchored):"; /work/repo/tools/packignore /tmp/xx
+
+# What about via sub .packignore?
+printf "foo/\n" > xx/.packignore
+printf "!keep\n" > xx/foo/.packignore
+echo "Test parent foo/, sub !keep:"; /work/repo/tools/packignore /tmp/xx
+
+printf "foo/\n" > xx/.packignore
+printf "!/keep\n" > xx/foo/.packignore
+echo "Test parent foo/, sub !/keep:"; /work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp/work && python3 tests.py 2>&1 | tail -40
+
+$ cd /tmp/work && python3 fuzz.py 100 0
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/a xx/b
+touch xx/a/cd xx/b/x xx/c
+printf "**\n!**/\n" > xx/.packignore
+echo "Test ** !**/ for files in sub-dirs:"
+/work/repo/tools/packignore /tmp/xx
+
+printf "**\n" > xx/.packignore
+echo "Test ** alone:"
+/work/repo/tools/packignore /tmp/xx
+
+# Dir-only match on ancestor - should NOT re-include contents
+printf "/a/cd\n!/a/\n" > xx/.packignore
+echo "Test /a/cd + !/a/:"
+/work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/a
+touch xx/a/cd
+
+printf "/a/cd\n!/a\n" > xx/.packignore
+echo "Test /a/cd + !/a (not dir-only):"
+/work/repo/tools/packignore /tmp/xx
+
+# Does a general negation re-include via ancestor dir?
+printf "**\n!a\n" > xx/.packignore
+echo "Test ** + !a (name match):"
+/work/repo/tools/packignore /tmp/xx
+
+printf "**\n!/a\n" > xx/.packignore
+echo "Test ** + !/a (anchored name):"
+/work/repo/tools/packignore /tmp/xx
+
+printf "**\n!/a/cd\n" > xx/.packignore
+echo "Test ** + !/a/cd:"
+/work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/foo && touch xx/foo/x xx/foo/keep
+
+printf "foo/\n!foo\n" > xx/.packignore
+echo "Test foo/ + !foo for files in foo:"
+/work/repo/tools/packignore /tmp/xx
+
+printf "!foo\nfoo/\n" > xx/.packignore
+echo "Test !foo + foo/:"
+/work/repo/tools/packignore /tmp/xx
+
+# What if dir re-include then specific exclude
+printf "!foo/\nfoo/x\n" > xx/.packignore
+echo "Test !foo/ + foo/x:"
+/work/repo/tools/packignore /tmp/xx
+
+# Nested - dir excluded, specific file re-included at root
+printf "foo/\n!foo/keep\n" > xx/.packignore
+echo "Test foo/ + !foo/keep:"
+/work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/foo && touch xx/foo/x xx/foo/y
+
+printf "foo/\n!foo/*\n" > xx/.packignore
+echo "Test foo/ + !foo/*:"
+/work/repo/tools/packignore /tmp/xx
+
+printf "foo/\n!foo/?\n" > xx/.packignore
+echo "Test foo/ + !foo/?:"
+/work/repo/tools/packignore /tmp/xx
+
+# Direct positive beats ancestor negative?
+printf "!foo\nfoo/x\n" > xx/.packignore
+echo "Test !foo + foo/x:"
+/work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp && rm -rf xx && mkdir -p xx/a/b/c xx/a/b/sibling
+touch xx/a/b/c/file xx/a/b/sibling/f xx/a/other
+
+printf "!a\na/b\n" > xx/.packignore
+echo "Test !a + a/b:"
+/work/repo/tools/packignore /tmp/xx
+
+$ cd /tmp/work && python3 tests.py 2>&1 | tail -8 && echo "---FUZZ---" && python3 fuzz.py 300 0 2>&1 | tail -8

@@ -1,0 +1,6923 @@
+{
+  "summary": {
+    "cases": 500,
+    "passed": 111,
+    "score": 0.222,
+    "file_accuracy": 0.7479984046350756,
+    "errors": 0,
+    "by_feature": {
+      "case": {
+        "passed": 34,
+        "cases": 201,
+        "rate": 0.1691542288557214
+      },
+      "char_class": {
+        "passed": 33,
+        "cases": 252,
+        "rate": 0.13095238095238096
+      },
+      "comment": {
+        "passed": 39,
+        "cases": 232,
+        "rate": 0.16810344827586207
+      },
+      "double_star": {
+        "passed": 47,
+        "cases": 309,
+        "rate": 0.15210355987055016
+      },
+      "escape": {
+        "passed": 15,
+        "cases": 138,
+        "rate": 0.10869565217391304
+      },
+      "leading_slash": {
+        "passed": 61,
+        "cases": 330,
+        "rate": 0.18484848484848485
+      },
+      "middle_slash": {
+        "passed": 68,
+        "cases": 395,
+        "rate": 0.17215189873417722
+      },
+      "negation": {
+        "passed": 66,
+        "cases": 385,
+        "rate": 0.17142857142857143
+      },
+      "nested_gitignore": {
+        "passed": 47,
+        "cases": 356,
+        "rate": 0.13202247191011235
+      },
+      "question": {
+        "passed": 40,
+        "cases": 227,
+        "rate": 0.1762114537444934
+      },
+      "star": {
+        "passed": 75,
+        "cases": 365,
+        "rate": 0.2054794520547945
+      },
+      "trailing_slash": {
+        "passed": 52,
+        "cases": 318,
+        "rate": 0.16352201257861634
+      },
+      "trailing_space": {
+        "passed": 36,
+        "cases": 225,
+        "rate": 0.16
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "dev-0000",
+      "pass": false,
+      "missing": [
+        "b/docs/b.txt",
+        "build/a/b.txt",
+        "build/a/lib/notes.md",
+        "foo/docs/b.txt",
+        "foo/docs/test/b.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8809523809523809,
+      "error": null
+    },
+    {
+      "id": "dev-0001",
+      "pass": false,
+      "missing": [
+        "b/b.txt",
+        "b/b/README",
+        "b/b/err.log",
+        "b/b/lib/util.py",
+        "b/b/logs/.env",
+        "b/b/x.c",
+        "b/foo",
+        "b/main.py",
+        "b/src/#notes.txt",
+        "b/src/.env",
+        "b/src/docs/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.38888888888888884,
+      "error": null
+    },
+    {
+      "id": "dev-0002",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "!important.txt",
+        ".gitignore",
+        "Makefile",
+        "f[1].txt",
+        "logs/!important.txt",
+        "logs/.gitignore",
+        "logs/docs/.gitignore",
+        "logs/docs/.hidden",
+        "logs/docs/debug.log",
+        "logs/docs/f[1].txt",
+        "logs/docs/test/.gitignore",
+        "logs/docs/test/build.sh",
+        "logs/docs/test/f[1].txt"
+      ],
+      "file_acc": 0.6829268292682926,
+      "error": null
+    },
+    {
+      "id": "dev-0003",
+      "pass": false,
+      "missing": [
+        "build/main.py"
+      ],
+      "extra": [
+        "build/node_modules/logs/.hidden"
+      ],
+      "file_acc": 0.8461538461538461,
+      "error": null
+    },
+    {
+      "id": "dev-0004",
+      "pass": false,
+      "missing": [
+        "out/node_modules/foo/#notes.txt",
+        "out/node_modules/foo/err.log",
+        "out/node_modules/foo/main.py"
+      ],
+      "extra": [
+        "a.txt"
+      ],
+      "file_acc": 0.7647058823529411,
+      "error": null
+    },
+    {
+      "id": "dev-0005",
+      "pass": false,
+      "missing": [
+        "README",
+        "logs/logs/b/Makefile"
+      ],
+      "extra": [
+        "logs/.gitignore",
+        "logs/util.py"
+      ],
+      "file_acc": 0.7647058823529411,
+      "error": null
+    },
+    {
+      "id": "dev-0006",
+      "pass": false,
+      "missing": [
+        "foo/!important.txt",
+        "foo/err.log",
+        "foo/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.5714285714285714,
+      "error": null
+    },
+    {
+      "id": "dev-0007",
+      "pass": false,
+      "missing": [
+        "node_modules/a/build/.gitignore",
+        "node_modules/a/build/util.py",
+        "node_modules/a/build/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0008",
+      "pass": false,
+      "missing": [
+        "logs/Makefile",
+        "logs/x.o",
+        "node_modules/data.json",
+        "node_modules/foo"
+      ],
+      "extra": [
+        ".gitignore"
+      ],
+      "file_acc": 0.5833333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0009",
+      "pass": false,
+      "missing": [
+        "test/.env"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0010",
+      "pass": false,
+      "missing": [
+        "lib/a",
+        "lib/docs/.gitignore",
+        "lib/docs/build.sh",
+        "lib/docs/build/a",
+        "lib/docs/main.py",
+        "lib/docs/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.4545454545454546,
+      "error": null
+    },
+    {
+      "id": "dev-0011",
+      "pass": false,
+      "missing": [
+        "foo/tmp/tmp/util.py"
+      ],
+      "extra": [
+        ".gitignore",
+        "a/README",
+        "a/build.sh",
+        "a/main.py",
+        "b/.env",
+        "b/Makefile",
+        "build.sh",
+        "foo/.gitignore",
+        "foo/README",
+        "foo/foo",
+        "main.py"
+      ],
+      "file_acc": 0.368421052631579,
+      "error": null
+    },
+    {
+      "id": "dev-0012",
+      "pass": false,
+      "missing": [
+        "out/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0013",
+      "pass": false,
+      "missing": [
+        "out/#notes.txt",
+        "out/README"
+      ],
+      "extra": [],
+      "file_acc": 0.8461538461538461,
+      "error": null
+    },
+    {
+      "id": "dev-0014",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0015",
+      "pass": false,
+      "missing": [
+        "node_modules/.env",
+        "src/build/lib/#notes.txt",
+        "src/build/lib/b.txt",
+        "src/build/lib/x.c",
+        "src/build/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0016",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "b/.hidden",
+        "b/b/foo/README",
+        "foo/util.py",
+        "node_modules/.env",
+        "node_modules/b/logs/.gitignore",
+        "node_modules/b/util.py",
+        "node_modules/x.c"
+      ],
+      "extra": [
+        "b/!important.txt",
+        "b/b/build.sh",
+        "b/b/src/build.sh",
+        "b/build.sh",
+        "node_modules/b/f[1].txt",
+        "node_modules/build.sh"
+      ],
+      "file_acc": 0.4814814814814815,
+      "error": null
+    },
+    {
+      "id": "dev-0017",
+      "pass": false,
+      "missing": [
+        "a/debug.log",
+        "logs/.env",
+        "logs/build/!important.txt",
+        "logs/build/a",
+        "logs/build/b.txt",
+        "logs/build/b/.gitignore",
+        "logs/build/b/README",
+        "logs/build/data.json",
+        "logs/f[1].txt",
+        "logs/notes.md",
+        "logs/util.py",
+        "x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.4285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0018",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0019",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "b/!important.txt",
+        "b/main.py",
+        "b/notes.md",
+        "b/test/.gitignore",
+        "b/test/README",
+        "logs/.hidden",
+        "logs/Makefile",
+        "logs/err.log",
+        "x.c"
+      ],
+      "file_acc": 0.3529411764705882,
+      "error": null
+    },
+    {
+      "id": "dev-0020",
+      "pass": false,
+      "missing": [
+        "src/docs/logs/README",
+        "src/docs/logs/foo"
+      ],
+      "extra": [
+        "foo/x.o"
+      ],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0021",
+      "pass": false,
+      "missing": [
+        "foo/test/src/foo",
+        "foo/test/src/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.8823529411764706,
+      "error": null
+    },
+    {
+      "id": "dev-0022",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0023",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0024",
+      "pass": false,
+      "missing": [
+        "lib/README"
+      ],
+      "extra": [],
+      "file_acc": 0.9230769230769231,
+      "error": null
+    },
+    {
+      "id": "dev-0025",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "a.txt",
+        "debug.log",
+        "docs/build/.gitignore",
+        "docs/build/a/util.py",
+        "docs/build/main.py",
+        "docs/f[1].txt",
+        "docs/out/.env",
+        "docs/out/notes.md",
+        "docs/out/src/!important.txt",
+        "docs/out/src/util.py",
+        "f[1].txt",
+        "tmp/x.o"
+      ],
+      "file_acc": 0.26315789473684215,
+      "error": null
+    },
+    {
+      "id": "dev-0026",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0027",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "a.txt",
+        "b/.env",
+        "b/README",
+        "b/err.log",
+        "b/foo/a",
+        "b/foo/foo",
+        "b/foo/util.py",
+        "b/lib/.hidden",
+        "b/lib/foo/.gitignore",
+        "b/lib/foo/Makefile",
+        "b/lib/foo/build.sh",
+        "b/util.py",
+        "f[1].txt",
+        "out/!important.txt",
+        "out/Makefile",
+        "out/f[1].txt",
+        "out/x.o",
+        "x.o"
+      ],
+      "file_acc": 0.13043478260869568,
+      "error": null
+    },
+    {
+      "id": "dev-0028",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0029",
+      "pass": false,
+      "missing": [
+        "lib/.env",
+        "lib/debug.log",
+        "node_modules/data.json",
+        "node_modules/err.log"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0030",
+      "pass": false,
+      "missing": [
+        "node_modules/.hidden",
+        "node_modules/a",
+        "node_modules/debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.8125,
+      "error": null
+    },
+    {
+      "id": "dev-0031",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "node_modules/.gitignore",
+        "node_modules/b/logs/.env",
+        "node_modules/b/logs/.gitignore",
+        "node_modules/b/util.py",
+        "node_modules/build/.gitignore",
+        "node_modules/build/err.log",
+        "node_modules/build/f[1].txt",
+        "node_modules/err.log",
+        "node_modules/foo",
+        "x.c"
+      ],
+      "file_acc": 0.42105263157894735,
+      "error": null
+    },
+    {
+      "id": "dev-0032",
+      "pass": false,
+      "missing": [
+        "build/src/lib/debug.log",
+        "build/src/lib/foo"
+      ],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "b.txt",
+        "tmp/.env",
+        "tmp/lib/.gitignore",
+        "tmp/test/logs/.hidden"
+      ],
+      "file_acc": 0.7575757575757576,
+      "error": null
+    },
+    {
+      "id": "dev-0033",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0034",
+      "pass": false,
+      "missing": [
+        "foo/f[1].txt"
+      ],
+      "extra": [
+        ".env"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0035",
+      "pass": false,
+      "missing": [
+        "test/main.py",
+        "test/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0036",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0037",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0038",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0039",
+      "pass": false,
+      "missing": [
+        "b/tmp/a/x.c"
+      ],
+      "extra": [
+        ".gitignore",
+        "b/!important.txt",
+        "b/node_modules/!important.txt",
+        "b/node_modules/a",
+        "b/node_modules/lib/f[1].txt",
+        "b/node_modules/lib/main.py",
+        "b/node_modules/lib/util.py",
+        "b/node_modules/tmp/!important.txt",
+        "b/node_modules/tmp/a.txt",
+        "b/node_modules/tmp/f[1].txt",
+        "b/tmp/!important.txt",
+        "b/tmp/.gitignore",
+        "b/tmp/notes.md",
+        "f[1].txt",
+        "foo",
+        "logs/!important.txt",
+        "logs/b.txt",
+        "logs/logs/b/.hidden",
+        "logs/logs/b/a",
+        "logs/logs/b/b.txt",
+        "logs/logs/lib/a",
+        "logs/logs/lib/main.py",
+        "logs/out/build.sh",
+        "logs/out/f[1].txt",
+        "logs/util.py",
+        "logs/x.o",
+        "src/Makefile",
+        "src/b.txt",
+        "src/debug.log",
+        "src/foo",
+        "src/test/notes.md"
+      ],
+      "file_acc": 0.2558139534883721,
+      "error": null
+    },
+    {
+      "id": "dev-0040",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "data.json",
+        "x.o"
+      ],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0041",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0042",
+      "pass": false,
+      "missing": [
+        "b/lib/node_modules/.hidden",
+        "b/lib/node_modules/a.txt",
+        "b/lib/node_modules/debug.log",
+        "b/lib/node_modules/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0043",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0044",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0045",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0046",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0047",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0048",
+      "pass": false,
+      "missing": [
+        "node_modules/.gitignore",
+        "node_modules/f[1].txt",
+        "node_modules/lib/.gitignore",
+        "node_modules/lib/a.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8260869565217391,
+      "error": null
+    },
+    {
+      "id": "dev-0049",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "a.txt",
+        "b.txt",
+        "node_modules/!important.txt",
+        "notes.md",
+        "src/#notes.txt",
+        "src/.env",
+        "src/data.json",
+        "src/err.log"
+      ],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0050",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "logs/b.txt",
+        "logs/foo",
+        "logs/main.py",
+        "test/a",
+        "test/a.txt",
+        "test/err.log",
+        "test/f[1].txt"
+      ],
+      "file_acc": 0.4666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0051",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "node_modules/README",
+        "node_modules/build.sh",
+        "node_modules/x.c",
+        "x.o"
+      ],
+      "file_acc": 0.6428571428571428,
+      "error": null
+    },
+    {
+      "id": "dev-0052",
+      "pass": false,
+      "missing": [
+        "docs/!important.txt",
+        "docs/docs/a/foo",
+        "docs/docs/a/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8421052631578947,
+      "error": null
+    },
+    {
+      "id": "dev-0053",
+      "pass": false,
+      "missing": [
+        "test/test/!important.txt",
+        "test/test/build/.env",
+        "test/test/build/err.log",
+        "test/test/build/main.py",
+        "test/test/foo",
+        "tmp/tmp/!important.txt",
+        "tmp/tmp/docs/.hidden",
+        "tmp/tmp/docs/b.txt",
+        "tmp/tmp/docs/data.json"
+      ],
+      "extra": [],
+      "file_acc": 0.6785714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0054",
+      "pass": false,
+      "missing": [
+        "tmp/!important.txt",
+        "tmp/build.sh"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0055",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "data.json",
+        "tmp/.gitignore",
+        "tmp/README",
+        "tmp/err.log",
+        "tmp/foo/main.py"
+      ],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0056",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/src/node_modules/a.txt",
+        "b/src/node_modules/main.py",
+        "b/tmp/docs/main.py",
+        "lib/lib/a.txt"
+      ],
+      "file_acc": 0.8518518518518519,
+      "error": null
+    },
+    {
+      "id": "dev-0057",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b.txt",
+        "lib/!important.txt",
+        "lib/debug.log",
+        "lib/docs/#notes.txt",
+        "lib/docs/a.txt",
+        "lib/logs/docs/README",
+        "lib/logs/docs/data.json",
+        "lib/logs/notes.md",
+        "lib/logs/out/a.txt",
+        "lib/x.c",
+        "main.py"
+      ],
+      "file_acc": 0.4,
+      "error": null
+    },
+    {
+      "id": "dev-0058",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "!important.txt",
+        "#notes.txt",
+        ".gitignore",
+        "node_modules/.gitignore",
+        "node_modules/a",
+        "node_modules/b.txt",
+        "node_modules/f[1].txt",
+        "node_modules/foo/util.py",
+        "node_modules/lib/.gitignore",
+        "node_modules/lib/README",
+        "node_modules/lib/f[1].txt",
+        "node_modules/lib/x.c",
+        "node_modules/main.py",
+        "tmp/README",
+        "tmp/b/#notes.txt",
+        "tmp/b/err.log",
+        "tmp/build/.gitignore",
+        "tmp/build/.hidden",
+        "tmp/build/test/.env",
+        "tmp/build/test/.hidden",
+        "tmp/build/test/main.py",
+        "tmp/build/util.py",
+        "tmp/err.log",
+        "util.py"
+      ],
+      "file_acc": 0.22580645161290325,
+      "error": null
+    },
+    {
+      "id": "dev-0059",
+      "pass": false,
+      "missing": [
+        "lib/logs/Makefile",
+        "lib/logs/tmp/a",
+        "lib/logs/tmp/foo",
+        "lib/logs/tmp/notes.md",
+        "lib/logs/x.c"
+      ],
+      "extra": [
+        "build.sh",
+        "lib/b.txt"
+      ],
+      "file_acc": 0.6818181818181819,
+      "error": null
+    },
+    {
+      "id": "dev-0060",
+      "pass": false,
+      "missing": [
+        "build/.gitignore",
+        "build/f[1].txt",
+        "build/node_modules/.gitignore",
+        "build/node_modules/README",
+        "build/node_modules/docs/README"
+      ],
+      "extra": [],
+      "file_acc": 0.5454545454545454,
+      "error": null
+    },
+    {
+      "id": "dev-0061",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "err.log",
+        "lib/err.log",
+        "lib/node_modules/b/!important.txt",
+        "lib/node_modules/b/.gitignore",
+        "lib/node_modules/debug.log",
+        "lib/node_modules/tmp/b.txt",
+        "x.c"
+      ],
+      "file_acc": 0.7096774193548387,
+      "error": null
+    },
+    {
+      "id": "dev-0062",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0063",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "b/b/b/notes.md",
+        "debug.log",
+        "node_modules/lib/.gitignore"
+      ],
+      "extra": [
+        "node_modules/out/b.txt"
+      ],
+      "file_acc": 0.7727272727272727,
+      "error": null
+    },
+    {
+      "id": "dev-0064",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0065",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "b.txt",
+        "docs/a.txt",
+        "docs/build.sh",
+        "docs/lib/.env",
+        "docs/lib/Makefile",
+        "docs/lib/README",
+        "docs/lib/foo/data.json",
+        "docs/lib/foo/x.o",
+        "docs/lib/main.py",
+        "docs/lib/node_modules/a.txt",
+        "docs/lib/node_modules/data.json",
+        "docs/lib/node_modules/f[1].txt",
+        "docs/lib/node_modules/notes.md",
+        "tmp/#notes.txt",
+        "tmp/b.txt",
+        "tmp/data.json",
+        "tmp/f[1].txt"
+      ],
+      "file_acc": 0.24,
+      "error": null
+    },
+    {
+      "id": "dev-0066",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0067",
+      "pass": false,
+      "missing": [
+        "foo/b/.gitignore",
+        "foo/b/debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.8823529411764706,
+      "error": null
+    },
+    {
+      "id": "dev-0068",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "README",
+        "build/.gitignore",
+        "build/err.log",
+        "debug.log",
+        "docs/build.sh",
+        "docs/main.py"
+      ],
+      "file_acc": 0.5555555555555556,
+      "error": null
+    },
+    {
+      "id": "dev-0069",
+      "pass": false,
+      "missing": [
+        "out/build/foo/.hidden",
+        "out/build/foo/a",
+        "out/build/foo/x.c"
+      ],
+      "extra": [
+        "out/node_modules/debug.log"
+      ],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0070",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a/README",
+        "a/test/#notes.txt",
+        "a/test/.env",
+        "a/test/lib/data.json",
+        "a/test/lib/main.py",
+        "a/test/src/.env",
+        "a/test/src/Makefile",
+        "a/test/src/debug.log",
+        "a/test/src/f[1].txt",
+        "a/test/util.py",
+        "a/util.py",
+        "node_modules/.gitignore",
+        "node_modules/a/a.txt",
+        "node_modules/x.c",
+        "util.py"
+      ],
+      "file_acc": 0.5675675675675675,
+      "error": null
+    },
+    {
+      "id": "dev-0071",
+      "pass": false,
+      "missing": [
+        "b/f[1].txt",
+        "build/src/test/f[1].txt"
+      ],
+      "extra": [
+        "build/debug.log",
+        "build/src/data.json",
+        "build/src/x.o",
+        "debug.log"
+      ],
+      "file_acc": 0.6842105263157895,
+      "error": null
+    },
+    {
+      "id": "dev-0072",
+      "pass": false,
+      "missing": [
+        "node_modules/tmp/.gitignore",
+        "node_modules/tmp/a.txt",
+        "node_modules/tmp/foo",
+        "node_modules/tmp/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0073",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0074",
+      "pass": false,
+      "missing": [
+        "foo/docs/README",
+        "foo/docs/docs/.env",
+        "foo/docs/docs/a.txt",
+        "foo/docs/docs/err.log",
+        "foo/docs/logs/README",
+        "foo/test/lib/#notes.txt",
+        "foo/test/lib/build.sh",
+        "foo/test/lib/f[1].txt",
+        "foo/test/lib/foo",
+        "lib/foo",
+        "lib/util.py"
+      ],
+      "extra": [
+        "foo/notes.md"
+      ],
+      "file_acc": 0.4545454545454546,
+      "error": null
+    },
+    {
+      "id": "dev-0075",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0076",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "out/a.txt",
+        "out/build/.env",
+        "out/build/README",
+        "out/build/a",
+        "out/build/build/.hidden",
+        "out/build/err.log",
+        "out/build/tmp/data.json",
+        "out/build/tmp/debug.log",
+        "out/f[1].txt",
+        "tmp/!important.txt",
+        "tmp/foo",
+        "tmp/lib/Makefile",
+        "tmp/lib/logs/!important.txt",
+        "tmp/lib/logs/err.log",
+        "tmp/lib/logs/x.c",
+        "tmp/lib/logs/x.o",
+        "tmp/lib/node_modules/a.txt",
+        "tmp/lib/node_modules/debug.log",
+        "tmp/tmp/#notes.txt",
+        "tmp/tmp/.gitignore",
+        "tmp/tmp/main.py",
+        "tmp/util.py",
+        "x.c"
+      ],
+      "file_acc": 0.19999999999999996,
+      "error": null
+    },
+    {
+      "id": "dev-0077",
+      "pass": false,
+      "missing": [
+        "foo/test/notes.md",
+        "node_modules/notes.md"
+      ],
+      "extra": [
+        "data.json"
+      ],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0078",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        ".hidden",
+        "foo/util.py",
+        "foo/x.o"
+      ],
+      "file_acc": 0.6153846153846154,
+      "error": null
+    },
+    {
+      "id": "dev-0079",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0080",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "a.txt",
+        "build/Makefile",
+        "build/main.py",
+        "build/notes.md",
+        "build/tmp/build.sh",
+        "build/tmp/err.log",
+        "build/util.py",
+        "data.json",
+        "docs/.gitignore",
+        "docs/README",
+        "docs/a",
+        "docs/foo/data.json",
+        "src/debug.log",
+        "src/err.log",
+        "src/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": null
+    },
+    {
+      "id": "dev-0081",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0082",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "docs/.gitignore",
+        "docs/.hidden",
+        "tmp/!important.txt",
+        "tmp/.hidden",
+        "tmp/lib/build.sh",
+        "tmp/lib/docs/!important.txt",
+        "tmp/lib/docs/.gitignore",
+        "tmp/lib/docs/a",
+        "tmp/lib/f[1].txt",
+        "tmp/lib/foo",
+        "tmp/lib/main.py",
+        "tmp/tmp/.gitignore",
+        "tmp/tmp/f[1].txt",
+        "tmp/tmp/notes.md"
+      ],
+      "file_acc": 0.40740740740740744,
+      "error": null
+    },
+    {
+      "id": "dev-0083",
+      "pass": false,
+      "missing": [
+        "a/node_modules/.gitignore",
+        "a/node_modules/README",
+        "a/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.7692307692307692,
+      "error": null
+    },
+    {
+      "id": "dev-0084",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "foo/build.sh",
+        "foo/foo/build.sh",
+        "lib/build.sh"
+      ],
+      "file_acc": 0.7857142857142857,
+      "error": null
+    },
+    {
+      "id": "dev-0085",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "lib/a/x.o",
+        "src/src/logs/x.o",
+        "src/x.o"
+      ],
+      "file_acc": 0.8846153846153846,
+      "error": null
+    },
+    {
+      "id": "dev-0086",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "foo/#notes.txt",
+        "logs/#notes.txt"
+      ],
+      "file_acc": 0.8947368421052632,
+      "error": null
+    },
+    {
+      "id": "dev-0087",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b/.gitignore",
+        "b/build.sh",
+        "b/err.log",
+        "b/src/err.log",
+        "b/src/notes.md",
+        "logs/Makefile",
+        "main.py"
+      ],
+      "file_acc": 0.7575757575757576,
+      "error": null
+    },
+    {
+      "id": "dev-0088",
+      "pass": false,
+      "missing": [
+        "build/f[1].txt",
+        "build/lib/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0089",
+      "pass": false,
+      "missing": [
+        "b/err.log",
+        "b/src/err.log"
+      ],
+      "extra": [
+        ".gitignore",
+        "b.txt",
+        "main.py"
+      ],
+      "file_acc": 0.7222222222222222,
+      "error": null
+    },
+    {
+      "id": "dev-0090",
+      "pass": false,
+      "missing": [
+        "docs/a"
+      ],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "err.log",
+        "util.py"
+      ],
+      "file_acc": 0.5454545454545454,
+      "error": null
+    },
+    {
+      "id": "dev-0091",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "b/.gitignore",
+        "b/a/Makefile",
+        "b/a/x.o",
+        "b/b.txt",
+        "b/b/b.txt",
+        "b/b/lib/#notes.txt",
+        "b/b/lib/.env",
+        "b/b/lib/foo",
+        "b/f[1].txt",
+        "b/x.c",
+        "b/x.o",
+        "build/.hidden",
+        "build/a/.gitignore",
+        "build/a/build.sh",
+        "build/a/node_modules/README",
+        "build/build/build.sh",
+        "build/build/out/foo",
+        "build/build/out/util.py",
+        "build/build/out/x.c",
+        "build/f[1].txt",
+        "out/.hidden",
+        "out/README",
+        "out/err.log",
+        "out/node_modules/lib/data.json",
+        "out/node_modules/x.c"
+      ],
+      "file_acc": 0.22857142857142854,
+      "error": null
+    },
+    {
+      "id": "dev-0092",
+      "pass": false,
+      "missing": [
+        "docs/b/tmp/build.sh",
+        "docs/b/tmp/data.json",
+        "docs/b/tmp/debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0093",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0094",
+      "pass": false,
+      "missing": [
+        "src/.gitignore",
+        "src/b.txt",
+        "src/build.sh",
+        "src/debug.log",
+        "src/lib/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.5454545454545454,
+      "error": null
+    },
+    {
+      "id": "dev-0095",
+      "pass": false,
+      "missing": [
+        "b/#notes.txt",
+        "b/b.txt",
+        "b/x.c",
+        "b/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.7333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0096",
+      "pass": false,
+      "missing": [
+        "out/b.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0097",
+      "pass": false,
+      "missing": [
+        "#notes.txt",
+        "b/node_modules/docs/main.py",
+        "b/node_modules/docs/notes.md"
+      ],
+      "extra": [
+        "b/node_modules/f[1].txt"
+      ],
+      "file_acc": 0.7647058823529411,
+      "error": null
+    },
+    {
+      "id": "dev-0098",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0099",
+      "pass": false,
+      "missing": [
+        "node_modules/build/.env",
+        "node_modules/build/.hidden",
+        "node_modules/build/foo/debug.log",
+        "node_modules/build/foo/notes.md",
+        "node_modules/build/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0100",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0101",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0102",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "foo",
+        "logs/build/!important.txt",
+        "logs/build/a.txt",
+        "logs/build/data.json",
+        "logs/build/logs/main.py",
+        "logs/build/src/.gitignore",
+        "logs/notes.md"
+      ],
+      "file_acc": 0.7419354838709677,
+      "error": null
+    },
+    {
+      "id": "dev-0103",
+      "pass": false,
+      "missing": [
+        "lib/build/.hidden",
+        "lib/build/a/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.9047619047619048,
+      "error": null
+    },
+    {
+      "id": "dev-0104",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0105",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/b/x.c",
+        "b/x.c",
+        "test/a/data.json",
+        "x.c"
+      ],
+      "file_acc": 0.8666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0106",
+      "pass": false,
+      "missing": [
+        "docs/node_modules/.gitignore",
+        "docs/node_modules/.hidden",
+        "docs/node_modules/build.sh",
+        "docs/node_modules/data.json",
+        "docs/node_modules/out/foo",
+        "docs/node_modules/util.py",
+        "lib/.gitignore",
+        "lib/a",
+        "lib/a.txt",
+        "lib/err.log",
+        "lib/src/.env",
+        "lib/src/a/README",
+        "lib/src/a/a.txt",
+        "lib/src/err.log",
+        "lib/src/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.4,
+      "error": null
+    },
+    {
+      "id": "dev-0107",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0108",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "a/.hidden",
+        "a/a",
+        "a/docs/.gitignore",
+        "a/docs/Makefile",
+        "a/docs/data.json",
+        "a/docs/notes.md",
+        "a/node_modules/!important.txt",
+        "a/node_modules/a",
+        "a/node_modules/err.log",
+        "a/node_modules/test/.gitignore",
+        "a/node_modules/test/main.py",
+        "a/node_modules/util.py",
+        "a/x.o",
+        "foo/b.txt",
+        "foo/lib/.gitignore",
+        "foo/lib/.hidden",
+        "foo/lib/README",
+        "foo/lib/build/.env",
+        "foo/lib/build/b.txt",
+        "foo/lib/build/main.py",
+        "foo/lib/util.py",
+        "foo/notes.md",
+        "foo/x.c"
+      ],
+      "file_acc": 0.24242424242424243,
+      "error": null
+    },
+    {
+      "id": "dev-0109",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "logs/.env"
+      ],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0110",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "build/.env",
+        "build/f[1].txt",
+        "build/lib/a.txt",
+        "build/lib/docs/.hidden",
+        "build/lib/docs/b.txt",
+        "build/lib/docs/f[1].txt",
+        "build/x.c",
+        "lib/out/lib/!important.txt",
+        "lib/out/lib/a",
+        "lib/out/x.c"
+      ],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0111",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b/foo",
+        "data.json",
+        "foo/f[1].txt",
+        "x.c",
+        "x.o"
+      ],
+      "file_acc": 0.5714285714285714,
+      "error": null
+    },
+    {
+      "id": "dev-0112",
+      "pass": false,
+      "missing": [
+        "a/.env",
+        "a/err.log",
+        "a/src/.gitignore",
+        "a/src/Makefile",
+        "a/src/b/b.txt",
+        "a/src/b/x.c",
+        "a/src/test/#notes.txt",
+        "a/src/test/f[1].txt",
+        "a/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.5263157894736843,
+      "error": null
+    },
+    {
+      "id": "dev-0113",
+      "pass": false,
+      "missing": [
+        "logs/foo/out/main.py"
+      ],
+      "extra": [
+        ".gitignore",
+        "a",
+        "out/!important.txt",
+        "out/.gitignore",
+        "out/util.py"
+      ],
+      "file_acc": 0.76,
+      "error": null
+    },
+    {
+      "id": "dev-0114",
+      "pass": false,
+      "missing": [
+        "b/.gitignore",
+        "b/debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0115",
+      "pass": false,
+      "missing": [
+        "node_modules/!important.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0116",
+      "pass": false,
+      "missing": [
+        "node_modules/tmp/logs/README",
+        "node_modules/tmp/logs/build.sh"
+      ],
+      "extra": [
+        "debug.log",
+        "node_modules/.hidden",
+        "out/.hidden"
+      ],
+      "file_acc": 0.782608695652174,
+      "error": null
+    },
+    {
+      "id": "dev-0117",
+      "pass": false,
+      "missing": [
+        "logs/foo/#notes.txt",
+        "logs/foo/a.txt",
+        "logs/foo/a/!important.txt",
+        "logs/foo/a/.gitignore",
+        "logs/foo/build.sh",
+        "logs/foo/f[1].txt",
+        "logs/foo/test/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.5333333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0118",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "a/README",
+        "data.json",
+        "foo"
+      ],
+      "file_acc": 0.6153846153846154,
+      "error": null
+    },
+    {
+      "id": "dev-0119",
+      "pass": false,
+      "missing": [
+        "test/Makefile"
+      ],
+      "extra": [
+        "src/x.o"
+      ],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0120",
+      "pass": false,
+      "missing": [
+        "test/debug.log"
+      ],
+      "extra": [
+        "build.sh"
+      ],
+      "file_acc": 0.8666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0121",
+      "pass": false,
+      "missing": [
+        "docs/debug.log"
+      ],
+      "extra": [
+        ".gitignore",
+        "f[1].txt",
+        "util.py"
+      ],
+      "file_acc": 0.4285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0122",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0123",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0124",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "a",
+        "debug.log",
+        "x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.6363636363636364,
+      "error": null
+    },
+    {
+      "id": "dev-0125",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0126",
+      "pass": false,
+      "missing": [
+        "out/logs/b.txt"
+      ],
+      "extra": [
+        "!important.txt",
+        "debug.log",
+        "f[1].txt",
+        "src/a.txt",
+        "src/foo",
+        "tmp/notes.md",
+        "tmp/x.c"
+      ],
+      "file_acc": 0.5294117647058824,
+      "error": null
+    },
+    {
+      "id": "dev-0127",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0128",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "test/b.txt"
+      ],
+      "file_acc": 0.9565217391304348,
+      "error": null
+    },
+    {
+      "id": "dev-0129",
+      "pass": false,
+      "missing": [
+        "lib/out/build/x.c"
+      ],
+      "extra": [
+        ".env",
+        ".gitignore",
+        ".hidden",
+        "b/#notes.txt",
+        "b/f[1].txt",
+        "err.log",
+        "foo",
+        "lib/#notes.txt",
+        "lib/out/.gitignore",
+        "lib/out/b.txt",
+        "lib/x.o"
+      ],
+      "file_acc": 0.5384615384615384,
+      "error": null
+    },
+    {
+      "id": "dev-0130",
+      "pass": false,
+      "missing": [
+        "test/docs/build/err.log",
+        "test/docs/data.json",
+        "test/docs/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0131",
+      "pass": false,
+      "missing": [
+        "a/.env",
+        "a/debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0132",
+      "pass": false,
+      "missing": [
+        "a/data.json",
+        "a/docs/Makefile",
+        "a/docs/a",
+        "a/docs/build.sh",
+        "a/docs/data.json",
+        "a/x.o",
+        "b/lib/.gitignore",
+        "b/lib/a/notes.md",
+        "b/lib/f[1].txt",
+        "b/lib/foo/README",
+        "b/lib/foo/main.py",
+        "node_modules/build.sh",
+        "node_modules/foo"
+      ],
+      "extra": [
+        "b/b.txt"
+      ],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0133",
+      "pass": false,
+      "missing": [
+        "build/src/.env",
+        "build/src/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0134",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0135",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "debug.log",
+        "node_modules/!important.txt",
+        "node_modules/.env",
+        "node_modules/src/build/!important.txt",
+        "node_modules/src/build/foo",
+        "node_modules/src/build/x.c",
+        "node_modules/src/foo",
+        "node_modules/src/test/.gitignore",
+        "node_modules/src/test/main.py",
+        "node_modules/src/test/x.o",
+        "node_modules/src/util.py",
+        "node_modules/tmp/Makefile",
+        "node_modules/tmp/a.txt",
+        "node_modules/tmp/foo",
+        "node_modules/tmp/lib/README",
+        "node_modules/tmp/lib/data.json",
+        "node_modules/tmp/lib/x.o",
+        "node_modules/tmp/main.py",
+        "node_modules/tmp/tmp/a.txt",
+        "node_modules/tmp/tmp/b.txt",
+        "x.o"
+      ],
+      "file_acc": 0.37142857142857144,
+      "error": null
+    },
+    {
+      "id": "dev-0136",
+      "pass": false,
+      "missing": [
+        "a/lib/.env",
+        "a/src/README",
+        "a/src/test/.env"
+      ],
+      "extra": [],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0137",
+      "pass": false,
+      "missing": [
+        "logs/b/!important.txt",
+        "logs/b/a.txt",
+        "logs/b/docs/main.py",
+        "logs/b/docs/notes.md",
+        "logs/x.o"
+      ],
+      "extra": [
+        "lib/debug.log"
+      ],
+      "file_acc": 0.4545454545454546,
+      "error": null
+    },
+    {
+      "id": "dev-0138",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0139",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "a/docs/data.json"
+      ],
+      "file_acc": 0.9411764705882353,
+      "error": null
+    },
+    {
+      "id": "dev-0140",
+      "pass": false,
+      "missing": [
+        "logs/#notes.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0141",
+      "pass": false,
+      "missing": [
+        "docs/out/.gitignore",
+        "docs/out/a/.env",
+        "tmp/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0142",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0143",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".env",
+        ".gitignore"
+      ],
+      "file_acc": 0.7857142857142857,
+      "error": null
+    },
+    {
+      "id": "dev-0144",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "build/logs/#notes.txt",
+        "build/logs/.gitignore",
+        "build/logs/x.o",
+        "debug.log"
+      ],
+      "file_acc": 0.8260869565217391,
+      "error": null
+    },
+    {
+      "id": "dev-0145",
+      "pass": false,
+      "missing": [
+        "b/tmp/src/f[1].txt",
+        "f[1].txt"
+      ],
+      "extra": [
+        "b/.gitignore",
+        "b/build.sh",
+        "b/err.log"
+      ],
+      "file_acc": 0.6875,
+      "error": null
+    },
+    {
+      "id": "dev-0146",
+      "pass": false,
+      "missing": [
+        "node_modules/logs/build/b.txt",
+        "node_modules/logs/build/x.o"
+      ],
+      "extra": [
+        ".gitignore",
+        "node_modules/logs/.gitignore",
+        "node_modules/logs/.hidden"
+      ],
+      "file_acc": 0.7619047619047619,
+      "error": null
+    },
+    {
+      "id": "dev-0147",
+      "pass": false,
+      "missing": [
+        "src/a/lib/.hidden"
+      ],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "src/.gitignore",
+        "src/b.txt",
+        "src/build.sh",
+        "src/notes.md"
+      ],
+      "file_acc": 0.5882352941176471,
+      "error": null
+    },
+    {
+      "id": "dev-0148",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0149",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0150",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "foo/lib/#notes.txt",
+        "foo/lib/build.sh",
+        "foo/lib/out/#notes.txt",
+        "foo/lib/out/a.txt",
+        "foo/lib/out/x.o",
+        "foo/lib/x.c",
+        "foo/lib/x.o",
+        "logs/!important.txt",
+        "logs/Makefile",
+        "logs/data.json",
+        "x.o"
+      ],
+      "file_acc": 0.25,
+      "error": null
+    },
+    {
+      "id": "dev-0151",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "src/debug.log"
+      ],
+      "file_acc": 0.9375,
+      "error": null
+    },
+    {
+      "id": "dev-0152",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0153",
+      "pass": false,
+      "missing": [
+        "build/logs/build.sh",
+        "build/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0154",
+      "pass": false,
+      "missing": [
+        "build/README",
+        "build/build.sh",
+        "build/build/#notes.txt",
+        "build/build/.gitignore",
+        "build/build/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.4444444444444444,
+      "error": null
+    },
+    {
+      "id": "dev-0155",
+      "pass": false,
+      "missing": [
+        "docs/out/b/#notes.txt",
+        "docs/out/b/Makefile",
+        "docs/out/b/a",
+        "docs/out/b/data.json",
+        "docs/out/util.py",
+        "docs/out/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.7,
+      "error": null
+    },
+    {
+      "id": "dev-0156",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0157",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0158",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "build.sh",
+        "err.log",
+        "foo/#notes.txt",
+        "foo/a/b.txt",
+        "foo/a/docs/.env",
+        "foo/a/docs/b.txt",
+        "foo/debug.log",
+        "foo/err.log",
+        "foo/lib/.hidden",
+        "foo/lib/src/.gitignore",
+        "foo/lib/x.c",
+        "foo/util.py"
+      ],
+      "file_acc": 0.125,
+      "error": null
+    },
+    {
+      "id": "dev-0159",
+      "pass": false,
+      "missing": [
+        "b/node_modules/tmp/.env",
+        "b/node_modules/tmp/.gitignore"
+      ],
+      "extra": [
+        "a"
+      ],
+      "file_acc": 0.88,
+      "error": null
+    },
+    {
+      "id": "dev-0160",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "err.log",
+        "foo"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0161",
+      "pass": false,
+      "missing": [
+        "test/b/docs/x.c",
+        "test/x.c"
+      ],
+      "extra": [
+        ".gitignore",
+        "a/.gitignore",
+        "a/README",
+        "a/f[1].txt",
+        "a/logs/#notes.txt",
+        "build.sh",
+        "debug.log",
+        "err.log",
+        "f[1].txt",
+        "node_modules/.gitignore",
+        "node_modules/err.log"
+      ],
+      "file_acc": 0.6486486486486487,
+      "error": null
+    },
+    {
+      "id": "dev-0162",
+      "pass": false,
+      "missing": [
+        "foo/.hidden"
+      ],
+      "extra": [
+        "build/a/docs/b.txt",
+        "build/build/b.txt"
+      ],
+      "file_acc": 0.8636363636363636,
+      "error": null
+    },
+    {
+      "id": "dev-0163",
+      "pass": false,
+      "missing": [
+        "src/!important.txt",
+        "src/#notes.txt",
+        "src/Makefile"
+      ],
+      "extra": [],
+      "file_acc": 0.625,
+      "error": null
+    },
+    {
+      "id": "dev-0164",
+      "pass": false,
+      "missing": [
+        "tmp/logs/a"
+      ],
+      "extra": [],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0165",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "foo/data.json",
+        "foo/debug.log",
+        "lib/.gitignore",
+        "lib/Makefile",
+        "lib/a",
+        "lib/build.sh"
+      ],
+      "file_acc": 0.5294117647058824,
+      "error": null
+    },
+    {
+      "id": "dev-0166",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "Makefile",
+        "err.log",
+        "f[1].txt",
+        "tmp/#notes.txt",
+        "tmp/b.txt",
+        "tmp/src/f[1].txt"
+      ],
+      "file_acc": 0.5789473684210527,
+      "error": null
+    },
+    {
+      "id": "dev-0167",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0168",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0169",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "Makefile",
+        "a.txt",
+        "util.py"
+      ],
+      "file_acc": 0.5555555555555556,
+      "error": null
+    },
+    {
+      "id": "dev-0170",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0171",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0172",
+      "pass": false,
+      "missing": [
+        "src/logs/!important.txt",
+        "src/logs/docs/!important.txt",
+        "src/logs/docs/README",
+        "src/logs/docs/debug.log",
+        "src/logs/docs/main.py",
+        "src/logs/f[1].txt",
+        "src/logs/main.py",
+        "src/logs/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0173",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "build.sh",
+        "main.py"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0174",
+      "pass": false,
+      "missing": [
+        "test/Makefile"
+      ],
+      "extra": [
+        "test/a/build/foo"
+      ],
+      "file_acc": 0.8461538461538461,
+      "error": null
+    },
+    {
+      "id": "dev-0175",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0176",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "x.o"
+      ],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0177",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "a/b/a",
+        "x.o"
+      ],
+      "file_acc": 0.9047619047619048,
+      "error": null
+    },
+    {
+      "id": "dev-0178",
+      "pass": false,
+      "missing": [
+        "logs/.env",
+        "logs/Makefile",
+        "logs/f[1].txt",
+        "logs/util.py",
+        "out/build.sh",
+        "out/data.json",
+        "out/debug.log",
+        "out/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.3846153846153846,
+      "error": null
+    },
+    {
+      "id": "dev-0179",
+      "pass": false,
+      "missing": [
+        "logs/#notes.txt",
+        "logs/tmp/.gitignore",
+        "logs/tmp/.hidden",
+        "logs/tmp/a",
+        "logs/tmp/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.5,
+      "error": null
+    },
+    {
+      "id": "dev-0180",
+      "pass": false,
+      "missing": [
+        "logs/data.json",
+        "logs/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0181",
+      "pass": false,
+      "missing": [
+        "f[1].txt",
+        "src/docs/f[1].txt"
+      ],
+      "extra": [
+        "src/docs/#notes.txt"
+      ],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0182",
+      "pass": false,
+      "missing": [
+        "build/x.c",
+        "docs/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0183",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0184",
+      "pass": false,
+      "missing": [
+        "foo/README"
+      ],
+      "extra": [],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0185",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0186",
+      "pass": false,
+      "missing": [
+        "util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.9545454545454546,
+      "error": null
+    },
+    {
+      "id": "dev-0187",
+      "pass": false,
+      "missing": [
+        "Makefile",
+        "build/x.o",
+        "logs/.env",
+        "logs/a/b/x.o",
+        "logs/a/lib/x.c",
+        "out/logs/src/.env",
+        "out/logs/src/Makefile",
+        "out/logs/src/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0188",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "build/.gitignore",
+        "build/.hidden",
+        "build/README",
+        "build/b.txt",
+        "build/data.json",
+        "f[1].txt",
+        "x.o"
+      ],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0189",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "a.txt",
+        "build/.gitignore",
+        "build/a",
+        "data.json",
+        "docs/Makefile",
+        "docs/a.txt",
+        "docs/node_modules/.env",
+        "docs/node_modules/build/!important.txt",
+        "docs/node_modules/build/debug.log",
+        "docs/node_modules/build/f[1].txt",
+        "docs/node_modules/build/main.py",
+        "docs/node_modules/f[1].txt",
+        "docs/node_modules/x.c",
+        "docs/notes.md"
+      ],
+      "file_acc": 0.19999999999999996,
+      "error": null
+    },
+    {
+      "id": "dev-0190",
+      "pass": false,
+      "missing": [
+        "#notes.txt",
+        "src/node_modules/tmp/#notes.txt",
+        "src/node_modules/tmp/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.8421052631578947,
+      "error": null
+    },
+    {
+      "id": "dev-0191",
+      "pass": false,
+      "missing": [
+        "node_modules/b/!important.txt",
+        "node_modules/b/a/!important.txt",
+        "node_modules/docs/main.py"
+      ],
+      "extra": [
+        "node_modules/docs/node_modules/Makefile"
+      ],
+      "file_acc": 0.8823529411764706,
+      "error": null
+    },
+    {
+      "id": "dev-0192",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0193",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0194",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "notes.md",
+        "util.py"
+      ],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0195",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "out/logs/!important.txt",
+        "out/x.o"
+      ],
+      "file_acc": 0.8181818181818181,
+      "error": null
+    },
+    {
+      "id": "dev-0196",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b.txt",
+        "data.json",
+        "test/.env",
+        "test/.gitignore",
+        "test/foo",
+        "test/main.py",
+        "tmp/#notes.txt",
+        "tmp/.hidden",
+        "tmp/node_modules/b.txt",
+        "tmp/notes.md"
+      ],
+      "file_acc": 0.5,
+      "error": null
+    },
+    {
+      "id": "dev-0197",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0198",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "debug.log",
+        "err.log"
+      ],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0199",
+      "pass": false,
+      "missing": [
+        "lib/build.sh"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0200",
+      "pass": false,
+      "missing": [
+        "build/#notes.txt",
+        "build/build/#notes.txt",
+        "build/build/node_modules/#notes.txt",
+        "build/build/node_modules/foo",
+        "build/f[1].txt",
+        "out/#notes.txt",
+        "out/b.txt",
+        "out/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0201",
+      "pass": false,
+      "missing": [
+        "build/lib/a.txt",
+        "build/lib/docs/.hidden",
+        "build/lib/docs/data.json",
+        "build/lib/foo",
+        "build/lib/x.c"
+      ],
+      "extra": [
+        "build/build.sh"
+      ],
+      "file_acc": 0.5714285714285714,
+      "error": null
+    },
+    {
+      "id": "dev-0202",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "foo",
+        "node_modules/foo",
+        "node_modules/src/#notes.txt",
+        "node_modules/src/.gitignore"
+      ],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0203",
+      "pass": false,
+      "missing": [
+        "build/lib/data.json"
+      ],
+      "extra": [
+        "build/a",
+        "debug.log"
+      ],
+      "file_acc": 0.7857142857142857,
+      "error": null
+    },
+    {
+      "id": "dev-0204",
+      "pass": false,
+      "missing": [
+        "lib/src/.gitignore",
+        "lib/src/.hidden",
+        "lib/src/node_modules/README",
+        "lib/src/node_modules/a"
+      ],
+      "extra": [
+        "lib/notes.md"
+      ],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0205",
+      "pass": false,
+      "missing": [
+        "a/node_modules/foo/a"
+      ],
+      "extra": [
+        "a.txt",
+        "a/node_modules/err.log",
+        "a/node_modules/util.py",
+        "node_modules/f[1].txt",
+        "node_modules/node_modules/!important.txt",
+        "node_modules/node_modules/#notes.txt",
+        "node_modules/node_modules/test/#notes.txt",
+        "node_modules/node_modules/test/f[1].txt"
+      ],
+      "file_acc": 0.625,
+      "error": null
+    },
+    {
+      "id": "dev-0206",
+      "pass": false,
+      "missing": [
+        "lib/.env"
+      ],
+      "extra": [
+        "foo",
+        "test/logs/out/foo"
+      ],
+      "file_acc": 0.8695652173913043,
+      "error": null
+    },
+    {
+      "id": "dev-0207",
+      "pass": false,
+      "missing": [
+        "out/logs/node_modules/.hidden"
+      ],
+      "extra": [
+        "node_modules/err.log"
+      ],
+      "file_acc": 0.9090909090909091,
+      "error": null
+    },
+    {
+      "id": "dev-0208",
+      "pass": false,
+      "missing": [
+        "out/.gitignore",
+        "out/data.json",
+        "out/x.c",
+        "out/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.5555555555555556,
+      "error": null
+    },
+    {
+      "id": "dev-0209",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "docs/a/debug.log",
+        "docs/lib/debug.log",
+        "docs/lib/notes.md",
+        "docs/notes.md"
+      ],
+      "file_acc": 0.8518518518518519,
+      "error": null
+    },
+    {
+      "id": "dev-0210",
+      "pass": false,
+      "missing": [
+        "node_modules/Makefile",
+        "node_modules/src/Makefile",
+        "src/Makefile"
+      ],
+      "extra": [],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0211",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0212",
+      "pass": false,
+      "missing": [
+        "logs/b/build/.hidden",
+        "logs/out/b.txt",
+        "logs/out/foo/util.py",
+        "logs/out/node_modules/.env",
+        "logs/out/node_modules/.hidden",
+        "logs/out/node_modules/foo"
+      ],
+      "extra": [
+        "logs/b/build/err.log"
+      ],
+      "file_acc": 0.631578947368421,
+      "error": null
+    },
+    {
+      "id": "dev-0213",
+      "pass": false,
+      "missing": [
+        "a/lib/b/.env",
+        "a/src/a/.gitignore",
+        "a/src/a/a.txt",
+        "a/src/node_modules/README",
+        "a/src/notes.md"
+      ],
+      "extra": [
+        "a/lib/f[1].txt"
+      ],
+      "file_acc": 0.7,
+      "error": null
+    },
+    {
+      "id": "dev-0214",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "b.txt",
+        "b/#notes.txt",
+        "b/a.txt",
+        "b/build.sh",
+        "b/x.o",
+        "build.sh",
+        "notes.md",
+        "tmp/Makefile",
+        "tmp/err.log",
+        "tmp/main.py",
+        "tmp/notes.md"
+      ],
+      "file_acc": 0.3157894736842105,
+      "error": null
+    },
+    {
+      "id": "dev-0215",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0216",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "foo/build/a/err.log"
+      ],
+      "file_acc": 0.9375,
+      "error": null
+    },
+    {
+      "id": "dev-0217",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0218",
+      "pass": false,
+      "missing": [
+        "out/src/!important.txt",
+        "out/src/a",
+        "out/src/x.c",
+        "test/src/build.sh",
+        "test/src/build/main.py",
+        "test/src/build/x.c",
+        "test/src/x.o"
+      ],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "a.txt",
+        "lib/.hidden",
+        "lib/foo/.gitignore",
+        "lib/foo/a.txt",
+        "out/foo"
+      ],
+      "file_acc": 0.5172413793103448,
+      "error": null
+    },
+    {
+      "id": "dev-0219",
+      "pass": false,
+      "missing": [
+        "b/build/f[1].txt",
+        "b/build/out/f[1].txt",
+        "b/build/test/#notes.txt",
+        "b/build/test/.hidden",
+        "b/build/test/main.py",
+        "b/build/test/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0220",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "b/test/out/.env"
+      ],
+      "file_acc": 0.85,
+      "error": null
+    },
+    {
+      "id": "dev-0221",
+      "pass": false,
+      "missing": [
+        "a/out/.gitignore",
+        "a/out/foo/f[1].txt",
+        "a/out/test/f[1].txt",
+        "b.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0222",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore"
+      ],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0223",
+      "pass": false,
+      "missing": [
+        "logs/lib/.gitignore"
+      ],
+      "extra": [
+        "build/debug.log"
+      ],
+      "file_acc": 0.8823529411764706,
+      "error": null
+    },
+    {
+      "id": "dev-0224",
+      "pass": false,
+      "missing": [
+        "lib/foo/tmp/a",
+        "lib/foo/tmp/data.json",
+        "lib/foo/tmp/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0225",
+      "pass": false,
+      "missing": [
+        "test/Makefile"
+      ],
+      "extra": [
+        ".gitignore",
+        "b/README",
+        "b/build.sh"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0226",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "build/out/b.txt",
+        "lib/b.txt",
+        "node_modules/node_modules/logs/b.txt"
+      ],
+      "file_acc": 0.8846153846153846,
+      "error": null
+    },
+    {
+      "id": "dev-0227",
+      "pass": false,
+      "missing": [
+        "b/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0228",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        "Makefile",
+        "foo"
+      ],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0229",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "!important.txt",
+        "#notes.txt",
+        ".gitignore",
+        "foo"
+      ],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0230",
+      "pass": false,
+      "missing": [
+        "a/test/.env",
+        "tmp/.env"
+      ],
+      "extra": [],
+      "file_acc": 0.8947368421052632,
+      "error": null
+    },
+    {
+      "id": "dev-0231",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "logs/b/debug.log",
+        "logs/b/test/err.log"
+      ],
+      "file_acc": 0.9310344827586207,
+      "error": null
+    },
+    {
+      "id": "dev-0232",
+      "pass": false,
+      "missing": [
+        "foo/.gitignore",
+        "foo/out/!important.txt",
+        "foo/out/.gitignore",
+        "foo/out/out/!important.txt",
+        "foo/out/out/err.log",
+        "foo/out/x.c",
+        "foo/x.c",
+        "out/foo/README",
+        "out/foo/test/!important.txt",
+        "out/foo/test/README",
+        "out/out/out/err.log"
+      ],
+      "extra": [],
+      "file_acc": 0.47619047619047616,
+      "error": null
+    },
+    {
+      "id": "dev-0233",
+      "pass": false,
+      "missing": [
+        "src/out/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.9615384615384616,
+      "error": null
+    },
+    {
+      "id": "dev-0234",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0235",
+      "pass": false,
+      "missing": [
+        "a/docs/build.sh",
+        "a/docs/build/debug.log",
+        "a/docs/build/x.c",
+        "a/docs/build/x.o",
+        "a/docs/f[1].txt",
+        "a/docs/out/!important.txt",
+        "a/docs/out/.gitignore",
+        "foo/foo/docs/.gitignore",
+        "foo/foo/docs/Makefile",
+        "foo/foo/docs/debug.log",
+        "foo/foo/tmp/main.py",
+        "foo/foo/tmp/x.o"
+      ],
+      "extra": [
+        "tmp/.env"
+      ],
+      "file_acc": 0.5517241379310345,
+      "error": null
+    },
+    {
+      "id": "dev-0236",
+      "pass": false,
+      "missing": [
+        "build/!important.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0237",
+      "pass": false,
+      "missing": [
+        "lib/data.json",
+        "lib/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0238",
+      "pass": false,
+      "missing": [
+        "build/a",
+        "build/foo",
+        "build/test/README",
+        "build/test/notes.md",
+        "build/test/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.6875,
+      "error": null
+    },
+    {
+      "id": "dev-0239",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "README",
+        "a",
+        "foo/debug.log",
+        "foo/util.py"
+      ],
+      "file_acc": 0.25,
+      "error": null
+    },
+    {
+      "id": "dev-0240",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "f[1].txt",
+        "out/!important.txt",
+        "out/b/test/.gitignore",
+        "out/b/test/a.txt",
+        "out/b/test/b.txt",
+        "out/b/test/f[1].txt",
+        "out/b/tmp/b.txt",
+        "src/!important.txt",
+        "src/.hidden",
+        "src/src/a.txt",
+        "src/src/x.o"
+      ],
+      "file_acc": 0.5862068965517242,
+      "error": null
+    },
+    {
+      "id": "dev-0241",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0242",
+      "pass": false,
+      "missing": [
+        "build/!important.txt",
+        "build/.env",
+        "build/Makefile",
+        "build/node_modules/#notes.txt",
+        "build/node_modules/Makefile",
+        "build/node_modules/b.txt",
+        "build/node_modules/build/.gitignore",
+        "build/node_modules/build/foo",
+        "build/node_modules/foo/Makefile",
+        "build/node_modules/foo/util.py",
+        "build/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.15384615384615385,
+      "error": null
+    },
+    {
+      "id": "dev-0243",
+      "pass": false,
+      "missing": [
+        "node_modules/out/foo/data.json",
+        "node_modules/out/foo/x.o"
+      ],
+      "extra": [
+        "node_modules/out/Makefile"
+      ],
+      "file_acc": 0.8125,
+      "error": null
+    },
+    {
+      "id": "dev-0244",
+      "pass": false,
+      "missing": [
+        "src/README",
+        "src/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0245",
+      "pass": false,
+      "missing": [
+        "b/err.log"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0246",
+      "pass": false,
+      "missing": [
+        "docs/build/.gitignore",
+        "docs/build/Makefile"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0247",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0248",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0249",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "data.json",
+        "out/build.sh",
+        "out/notes.md",
+        "out/util.py",
+        "out/x.c"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0250",
+      "pass": false,
+      "missing": [
+        "a/.env",
+        "a/.gitignore",
+        "a/foo",
+        "a/lib/build/#notes.txt",
+        "a/lib/build/a.txt",
+        "a/lib/build/x.c",
+        "a/lib/build/x.o",
+        "b/b.txt",
+        "b/x.c",
+        "docs/b/.env",
+        "docs/b/Makefile"
+      ],
+      "extra": [
+        "build.sh",
+        "docs/build/build.sh"
+      ],
+      "file_acc": 0.45833333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0251",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "foo/out/build/main.py"
+      ],
+      "file_acc": 0.9411764705882353,
+      "error": null
+    },
+    {
+      "id": "dev-0252",
+      "pass": false,
+      "missing": [
+        "tmp/!important.txt",
+        "tmp/Makefile",
+        "tmp/b/.gitignore",
+        "tmp/b/.hidden",
+        "tmp/b/debug.log",
+        "tmp/b/logs/f[1].txt"
+      ],
+      "extra": [
+        "util.py"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0253",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "logs/lib/logs/foo",
+        "logs/out/.hidden",
+        "logs/out/a/.gitignore",
+        "logs/out/a/a",
+        "logs/out/foo",
+        "logs/out/out/a",
+        "src/.env",
+        "src/.gitignore"
+      ],
+      "file_acc": 0.6875,
+      "error": null
+    },
+    {
+      "id": "dev-0254",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b.txt",
+        "build/data.json",
+        "build/notes.md",
+        "build/x.o",
+        "debug.log",
+        "foo/!important.txt",
+        "foo/.env",
+        "foo/Makefile",
+        "foo/build.sh"
+      ],
+      "file_acc": 0.375,
+      "error": null
+    },
+    {
+      "id": "dev-0255",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "a.txt",
+        "docs/#notes.txt",
+        "docs/build.sh",
+        "docs/data.json",
+        "docs/util.py",
+        "main.py",
+        "test/data.json"
+      ],
+      "file_acc": 0.4,
+      "error": null
+    },
+    {
+      "id": "dev-0256",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "src/.env",
+        "src/.hidden",
+        "src/Makefile",
+        "src/err.log",
+        "src/logs/a",
+        "src/logs/b.txt",
+        "src/logs/data.json",
+        "src/logs/f[1].txt",
+        "src/test/a",
+        "src/test/f[1].txt",
+        "x.o"
+      ],
+      "file_acc": 0.4347826086956522,
+      "error": null
+    },
+    {
+      "id": "dev-0257",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "a.txt",
+        "b/.gitignore",
+        "b/docs/!important.txt",
+        "b/docs/b.txt",
+        "b/lib/docs/b.txt",
+        "b/lib/f[1].txt",
+        "b/lib/main.py",
+        "b/lib/notes.md",
+        "b/lib/src/.env",
+        "b/lib/x.c",
+        "out/.env",
+        "out/.gitignore",
+        "out/docs/README",
+        "out/docs/b.txt",
+        "out/docs/b/.env",
+        "out/docs/f[1].txt",
+        "out/docs/foo/!important.txt",
+        "out/docs/foo/.gitignore",
+        "out/docs/foo/Makefile",
+        "out/docs/util.py",
+        "out/util.py",
+        "util.py",
+        "x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.1428571428571429,
+      "error": null
+    },
+    {
+      "id": "dev-0258",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "README",
+        "docs/.gitignore"
+      ],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0259",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "Makefile",
+        "docs/a.txt",
+        "docs/b.txt",
+        "docs/util.py",
+        "err.log",
+        "foo/build.sh",
+        "foo/build/.gitignore",
+        "foo/build/a",
+        "foo/build/util.py"
+      ],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0260",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0261",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "logs/out/x.o"
+      ],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0262",
+      "pass": false,
+      "missing": [
+        "a/README",
+        "a/docs/build/debug.log"
+      ],
+      "extra": [
+        "a/tmp/b.txt",
+        "a/tmp/src/b.txt",
+        "docs/.hidden"
+      ],
+      "file_acc": 0.782608695652174,
+      "error": null
+    },
+    {
+      "id": "dev-0263",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0264",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "out/.hidden",
+        "out/build.sh",
+        "out/debug.log",
+        "out/src/Makefile",
+        "out/src/err.log",
+        "out/src/f[1].txt"
+      ],
+      "file_acc": 0.625,
+      "error": null
+    },
+    {
+      "id": "dev-0265",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0266",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "docs/!important.txt",
+        "tmp/Makefile"
+      ],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0267",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "README",
+        "a",
+        "build/err.log",
+        "build/foo",
+        "build/logs/!important.txt",
+        "build/logs/data.json",
+        "build/logs/tmp/.gitignore",
+        "node_modules/.gitignore",
+        "node_modules/b.txt",
+        "node_modules/build.sh",
+        "node_modules/debug.log",
+        "node_modules/x.c",
+        "x.c"
+      ],
+      "file_acc": 0.5,
+      "error": null
+    },
+    {
+      "id": "dev-0268",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "main.py",
+        "node_modules/b.txt",
+        "node_modules/f[1].txt",
+        "node_modules/tmp/.gitignore",
+        "node_modules/tmp/a.txt"
+      ],
+      "file_acc": 0.41666666666666663,
+      "error": null
+    },
+    {
+      "id": "dev-0269",
+      "pass": false,
+      "missing": [
+        "foo/.gitignore",
+        "foo/Makefile",
+        "foo/b/README",
+        "foo/foo",
+        "foo/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.6428571428571428,
+      "error": null
+    },
+    {
+      "id": "dev-0270",
+      "pass": false,
+      "missing": [
+        "lib/data.json",
+        "lib/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0271",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "debug.log",
+        "lib/.env",
+        "out/err.log"
+      ],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0272",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "data.json",
+        "main.py"
+      ],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0273",
+      "pass": false,
+      "missing": [
+        "test/node_modules/.gitignore",
+        "test/node_modules/b.txt",
+        "test/node_modules/foo",
+        "test/node_modules/lib/a.txt",
+        "test/node_modules/lib/foo",
+        "test/node_modules/out/foo"
+      ],
+      "extra": [
+        "err.log"
+      ],
+      "file_acc": 0.5333333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0274",
+      "pass": false,
+      "missing": [
+        "a/test/debug.log",
+        "docs/build/README"
+      ],
+      "extra": [
+        "docs/b/x.o"
+      ],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0275",
+      "pass": false,
+      "missing": [
+        "build/.hidden",
+        "build/Makefile",
+        "build/b/build.sh",
+        "build/b/test/debug.log",
+        "build/build/!important.txt",
+        "build/build/Makefile",
+        "build/build/debug.log",
+        "build/data.json"
+      ],
+      "extra": [],
+      "file_acc": 0.4666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0276",
+      "pass": false,
+      "missing": [
+        "logs/test/lib/debug.log"
+      ],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "foo/a.txt",
+        "foo/b.txt",
+        "foo/build/README",
+        "foo/build/f[1].txt",
+        "foo/src/.env",
+        "foo/src/a/.gitignore",
+        "foo/src/a/README",
+        "foo/src/a/main.py",
+        "foo/util.py",
+        "logs/#notes.txt",
+        "logs/Makefile",
+        "logs/README",
+        "logs/x.c",
+        "out/data.json",
+        "out/f[1].txt",
+        "out/foo"
+      ],
+      "file_acc": 0.24,
+      "error": null
+    },
+    {
+      "id": "dev-0277",
+      "pass": false,
+      "missing": [
+        "out/foo",
+        "out/main.py",
+        "out/src/#notes.txt",
+        "out/src/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0278",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "Makefile",
+        "data.json",
+        "lib/a.txt",
+        "lib/test/notes.md",
+        "notes.md"
+      ],
+      "file_acc": 0.5384615384615384,
+      "error": null
+    },
+    {
+      "id": "dev-0279",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "foo/!important.txt",
+        "foo/x.c",
+        "x.o"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0280",
+      "pass": false,
+      "missing": [
+        "logs/#notes.txt",
+        "logs/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0281",
+      "pass": false,
+      "missing": [
+        "foo/#notes.txt",
+        "foo/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0282",
+      "pass": false,
+      "missing": [
+        "node_modules/out/!important.txt",
+        "node_modules/out/README",
+        "node_modules/out/f[1].txt",
+        "node_modules/out/tmp/a.txt",
+        "node_modules/out/tmp/err.log",
+        "node_modules/out/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.76,
+      "error": null
+    },
+    {
+      "id": "dev-0283",
+      "pass": false,
+      "missing": [
+        "build/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0284",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "test/README"
+      ],
+      "file_acc": 0.9090909090909091,
+      "error": null
+    },
+    {
+      "id": "dev-0285",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "!important.txt",
+        ".gitignore",
+        "a",
+        "b/.gitignore",
+        "docs/a.txt",
+        "docs/b/.gitignore",
+        "docs/b/b.txt",
+        "docs/b/f[1].txt",
+        "docs/b/notes.md",
+        "docs/util.py",
+        "err.log"
+      ],
+      "file_acc": 0.42105263157894735,
+      "error": null
+    },
+    {
+      "id": "dev-0286",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0287",
+      "pass": false,
+      "missing": [
+        "lib/Makefile",
+        "lib/data.json"
+      ],
+      "extra": [],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0288",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0289",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0290",
+      "pass": false,
+      "missing": [
+        "foo/a/docs/.env"
+      ],
+      "extra": [
+        ".gitignore",
+        "a",
+        "foo/#notes.txt",
+        "foo/.gitignore",
+        "foo/a.txt",
+        "foo/b.txt",
+        "node_modules/f[1].txt"
+      ],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0291",
+      "pass": false,
+      "missing": [
+        "src/.hidden",
+        "src/Makefile",
+        "src/lib/.hidden",
+        "src/lib/README",
+        "src/lib/logs/!important.txt",
+        "src/lib/logs/f[1].txt",
+        "src/lib/logs/util.py",
+        "tmp/b/build/.gitignore"
+      ],
+      "extra": [
+        "b/build.sh",
+        "tmp/b/b.txt"
+      ],
+      "file_acc": 0.6875,
+      "error": null
+    },
+    {
+      "id": "dev-0292",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0293",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "err.log"
+      ],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0294",
+      "pass": false,
+      "missing": [
+        "b/out/tmp/notes.md",
+        "tmp/#notes.txt",
+        "tmp/a.txt",
+        "tmp/notes.md",
+        "tmp/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.7727272727272727,
+      "error": null
+    },
+    {
+      "id": "dev-0295",
+      "pass": false,
+      "missing": [
+        ".gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0296",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0297",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "foo/Makefile",
+        "main.py"
+      ],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0298",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0299",
+      "pass": false,
+      "missing": [
+        "docs/logs/tmp/a",
+        "docs/logs/tmp/b.txt",
+        "test/test/#notes.txt"
+      ],
+      "extra": [
+        "build/foo"
+      ],
+      "file_acc": 0.8260869565217391,
+      "error": null
+    },
+    {
+      "id": "dev-0300",
+      "pass": false,
+      "missing": [
+        "out/.env",
+        "out/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0301",
+      "pass": false,
+      "missing": [
+        "logs/#notes.txt",
+        "logs/docs/a/#notes.txt"
+      ],
+      "extra": [
+        "logs/docs/out/debug.log"
+      ],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0302",
+      "pass": false,
+      "missing": [
+        "tmp/build/Makefile",
+        "tmp/build/node_modules/Makefile"
+      ],
+      "extra": [],
+      "file_acc": 0.9393939393939394,
+      "error": null
+    },
+    {
+      "id": "dev-0303",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "debug.log",
+        "docs/util.py",
+        "test/.gitignore",
+        "test/main.py"
+      ],
+      "file_acc": 0.4545454545454546,
+      "error": null
+    },
+    {
+      "id": "dev-0304",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0305",
+      "pass": false,
+      "missing": [
+        "docs/src/docs/debug.log",
+        "test/foo/a",
+        "test/foo/b/!important.txt",
+        "test/foo/b/README",
+        "test/foo/b/main.py",
+        "test/foo/debug.log",
+        "test/foo/main.py",
+        "test/foo/test/data.json",
+        "test/foo/test/debug.log",
+        "test/foo/test/foo",
+        "test/foo/x.o"
+      ],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "docs/src/.env",
+        "docs/src/.hidden"
+      ],
+      "file_acc": 0.5161290322580645,
+      "error": null
+    },
+    {
+      "id": "dev-0306",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0307",
+      "pass": false,
+      "missing": [
+        "docs/.env",
+        "docs/debug.log",
+        "docs/f[1].txt",
+        "docs/foo",
+        "docs/logs/.gitignore",
+        "docs/tmp/!important.txt",
+        "docs/tmp/.env",
+        "docs/tmp/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0308",
+      "pass": false,
+      "missing": [
+        "lib/logs/x.c",
+        "lib/tmp/x.o",
+        "lib/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.85,
+      "error": null
+    },
+    {
+      "id": "dev-0309",
+      "pass": false,
+      "missing": [
+        "tmp/build/foo/main.py",
+        "tmp/build/logs/main.py"
+      ],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "b/!important.txt",
+        "b/b/.hidden",
+        "b/b/data.json",
+        "b/b/foo",
+        "b/docs/#notes.txt",
+        "b/docs/a",
+        "b/docs/foo",
+        "b/docs/out/!important.txt",
+        "b/docs/out/build.sh",
+        "b/docs/out/debug.log",
+        "f[1].txt",
+        "notes.md",
+        "tmp/!important.txt",
+        "tmp/debug.log",
+        "tmp/test/debug.log",
+        "tmp/test/err.log",
+        "tmp/test/foo",
+        "tmp/util.py"
+      ],
+      "file_acc": 0.3529411764705882,
+      "error": null
+    },
+    {
+      "id": "dev-0310",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "build.sh",
+        "test/Makefile"
+      ],
+      "file_acc": 0.8421052631578947,
+      "error": null
+    },
+    {
+      "id": "dev-0311",
+      "pass": false,
+      "missing": [
+        "build/a/build.sh",
+        "build/err.log"
+      ],
+      "extra": [],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0312",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0313",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0314",
+      "pass": false,
+      "missing": [
+        "tmp/lib/err.log",
+        "tmp/node_modules/data.json",
+        "tmp/node_modules/util.py",
+        "tmp/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.6923076923076923,
+      "error": null
+    },
+    {
+      "id": "dev-0315",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0316",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "build/docs/Makefile",
+        "build/docs/foo",
+        "build/docs/node_modules/README",
+        "build/foo",
+        "foo",
+        "lib/a",
+        "lib/a.txt",
+        "lib/data.json",
+        "lib/foo/Makefile",
+        "lib/foo/logs/README",
+        "lib/foo/logs/b.txt",
+        "lib/foo/util.py",
+        "x.c"
+      ],
+      "file_acc": 0.31818181818181823,
+      "error": null
+    },
+    {
+      "id": "dev-0317",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0318",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/x.o"
+      ],
+      "file_acc": 0.9473684210526316,
+      "error": null
+    },
+    {
+      "id": "dev-0319",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a/Makefile",
+        "a/foo",
+        "b/.hidden",
+        "b/Makefile",
+        "node_modules/data.json",
+        "node_modules/debug.log"
+      ],
+      "file_acc": 0.5882352941176471,
+      "error": null
+    },
+    {
+      "id": "dev-0320",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "logs/#notes.txt",
+        "logs/a",
+        "logs/out/f[1].txt",
+        "logs/out/node_modules/README",
+        "logs/out/node_modules/a.txt",
+        "logs/out/node_modules/util.py",
+        "main.py",
+        "x.c",
+        "x.o"
+      ],
+      "file_acc": 0.5652173913043479,
+      "error": null
+    },
+    {
+      "id": "dev-0321",
+      "pass": false,
+      "missing": [
+        "src/node_modules/#notes.txt",
+        "src/node_modules/foo/debug.log",
+        "src/node_modules/foo/main.py",
+        "src/node_modules/foo/x.c",
+        "src/node_modules/test/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0322",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "build/f[1].txt",
+        "build/main.py",
+        "err.log",
+        "out/!important.txt",
+        "out/err.log",
+        "out/f[1].txt",
+        "out/tmp/.gitignore",
+        "out/tmp/Makefile",
+        "out/tmp/a/a",
+        "out/util.py",
+        "util.py",
+        "x.o"
+      ],
+      "file_acc": 0.30000000000000004,
+      "error": null
+    },
+    {
+      "id": "dev-0323",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0324",
+      "pass": false,
+      "missing": [
+        "test/README",
+        "test/a",
+        "test/b/#notes.txt",
+        "test/b/.env",
+        "test/b/a",
+        "test/b/f[1].txt",
+        "test/util.py",
+        "test/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.5,
+      "error": null
+    },
+    {
+      "id": "dev-0325",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0326",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "data.json",
+        "main.py",
+        "test/!important.txt",
+        "test/.env",
+        "test/README",
+        "test/a/!important.txt",
+        "test/a/README",
+        "test/a/f[1].txt"
+      ],
+      "file_acc": 0.2857142857142857,
+      "error": null
+    },
+    {
+      "id": "dev-0327",
+      "pass": false,
+      "missing": [
+        "test/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0328",
+      "pass": false,
+      "missing": [
+        "foo/README",
+        "foo/x.c"
+      ],
+      "extra": [
+        ".gitignore"
+      ],
+      "file_acc": 0.8636363636363636,
+      "error": null
+    },
+    {
+      "id": "dev-0329",
+      "pass": false,
+      "missing": [
+        "a/data.json"
+      ],
+      "extra": [],
+      "file_acc": 0.9090909090909091,
+      "error": null
+    },
+    {
+      "id": "dev-0330",
+      "pass": false,
+      "missing": [
+        "test/logs/a",
+        "test/node_modules/README",
+        "test/node_modules/a"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0331",
+      "pass": false,
+      "missing": [
+        "node_modules/src/src/build.sh"
+      ],
+      "extra": [
+        "a.txt",
+        "docs/a.txt",
+        "docs/b/#notes.txt",
+        "docs/b/test/f[1].txt"
+      ],
+      "file_acc": 0.782608695652174,
+      "error": null
+    },
+    {
+      "id": "dev-0332",
+      "pass": false,
+      "missing": [
+        "lib/node_modules/lib/!important.txt",
+        "lib/node_modules/lib/Makefile",
+        "lib/node_modules/lib/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0333",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0334",
+      "pass": false,
+      "missing": [
+        "build/build.sh"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0335",
+      "pass": false,
+      "missing": [
+        "b/.hidden",
+        "b/build.sh",
+        "b/util.py",
+        "b/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.5555555555555556,
+      "error": null
+    },
+    {
+      "id": "dev-0336",
+      "pass": false,
+      "missing": [
+        "logs/b.txt",
+        "logs/tmp/a.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0337",
+      "pass": false,
+      "missing": [
+        "src/b/lib/#notes.txt"
+      ],
+      "extra": [
+        "src/b/lib/err.log",
+        "src/b/lib/notes.md"
+      ],
+      "file_acc": 0.8695652173913043,
+      "error": null
+    },
+    {
+      "id": "dev-0338",
+      "pass": false,
+      "missing": [
+        "lib/!important.txt",
+        "lib/node_modules/.gitignore",
+        "lib/node_modules/Makefile",
+        "lib/node_modules/b.txt",
+        "lib/node_modules/data.json",
+        "lib/node_modules/lib/.env",
+        "lib/node_modules/lib/a.txt",
+        "lib/node_modules/notes.md",
+        "lib/node_modules/src/err.log",
+        "lib/node_modules/src/notes.md",
+        "lib/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.42105263157894735,
+      "error": null
+    },
+    {
+      "id": "dev-0339",
+      "pass": false,
+      "missing": [
+        "lib/logs/docs/f[1].txt"
+      ],
+      "extra": [
+        "lib/logs/docs/notes.md",
+        "lib/logs/docs/x.o",
+        "x.o"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0340",
+      "pass": false,
+      "missing": [
+        "foo/#notes.txt",
+        "lib/#notes.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0341",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0342",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0343",
+      "pass": false,
+      "missing": [
+        "build/main.py",
+        "tmp/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0344",
+      "pass": false,
+      "missing": [
+        "node_modules/README",
+        "node_modules/a.txt",
+        "node_modules/foo/docs/#notes.txt",
+        "node_modules/foo/docs/Makefile",
+        "node_modules/foo/main.py",
+        "node_modules/foo/notes.md",
+        "node_modules/foo/util.py",
+        "node_modules/foo/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.5294117647058824,
+      "error": null
+    },
+    {
+      "id": "dev-0345",
+      "pass": false,
+      "missing": [
+        "node_modules/build/.hidden",
+        "node_modules/docs/.env",
+        "node_modules/docs/logs/.gitignore"
+      ],
+      "extra": [
+        "Makefile"
+      ],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0346",
+      "pass": false,
+      "missing": [
+        "build/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.9473684210526316,
+      "error": null
+    },
+    {
+      "id": "dev-0347",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0348",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "b.txt",
+        "f[1].txt",
+        "logs/#notes.txt",
+        "logs/b.txt",
+        "logs/main.py",
+        "out/!important.txt",
+        "out/test/README"
+      ],
+      "file_acc": 0.4,
+      "error": null
+    },
+    {
+      "id": "dev-0349",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "!important.txt",
+        ".gitignore",
+        "f[1].txt",
+        "foo",
+        "notes.md",
+        "test/!important.txt",
+        "test/.gitignore",
+        "test/README"
+      ],
+      "file_acc": 0.4285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0350",
+      "pass": false,
+      "missing": [
+        "out/a/tmp/a",
+        "out/a/tmp/debug.log"
+      ],
+      "extra": [
+        "f[1].txt",
+        "out/#notes.txt"
+      ],
+      "file_acc": 0.7647058823529411,
+      "error": null
+    },
+    {
+      "id": "dev-0351",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "foo/docs/lib/util.py",
+        "util.py"
+      ],
+      "file_acc": 0.9259259259259259,
+      "error": null
+    },
+    {
+      "id": "dev-0352",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "a",
+        "build/notes.md",
+        "docs/.gitignore",
+        "docs/a.txt",
+        "docs/x.c",
+        "node_modules/#notes.txt",
+        "node_modules/.gitignore",
+        "node_modules/.hidden",
+        "node_modules/data.json",
+        "node_modules/x.o"
+      ],
+      "file_acc": 0.5,
+      "error": null
+    },
+    {
+      "id": "dev-0353",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "foo/.gitignore",
+        "foo/debug.log"
+      ],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0354",
+      "pass": false,
+      "missing": [
+        "node_modules/.env"
+      ],
+      "extra": [
+        ".gitignore",
+        "a/Makefile",
+        "a/debug.log",
+        "a/test/#notes.txt",
+        "a/test/a/.hidden",
+        "a/test/a/Makefile",
+        "a/test/a/build.sh",
+        "a/test/a/err.log",
+        "a/test/b.txt",
+        "a/test/debug.log",
+        "f[1].txt",
+        "foo"
+      ],
+      "file_acc": 0.38095238095238093,
+      "error": null
+    },
+    {
+      "id": "dev-0355",
+      "pass": false,
+      "missing": [
+        "docs/foo/README"
+      ],
+      "extra": [
+        "!important.txt",
+        ".gitignore",
+        "lib/.gitignore",
+        "lib/main.py",
+        "lib/node_modules/.gitignore",
+        "lib/node_modules/foo"
+      ],
+      "file_acc": 0.7307692307692308,
+      "error": null
+    },
+    {
+      "id": "dev-0356",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0357",
+      "pass": false,
+      "missing": [
+        "build/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0358",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0359",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "#notes.txt",
+        ".gitignore",
+        "build/build/util.py",
+        "build/lib/#notes.txt",
+        "build/lib/data.json",
+        "build/lib/debug.log",
+        "build/util.py",
+        "build/x.o",
+        "main.py",
+        "tmp/.gitignore",
+        "tmp/Makefile",
+        "tmp/README"
+      ],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0360",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0361",
+      "pass": false,
+      "missing": [
+        "src/b/b.txt",
+        "src/b/err.log",
+        "src/b/foo",
+        "src/b/out/build.sh",
+        "src/b/out/err.log",
+        "src/b/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.6470588235294117,
+      "error": null
+    },
+    {
+      "id": "dev-0362",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0363",
+      "pass": false,
+      "missing": [
+        "a/out/lib/x.c",
+        "a/out/src/util.py",
+        "a/src/!important.txt",
+        "a/src/.hidden",
+        "lib/!important.txt",
+        "lib/test/node_modules/.env",
+        "lib/test/node_modules/.gitignore",
+        "lib/test/node_modules/Makefile"
+      ],
+      "extra": [
+        "a/out/src/a.txt"
+      ],
+      "file_acc": 0.64,
+      "error": null
+    },
+    {
+      "id": "dev-0364",
+      "pass": false,
+      "missing": [
+        "src/build/docs/a.txt",
+        "src/build/docs/data.json"
+      ],
+      "extra": [
+        "build/b.txt",
+        "build/node_modules/b.txt",
+        "node_modules/a/x.o",
+        "node_modules/x.o"
+      ],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0365",
+      "pass": false,
+      "missing": [
+        "logs/test/lib/#notes.txt",
+        "logs/test/out/README",
+        "logs/test/out/build.sh",
+        "logs/test/out/f[1].txt",
+        "logs/test/out/x.o"
+      ],
+      "extra": [
+        ".gitignore",
+        "test/.env",
+        "test/.gitignore",
+        "tmp/src/a/#notes.txt"
+      ],
+      "file_acc": 0.5909090909090908,
+      "error": null
+    },
+    {
+      "id": "dev-0366",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0367",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "f[1].txt",
+        "foo/.env",
+        "foo/.gitignore",
+        "foo/b.txt",
+        "foo/b/b.txt",
+        "foo/b/logs/build.sh",
+        "foo/b/notes.md",
+        "foo/b/util.py",
+        "foo/b/x.o",
+        "foo/test/a.txt",
+        "foo/test/out/#notes.txt",
+        "foo/test/out/.gitignore",
+        "foo/test/out/README",
+        "foo/test/out/build.sh",
+        "foo/test/out/x.o",
+        "foo/test/src/util.py",
+        "main.py",
+        "util.py"
+      ],
+      "file_acc": 0.23076923076923073,
+      "error": null
+    },
+    {
+      "id": "dev-0368",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b/a",
+        "main.py"
+      ],
+      "file_acc": 0.85,
+      "error": null
+    },
+    {
+      "id": "dev-0369",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "main.py",
+        "util.py"
+      ],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "dev-0370",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/a.txt",
+        "docs/node_modules/lib/a.txt"
+      ],
+      "file_acc": 0.8947368421052632,
+      "error": null
+    },
+    {
+      "id": "dev-0371",
+      "pass": false,
+      "missing": [
+        ".env",
+        "test/Makefile",
+        "test/a.txt",
+        "test/main.py",
+        "test/x.o"
+      ],
+      "extra": [
+        "foo"
+      ],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0372",
+      "pass": false,
+      "missing": [
+        "docs/#notes.txt",
+        "docs/README",
+        "docs/f[1].txt",
+        "docs/main.py",
+        "lib/b/f[1].txt",
+        "lib/b/notes.md",
+        "lib/b/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.46153846153846156,
+      "error": null
+    },
+    {
+      "id": "dev-0373",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0374",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0375",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".hidden"
+      ],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0376",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0377",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0378",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0379",
+      "pass": false,
+      "missing": [
+        "logs/b.txt",
+        "logs/foo/.gitignore",
+        "logs/foo/build/debug.log",
+        "logs/foo/build/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0380",
+      "pass": false,
+      "missing": [
+        "a/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.9473684210526316,
+      "error": null
+    },
+    {
+      "id": "dev-0381",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "!important.txt",
+        ".gitignore",
+        "a",
+        "a.txt",
+        "node_modules/#notes.txt",
+        "node_modules/.gitignore",
+        "node_modules/foo"
+      ],
+      "file_acc": 0.6111111111111112,
+      "error": null
+    },
+    {
+      "id": "dev-0382",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "docs/out/util.py",
+        "tmp/tmp/node_modules/util.py"
+      ],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0383",
+      "pass": false,
+      "missing": [
+        ".env",
+        "build/.env",
+        "build/foo",
+        "build/tmp/docs/err.log",
+        "build/tmp/f[1].txt",
+        "docs/#notes.txt",
+        "docs/.gitignore",
+        "docs/a",
+        "docs/x.c",
+        "foo",
+        "logs/.gitignore",
+        "logs/a",
+        "logs/b.txt",
+        "logs/docs/README",
+        "logs/docs/foo",
+        "logs/docs/util.py",
+        "logs/out/.gitignore",
+        "logs/out/.hidden",
+        "logs/out/README",
+        "logs/out/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.3548387096774194,
+      "error": null
+    },
+    {
+      "id": "dev-0384",
+      "pass": false,
+      "missing": [
+        "lib/README"
+      ],
+      "extra": [],
+      "file_acc": 0.95,
+      "error": null
+    },
+    {
+      "id": "dev-0385",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0386",
+      "pass": false,
+      "missing": [
+        "a/.gitignore",
+        "a/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0387",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0388",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0389",
+      "pass": false,
+      "missing": [
+        "docs/lib/Makefile",
+        "docs/lib/a.txt"
+      ],
+      "extra": [
+        "README",
+        "docs/README"
+      ],
+      "file_acc": 0.7894736842105263,
+      "error": null
+    },
+    {
+      "id": "dev-0390",
+      "pass": false,
+      "missing": [
+        "logs/test/node_modules/x.c"
+      ],
+      "extra": [
+        "notes.md",
+        "src/notes.md"
+      ],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0391",
+      "pass": false,
+      "missing": [
+        "node_modules/foo/data.json",
+        "node_modules/foo/src/#notes.txt",
+        "node_modules/foo/src/err.log",
+        "node_modules/foo/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0392",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0393",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0394",
+      "pass": false,
+      "missing": [
+        "build/b/lib/f[1].txt",
+        "docs/build/build/util.py"
+      ],
+      "extra": [
+        "build/!important.txt",
+        "data.json",
+        "docs/.hidden",
+        "docs/build/!important.txt",
+        "docs/build/.hidden",
+        "docs/build/build/data.json",
+        "logs/node_modules/!important.txt",
+        "logs/out/!important.txt",
+        "logs/out/data.json"
+      ],
+      "file_acc": 0.7441860465116279,
+      "error": null
+    },
+    {
+      "id": "dev-0395",
+      "pass": false,
+      "missing": [
+        "a/b/!important.txt",
+        "a/b/.hidden",
+        "a/b/err.log",
+        "a/logs/.env",
+        "a/logs/notes.md",
+        "a/logs/out/.gitignore",
+        "a/logs/out/build.sh",
+        "a/logs/out/err.log",
+        "a/logs/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.5263157894736843,
+      "error": null
+    },
+    {
+      "id": "dev-0396",
+      "pass": false,
+      "missing": [
+        "node_modules/a/a.txt",
+        "node_modules/a/debug.log",
+        "node_modules/node_modules/!important.txt",
+        "node_modules/node_modules/.gitignore",
+        "node_modules/node_modules/a",
+        "node_modules/node_modules/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.5714285714285714,
+      "error": null
+    },
+    {
+      "id": "dev-0397",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "src/logs/docs/!important.txt"
+      ],
+      "file_acc": 0.96,
+      "error": null
+    },
+    {
+      "id": "dev-0398",
+      "pass": false,
+      "missing": [
+        "docs/b/.gitignore",
+        "docs/b/Makefile",
+        "docs/b/src/debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0399",
+      "pass": false,
+      "missing": [
+        "logs/foo/#notes.txt",
+        "out/b/foo/.gitignore",
+        "out/b/foo/README",
+        "out/b/foo/util.py"
+      ],
+      "extra": [
+        "out/Makefile",
+        "out/foo"
+      ],
+      "file_acc": 0.7857142857142857,
+      "error": null
+    },
+    {
+      "id": "dev-0400",
+      "pass": false,
+      "missing": [
+        "build/#notes.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0401",
+      "pass": false,
+      "missing": [
+        "out/b/a/x.o"
+      ],
+      "extra": [
+        ".gitignore",
+        "out/.gitignore",
+        "out/b/.gitignore",
+        "out/b/a/.env"
+      ],
+      "file_acc": 0.7916666666666666,
+      "error": null
+    },
+    {
+      "id": "dev-0402",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "docs/out/.gitignore",
+        "docs/out/debug.log",
+        "docs/util.py",
+        "out/.gitignore",
+        "out/.hidden",
+        "out/Makefile",
+        "out/build/build.sh",
+        "out/build/x.c",
+        "out/test/b.txt",
+        "out/test/x.o",
+        "out/x.c",
+        "tmp/.env",
+        "tmp/b.txt",
+        "tmp/foo",
+        "x.c"
+      ],
+      "file_acc": 0.4838709677419355,
+      "error": null
+    },
+    {
+      "id": "dev-0403",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "Makefile",
+        "a/build.sh",
+        "a/data.json",
+        "a/debug.log",
+        "a/node_modules/!important.txt",
+        "a/node_modules/Makefile",
+        "a/node_modules/docs/!important.txt",
+        "a/node_modules/docs/README",
+        "a/node_modules/f[1].txt",
+        "a/node_modules/src/.gitignore",
+        "a/node_modules/src/README",
+        "a/node_modules/src/main.py",
+        "out/.gitignore",
+        "out/a.txt",
+        "out/f[1].txt",
+        "out/test/lib/.gitignore",
+        "out/test/lib/a.txt",
+        "out/test/lib/f[1].txt",
+        "out/x.c",
+        "src/.env",
+        "src/lib/.gitignore",
+        "src/lib/f[1].txt",
+        "src/lib/src/.gitignore",
+        "src/lib/x.c",
+        "src/out/.env",
+        "src/out/build/.gitignore",
+        "src/out/build/b.txt",
+        "src/out/build/data.json",
+        "src/out/src/.env",
+        "src/out/src/b.txt",
+        "src/out/src/main.py",
+        "src/util.py",
+        "util.py",
+        "x.c"
+      ],
+      "file_acc": 0.28,
+      "error": null
+    },
+    {
+      "id": "dev-0404",
+      "pass": false,
+      "missing": [
+        "node_modules/lib/build/build.sh",
+        "node_modules/lib/build/foo",
+        "node_modules/tmp/build/README",
+        "node_modules/tmp/build/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0405",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0406",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "logs/x.o"
+      ],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0407",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0408",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "lib/.gitignore"
+      ],
+      "file_acc": 0.9166666666666666,
+      "error": null
+    },
+    {
+      "id": "dev-0409",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0410",
+      "pass": false,
+      "missing": [
+        "a.txt",
+        "docs/lib/build.sh"
+      ],
+      "extra": [
+        "docs/!important.txt"
+      ],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0411",
+      "pass": false,
+      "missing": [
+        "foo/out/out/main.py",
+        "node_modules/foo/main.py",
+        "src/lib/out/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.9302325581395349,
+      "error": null
+    },
+    {
+      "id": "dev-0412",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0413",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "build/a",
+        "build/main.py",
+        "f[1].txt",
+        "lib/Makefile",
+        "lib/b/b.txt",
+        "lib/b/debug.log",
+        "lib/b/err.log",
+        "lib/b/x.c",
+        "lib/build/build.sh",
+        "lib/build/foo",
+        "lib/x.o"
+      ],
+      "file_acc": 0.5666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0414",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "logs/b.txt",
+        "logs/logs/!important.txt",
+        "logs/logs/foo/#notes.txt",
+        "out/!important.txt"
+      ],
+      "file_acc": 0.8181818181818181,
+      "error": null
+    },
+    {
+      "id": "dev-0415",
+      "pass": false,
+      "missing": [
+        "src/a/src/.env"
+      ],
+      "extra": [],
+      "file_acc": 0.9166666666666666,
+      "error": null
+    },
+    {
+      "id": "dev-0416",
+      "pass": false,
+      "missing": [
+        "b/test/err.log",
+        "tmp/a",
+        "tmp/tmp/a"
+      ],
+      "extra": [],
+      "file_acc": 0.8695652173913043,
+      "error": null
+    },
+    {
+      "id": "dev-0417",
+      "pass": false,
+      "missing": [
+        "a",
+        "out/!important.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0418",
+      "pass": false,
+      "missing": [
+        "test/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0419",
+      "pass": false,
+      "missing": [
+        "lib/data.json"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0420",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "data.json",
+        "foo",
+        "logs/!important.txt",
+        "logs/err.log",
+        "logs/lib/.gitignore",
+        "logs/lib/data.json",
+        "logs/lib/err.log",
+        "logs/lib/foo/.env",
+        "logs/lib/foo/Makefile",
+        "node_modules/debug.log",
+        "node_modules/foo",
+        "node_modules/logs/.env",
+        "node_modules/logs/util.py",
+        "node_modules/logs/x.c"
+      ],
+      "file_acc": 0.36,
+      "error": null
+    },
+    {
+      "id": "dev-0421",
+      "pass": false,
+      "missing": [
+        "tmp/build/f[1].txt",
+        "tmp/build/logs/README",
+        "tmp/build/logs/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.7857142857142857,
+      "error": null
+    },
+    {
+      "id": "dev-0422",
+      "pass": false,
+      "missing": [
+        "build/.gitignore",
+        "build/a",
+        "build/b.txt",
+        "node_modules/src/build/!important.txt",
+        "node_modules/src/build/a.txt",
+        "node_modules/src/build/debug.log",
+        "node_modules/src/build/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.6956521739130435,
+      "error": null
+    },
+    {
+      "id": "dev-0423",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "Makefile",
+        "README",
+        "a/err.log",
+        "a/lib/a/a.txt",
+        "a/lib/a/build.sh",
+        "a/lib/a/util.py",
+        "a/lib/err.log",
+        "debug.log",
+        "test/b.txt",
+        "test/debug.log",
+        "test/src/#notes.txt",
+        "test/src/.hidden",
+        "test/src/README"
+      ],
+      "file_acc": 0.26315789473684215,
+      "error": null
+    },
+    {
+      "id": "dev-0424",
+      "pass": false,
+      "missing": [
+        "logs/!important.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0425",
+      "pass": false,
+      "missing": [
+        "src/src/foo/a"
+      ],
+      "extra": [
+        "!important.txt",
+        ".gitignore",
+        "README",
+        "foo/b/.gitignore",
+        "foo/b/a/.gitignore",
+        "foo/b/a/debug.log",
+        "foo/b/foo",
+        "foo/build.sh"
+      ],
+      "file_acc": 0.6538461538461539,
+      "error": null
+    },
+    {
+      "id": "dev-0426",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "README",
+        "b.txt",
+        "b/.hidden",
+        "b/Makefile",
+        "b/build/.hidden",
+        "b/build/a.txt",
+        "b/build/data.json",
+        "b/build/x.c",
+        "tmp/.gitignore",
+        "tmp/build/#notes.txt",
+        "tmp/data.json",
+        "tmp/debug.log",
+        "tmp/x.c",
+        "util.py"
+      ],
+      "file_acc": 0.375,
+      "error": null
+    },
+    {
+      "id": "dev-0427",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "lib/test/x.c",
+        "logs/a.txt",
+        "src/b/x.c"
+      ],
+      "file_acc": 0.8695652173913043,
+      "error": null
+    },
+    {
+      "id": "dev-0428",
+      "pass": false,
+      "missing": [
+        "a/build/README",
+        "a/build/debug.log",
+        "a/build/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0429",
+      "pass": false,
+      "missing": [
+        "logs/.gitignore",
+        "logs/Makefile",
+        "logs/x.o",
+        "out/b.txt",
+        "out/docs/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.5833333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0430",
+      "pass": false,
+      "missing": [
+        "build/.gitignore",
+        "build/foo"
+      ],
+      "extra": [
+        "test/build.sh"
+      ],
+      "file_acc": 0.7,
+      "error": null
+    },
+    {
+      "id": "dev-0431",
+      "pass": false,
+      "missing": [
+        "data.json",
+        "docs/!important.txt",
+        "docs/.hidden",
+        "docs/b/foo/a.txt",
+        "docs/b/foo/x.o",
+        "docs/b/main.py",
+        "docs/b/node_modules/.env",
+        "docs/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.6190476190476191,
+      "error": null
+    },
+    {
+      "id": "dev-0432",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a.txt",
+        "b.txt",
+        "foo",
+        "out/logs/a/.gitignore",
+        "out/logs/a/debug.log",
+        "out/logs/data.json",
+        "out/logs/debug.log",
+        "out/logs/docs/!important.txt",
+        "out/logs/docs/data.json",
+        "out/logs/err.log",
+        "out/logs/x.o",
+        "out/main.py"
+      ],
+      "file_acc": 0.5806451612903225,
+      "error": null
+    },
+    {
+      "id": "dev-0433",
+      "pass": false,
+      "missing": [
+        "tmp/err.log"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0434",
+      "pass": false,
+      "missing": [
+        "src/lib/test/b.txt",
+        "src/lib/test/build.sh",
+        "src/lib/test/data.json",
+        "src/out/lib/.gitignore",
+        "src/out/lib/f[1].txt"
+      ],
+      "extra": [
+        ".env"
+      ],
+      "file_acc": 0.76,
+      "error": null
+    },
+    {
+      "id": "dev-0435",
+      "pass": false,
+      "missing": [
+        "foo/#notes.txt",
+        "foo/a.txt",
+        "foo/build/#notes.txt",
+        "foo/foo/.gitignore"
+      ],
+      "extra": [
+        "node_modules/foo"
+      ],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0436",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0437",
+      "pass": false,
+      "missing": [
+        "src/Makefile"
+      ],
+      "extra": [],
+      "file_acc": 0.95,
+      "error": null
+    },
+    {
+      "id": "dev-0438",
+      "pass": false,
+      "missing": [
+        "f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9655172413793104,
+      "error": null
+    },
+    {
+      "id": "dev-0439",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0440",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".env",
+        ".gitignore"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0441",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b.txt",
+        "logs/a.txt",
+        "logs/node_modules/!important.txt",
+        "logs/node_modules/main.py",
+        "logs/tmp/#notes.txt"
+      ],
+      "file_acc": 0.782608695652174,
+      "error": null
+    },
+    {
+      "id": "dev-0442",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "lib/node_modules/.env",
+        "lib/node_modules/b/.gitignore",
+        "lib/node_modules/build.sh",
+        "lib/node_modules/out/.gitignore",
+        "lib/x.o",
+        "logs/a/out/.env",
+        "logs/a/out/.hidden",
+        "logs/x.c"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0443",
+      "pass": false,
+      "missing": [
+        "docs/.env",
+        "docs/.hidden",
+        "docs/foo",
+        "docs/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0444",
+      "pass": false,
+      "missing": [
+        "node_modules/.hidden",
+        "node_modules/src/!important.txt",
+        "node_modules/src/.gitignore",
+        "node_modules/src/lib/.hidden",
+        "node_modules/src/node_modules/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.5454545454545454,
+      "error": null
+    },
+    {
+      "id": "dev-0445",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0446",
+      "pass": false,
+      "missing": [
+        "lib/lib/a/!important.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0447",
+      "pass": false,
+      "missing": [
+        "docs/src/.hidden",
+        "docs/src/notes.md",
+        "docs/src/src/.gitignore",
+        "docs/src/src/Makefile",
+        "docs/src/test/err.log",
+        "docs/src/test/x.o",
+        "docs/src/util.py"
+      ],
+      "extra": [
+        "b.txt",
+        "docs/test/#notes.txt",
+        "docs/test/f[1].txt",
+        "docs/test/out/f[1].txt",
+        "f[1].txt"
+      ],
+      "file_acc": 0.5384615384615384,
+      "error": null
+    },
+    {
+      "id": "dev-0448",
+      "pass": false,
+      "missing": [
+        "foo/.hidden",
+        "foo/data.json",
+        "foo/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0449",
+      "pass": false,
+      "missing": [
+        "a/build/#notes.txt",
+        "a/build/b.txt",
+        "a/foo/b.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.7692307692307692,
+      "error": null
+    },
+    {
+      "id": "dev-0450",
+      "pass": false,
+      "missing": [
+        "b/.gitignore",
+        "b/README",
+        "b/node_modules/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0451",
+      "pass": false,
+      "missing": [
+        "src/logs/README",
+        "src/tmp/b/README",
+        "src/tmp/out/a.txt"
+      ],
+      "extra": [
+        ".gitignore",
+        "a",
+        "out/notes.md",
+        "test/.gitignore",
+        "test/.hidden",
+        "test/foo/a",
+        "test/foo/test/.hidden",
+        "test/logs/foo",
+        "test/logs/test/.gitignore",
+        "test/logs/x.o"
+      ],
+      "file_acc": 0.7173913043478262,
+      "error": null
+    },
+    {
+      "id": "dev-0452",
+      "pass": false,
+      "missing": [
+        "docs/node_modules/data.json"
+      ],
+      "extra": [
+        ".gitignore",
+        "docs/.gitignore"
+      ],
+      "file_acc": 0.85,
+      "error": null
+    },
+    {
+      "id": "dev-0453",
+      "pass": false,
+      "missing": [
+        "a/.env",
+        "a/.gitignore",
+        "a/b.txt",
+        "build/.gitignore",
+        "build/a",
+        "build/f[1].txt",
+        "build/lib/README",
+        "build/lib/data.json",
+        "build/lib/logs/#notes.txt",
+        "build/lib/logs/README",
+        "build/lib/logs/main.py",
+        "build/lib/main.py",
+        "build/x.c",
+        "out/.gitignore",
+        "out/README",
+        "out/a",
+        "out/build/a",
+        "out/build/build/main.py",
+        "out/build/f[1].txt",
+        "out/build/foo",
+        "out/notes.md",
+        "out/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.12,
+      "error": null
+    },
+    {
+      "id": "dev-0454",
+      "pass": false,
+      "missing": [
+        "a/docs/util.py"
+      ],
+      "extra": [
+        "!important.txt",
+        "a/err.log",
+        "b/!important.txt",
+        "build/#notes.txt",
+        "build/b.txt",
+        "build/debug.log",
+        "build/foo/Makefile",
+        "build/foo/docs/build.sh",
+        "build/foo/foo",
+        "build/foo/main.py",
+        "build/test/#notes.txt",
+        "build/test/Makefile",
+        "build/test/f[1].txt",
+        "build/test/test/err.log",
+        "build/x.c",
+        "data.json",
+        "f[1].txt"
+      ],
+      "file_acc": 0.47058823529411764,
+      "error": null
+    },
+    {
+      "id": "dev-0455",
+      "pass": false,
+      "missing": [
+        "node_modules/node_modules/out/README",
+        "node_modules/node_modules/out/notes.md",
+        "out/f[1].txt"
+      ],
+      "extra": [
+        "build/build/build/b.txt",
+        "build/build/util.py"
+      ],
+      "file_acc": 0.8076923076923077,
+      "error": null
+    },
+    {
+      "id": "dev-0456",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "README"
+      ],
+      "file_acc": 0.9375,
+      "error": null
+    },
+    {
+      "id": "dev-0457",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0458",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0459",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0460",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0461",
+      "pass": false,
+      "missing": [
+        "build/foo"
+      ],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "lib/.gitignore",
+        "lib/build.sh",
+        "tmp/.env",
+        "tmp/a.txt",
+        "tmp/data.json",
+        "tmp/err.log",
+        "x.c",
+        "x.o"
+      ],
+      "file_acc": 0.5217391304347826,
+      "error": null
+    },
+    {
+      "id": "dev-0462",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0463",
+      "pass": false,
+      "missing": [
+        "out/node_modules/foo/x.c",
+        "out/out/src/data.json"
+      ],
+      "extra": [],
+      "file_acc": 0.9166666666666666,
+      "error": null
+    },
+    {
+      "id": "dev-0464",
+      "pass": false,
+      "missing": [
+        "b/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0465",
+      "pass": false,
+      "missing": [
+        "test/build/#notes.txt",
+        "test/build/.gitignore",
+        "test/build/test/Makefile",
+        "test/build/test/a",
+        "test/build/test/a.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.5454545454545454,
+      "error": null
+    },
+    {
+      "id": "dev-0466",
+      "pass": false,
+      "missing": [
+        "build/!important.txt",
+        "build/test/README",
+        "build/util.py",
+        "build/x.o",
+        "out/tmp/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.6875,
+      "error": null
+    },
+    {
+      "id": "dev-0467",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0468",
+      "pass": false,
+      "missing": [
+        "tmp/.hidden",
+        "tmp/data.json",
+        "tmp/f[1].txt",
+        "tmp/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "dev-0469",
+      "pass": false,
+      "missing": [
+        ".env",
+        ".gitignore",
+        "b/.hidden",
+        "b/b/.gitignore",
+        "b/b/Makefile",
+        "b/b/a",
+        "b/b/docs/a.txt",
+        "b/b/docs/debug.log",
+        "b/b/x.c",
+        "src/!important.txt",
+        "src/.gitignore",
+        "src/err.log",
+        "src/out/.gitignore",
+        "src/out/err.log",
+        "src/out/foo/foo",
+        "src/out/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.05882352941176472,
+      "error": null
+    },
+    {
+      "id": "dev-0470",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0471",
+      "pass": false,
+      "missing": [
+        "build/test/!important.txt",
+        "build/test/.gitignore"
+      ],
+      "extra": [
+        ".env",
+        ".hidden",
+        "node_modules/logs/.hidden"
+      ],
+      "file_acc": 0.7058823529411764,
+      "error": null
+    },
+    {
+      "id": "dev-0472",
+      "pass": false,
+      "missing": [
+        "a/.env",
+        "a/b/a/README",
+        "a/b/a/f[1].txt",
+        "a/b/a/foo",
+        "a/b/a/util.py",
+        "a/b/build.sh",
+        "a/b/debug.log",
+        "a/b/foo/.env",
+        "a/b/foo/b.txt",
+        "a/build.sh",
+        "a/foo",
+        "lib/a"
+      ],
+      "extra": [],
+      "file_acc": 0.5555555555555556,
+      "error": null
+    },
+    {
+      "id": "dev-0473",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "foo",
+        "util.py"
+      ],
+      "file_acc": 0.8260869565217391,
+      "error": null
+    },
+    {
+      "id": "dev-0474",
+      "pass": false,
+      "missing": [
+        "src/f[1].txt",
+        "tmp/b/#notes.txt",
+        "tmp/b/.gitignore",
+        "tmp/b/err.log",
+        "tmp/b/tmp/data.json",
+        "tmp/b/tmp/debug.log",
+        "tmp/b/tmp/main.py",
+        "tmp/debug.log",
+        "tmp/f[1].txt",
+        "tmp/foo/.gitignore",
+        "tmp/foo/Makefile",
+        "tmp/foo/build.sh",
+        "tmp/foo/node_modules/.hidden",
+        "tmp/foo/out/.env",
+        "tmp/foo/out/.hidden",
+        "tmp/foo/out/notes.md",
+        "tmp/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.37037037037037035,
+      "error": null
+    },
+    {
+      "id": "dev-0475",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "node_modules/#notes.txt",
+        "node_modules/foo",
+        "node_modules/notes.md",
+        "node_modules/util.py",
+        "x.c"
+      ],
+      "file_acc": 0.5333333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0476",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "err.log"
+      ],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0477",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "b.txt",
+        "logs/.gitignore",
+        "logs/a",
+        "x.o"
+      ],
+      "file_acc": 0.7692307692307692,
+      "error": null
+    },
+    {
+      "id": "dev-0478",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0479",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0480",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "debug.log"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0481",
+      "pass": false,
+      "missing": [
+        "node_modules/Makefile"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "dev-0482",
+      "pass": false,
+      "missing": [
+        "node_modules/logs/data.json",
+        "src/src/tmp/x.c",
+        "src/src/tmp/x.o"
+      ],
+      "extra": [
+        "Makefile",
+        "b.txt",
+        "src/a.txt"
+      ],
+      "file_acc": 0.7777777777777778,
+      "error": null
+    },
+    {
+      "id": "dev-0483",
+      "pass": false,
+      "missing": [
+        "logs/a/x.o",
+        "logs/x.o"
+      ],
+      "extra": [
+        ".env",
+        ".gitignore",
+        "a",
+        "docs/debug.log",
+        "docs/x.c",
+        "src/.gitignore",
+        "src/util.py"
+      ],
+      "file_acc": 0.5,
+      "error": null
+    },
+    {
+      "id": "dev-0484",
+      "pass": false,
+      "missing": [
+        "logs/out/src/util.py",
+        "node_modules/lib/Makefile"
+      ],
+      "extra": [
+        ".hidden",
+        "logs/out/src/x.o",
+        "node_modules/a/foo",
+        "node_modules/a/lib/x.c"
+      ],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0485",
+      "pass": false,
+      "missing": [
+        "lib/.env",
+        "lib/.hidden",
+        "lib/src/logs/.hidden",
+        "lib/src/tmp/a.txt",
+        "lib/src/tmp/build.sh",
+        "lib/src/tmp/data.json",
+        "lib/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.631578947368421,
+      "error": null
+    },
+    {
+      "id": "dev-0486",
+      "pass": false,
+      "missing": [
+        "out/foo/util.py",
+        "out/foo/x.c"
+      ],
+      "extra": [
+        ".gitignore"
+      ],
+      "file_acc": 0.9032258064516129,
+      "error": null
+    },
+    {
+      "id": "dev-0487",
+      "pass": false,
+      "missing": [
+        "lib/docs/.env"
+      ],
+      "extra": [],
+      "file_acc": 0.9090909090909091,
+      "error": null
+    },
+    {
+      "id": "dev-0488",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        ".hidden",
+        "a.txt",
+        "util.py"
+      ],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "dev-0489",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "out/#notes.txt",
+        "out/README",
+        "out/a",
+        "out/data.json",
+        "test/README",
+        "test/build.sh",
+        "test/f[1].txt",
+        "test/util.py"
+      ],
+      "file_acc": 0.4375,
+      "error": null
+    },
+    {
+      "id": "dev-0490",
+      "pass": false,
+      "missing": [
+        "#notes.txt",
+        "src/a/#notes.txt",
+        "src/b/#notes.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0491",
+      "pass": false,
+      "missing": [
+        "a/lib/Makefile",
+        "a/lib/build.sh",
+        "a/lib/foo/a",
+        "a/lib/foo/notes.md",
+        "a/lib/x.o"
+      ],
+      "extra": [
+        "#notes.txt",
+        "a.txt",
+        "build/f[1].txt"
+      ],
+      "file_acc": 0.6190476190476191,
+      "error": null
+    },
+    {
+      "id": "dev-0492",
+      "pass": false,
+      "missing": [
+        "tmp/test/tmp/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.9333333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0493",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "test/tmp/docs/x.o",
+        "test/tmp/x.o"
+      ],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0494",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0495",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/a.txt",
+        "notes.md",
+        "src/main.py"
+      ],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0496",
+      "pass": false,
+      "missing": [
+        "lib/README"
+      ],
+      "extra": [],
+      "file_acc": 0.9230769230769231,
+      "error": null
+    },
+    {
+      "id": "dev-0497",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "b/.env",
+        "b/.hidden",
+        "b/a",
+        "b/foo/.hidden",
+        "b/foo/a/data.json",
+        "b/foo/b.txt",
+        "b/foo/data.json",
+        "b/foo/x.o",
+        "build/b.txt",
+        "build/tmp/b/a",
+        "build/tmp/b/util.py",
+        "build/tmp/b/x.c",
+        "build/tmp/notes.md",
+        "build/tmp/out/#notes.txt",
+        "build/tmp/out/.gitignore",
+        "build/tmp/out/foo",
+        "build/x.c",
+        "lib/!important.txt",
+        "lib/README",
+        "lib/a.txt",
+        "lib/f[1].txt"
+      ],
+      "file_acc": 0.29032258064516125,
+      "error": null
+    },
+    {
+      "id": "dev-0498",
+      "pass": false,
+      "missing": [
+        "b/docs/f[1].txt"
+      ],
+      "extra": [
+        "b/docs/err.log"
+      ],
+      "file_acc": 0.7142857142857143,
+      "error": null
+    },
+    {
+      "id": "dev-0499",
+      "pass": false,
+      "missing": [
+        "tmp/!important.txt",
+        "tmp/b.txt",
+        "tmp/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.5,
+      "error": null
+    }
+  ]
+}

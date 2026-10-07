@@ -1,0 +1,45 @@
+$ git ls-files && cat snapshot/ignore.py && cat tests/*.py | head -150 && git --version && python3 --version
+
+$ cat snapshot/cli.py README.md | head -80
+
+$ mkdir -p /tmp/fuzz && cp /work/repo/snapshot/ignore.py /tmp/fuzz/git_ignore.py
+
+$ python3 -m unittest 2>&1 | tail -3
+
+$ cd /tmp && nproc && time python3 -I /tmp/fuzz/fuzz.py 0 2000
+
+$ cd /tmp && sed -i 's/except (FileExistsError, NotADirectoryError):/except OSError:/' /tmp/fuzz/fuzz.py && time python3 -I /tmp/fuzz/fuzz.py 0 3000
+
+$ cd /tmp && time python3 -I /tmp/fuzz/fuzz2.py 0 4000
+
+$ cd /tmp/fuzz && sed -e 's/^CH = .*/CH = ["a", "b", "a", "b", "c"]/' \
+ -e 's/^TOK = \[/TOK = ["a", "b", "a\/", "b\/", "\/a", "**", "**\/", "\/**\/", "a**", "**a", "*", "\/", "?", "\/\/", "\\\\\/", "[ab]", "[\/]", "a\/**\/b", /' \
+ -e 's/rng.randint(1, 4))\]/rng.randint(1, 6))]/' -e 's/rng.randint(0, 5)))/rng.randint(0, 7)))/' \
+ -e 's/fail2_/fail3_/' fuzz2.py > fuzz3.py && grep -n "^CH\|^TOK\|randint(1, 6)\|randint(0, 7)" fuzz3.py | cut -c1-150 && cd /tmp && time python3 -I /tmp/fuzz/fuzz3.py 100000 5000
+
+$ cd /tmp && cat > /tmp/fuzz/cases.py <<'EOF'
+import sys, tempfile
+sys.path[:0] = ["/work/repo", "/tmp/fuzz"]
+from tests.test_ignore import make_tree
+from snapshot.ignore import ignored_files as mine
+from git_ignore import ignored_files as ref
+cases = [
+ {".gitignore": "a**/b\n", "ax/y/b": None, "a/b": None, "ab": None},
+ {".gitignore": "[[:space:]]\n", "\x0b": None, "\t": None, "\f": None},
+ {".gitignore": "build/\n!build/keep\n", "build/keep": None, "build/x": None},
+ {".gitignore": "*\n!*/\n!keep\n", "d/keep": None, "d/x": None, "keep": None},
+ {".gitignore": "x\n", "sub/.git/x": None, "sub/.git": None} if False else {".gitignore": "x\n", "sub/.git/x": None, "sub/x": None},
+ {".gitignore": "foo  \nbar\\ \nbaz\\\t\n", "foo": None, "bar ": None, "baz\t": None},
+ {".gitignore": "\\#a\n\\!b\n#c\n", "#a": None, "!b": None, "#c": None},
+ {"d/.gitignore": "/e\n*.o\n", "d/e/f": None, "d/x.o": None, "e/f": None, "x.o": None},
+]
+for c in cases:
+    with tempfile.TemporaryDirectory() as r:
+        make_tree(r, c); a, b = mine(r), ref(r)
+        print("OK " if a == b else "BAD", b)
+EOF
+python3 -I /tmp/fuzz/cases.py
+
+$ python3 -m unittest 2>&1 | tail -3 && grep -rn "subprocess\|import" snapshot/ignore.py && git status --short
+
+$ rm -rf snapshot/__pycache__ tests/__pycache__ && git status --short

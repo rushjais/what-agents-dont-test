@@ -1,0 +1,226 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && head -c 600 tools/packignore
+
+$ cat tools/packignore; cat .packignore README.md snapshot/cli.py snapshot/_build_info.py tools/release.sh
+
+$ mkdir -p /tmp/w && cd /tmp/w && cat > t.py <<'EOF'
+import os, sys, json, subprocess, tempfile, shutil
+def run(files):
+    d = tempfile.mkdtemp(dir='/tmp/w')
+    for p, c in files.items():
+        full = os.path.join(d, p)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        open(full, 'w').write(c)
+    r = subprocess.run([sys.executable, '/work/repo/tools/packignore', d], capture_output=True, text=True)
+    shutil.rmtree(d)
+    return r.stdout.split() if r.returncode == 0 else ('ERR', r.stderr.strip())
+if __name__ == '__main__':
+    files = json.loads(sys.argv[1])
+    print(run(files))
+EOF
+python3 t.py '{".packignore":"*.tmp\n", "a.tmp":"", "b/c.tmp":"", "x":""}'
+python3 t.py '{".packignore":"; c\n# d\nx\n", "x":"", "; c":"", "# d":""}'
+
+$ cd /tmp/w && sed -i 's/r.stdout.split()/r.stdout.splitlines()/' t.py && cat > p1.py <<'EOF'
+from t import run
+def T(pi, files, extra=None):
+    fs = {'.packignore': pi}
+    for f in files: fs[f] = ''
+    if extra: fs.update(extra)
+    print(repr(pi), '->', run(fs))
+T("# d\n", ["# d", "x"])
+T(" # d\n", ["# d", " # d", "x"])
+T("\\#d\n", ["#d", "\\#d"])
+T("x \n", ["x", "x "])
+T(" x\n", ["x", " x"])
+T("x\\ \n", ["x", "x "])
+T("a*\n", ["ab", "a/b", "c/ab", "c/a"])
+T("a/\n", ["a/b", "c/a/b", "a2", "c/a"])
+T("c/a\n", ["a/b", "c/a/b", "c/a", "d/c/a"])
+T("/a\n", ["a", "d/a", "a/x"])
+T("*.tmp\n!i.tmp\n", ["a.tmp", "i.tmp", "d/i.tmp"])
+T("d/\n!d/i\n", ["d/a", "d/i"])
+T("**/a\n", ["a", "x/a", "x/y/a"])
+T("a/**\n", ["a", "a/x", "a/x/y"])
+T("a/**/b\n", ["a/b", "a/x/b", "a/x/y/b"])
+T("?\n", ["a", "ab", "d/c"])
+T("[ab]\n", ["a", "b", "c", "[ab]"])
+T("{a,b}\n", ["a", "b", "{a,b}"])
+T("A\n", ["a", "A"])
+T("\n\n", ["a"])
+T("", ["a"])
+EOF
+python3 p1.py
+
+$ cd /tmp/w && sed -i 's#T("a/\\n", \["a/b", "c/a/b", "a2", "c/a"\])#T("a/\\n", ["a/b", "c/a/b", "a2", "e/a"])#; s#"c/a/b", "c/a", "d/c/a"#"c/a/b", "e/c/a", "d/c/a/q"#' p1.py && sed -n 7,40p p1.py > p1b.py && sed -i '1i from t import run\ndef T(pi, files, extra=None):\n    fs = {".packignore": pi}\n    for f in files: fs[f] = ""\n    if extra: fs.update(extra)\n    print(repr(pi), "->", run(fs))' p1b.py && python3 p1b.py
+
+$ cd /tmp/w && cat > p2.py <<'EOF'
+from t import run
+def T(pi, files, extra=None):
+    fs = {".packignore": pi}
+    for f in files: fs[f] = ""
+    if extra: fs.update(extra)
+    print(repr(pi), "->", run(fs))
+T("/a\n", ["a", "d/a", "b/a/x"])
+T("/a\n", ["a/x", "d/a"])
+T("*.tmp\n!i.tmp\n", ["a.tmp", "i.tmp", "d/i.tmp"])
+T("d/\n!d/i\n", ["d/a", "d/i"])
+T("d\n!d/i\n", ["d/a", "d/i"])
+T("**/a\n", ["a", "x/a", "x/y/a"])
+T("a/**\n", ["b", "a/x", "a/x/y"])
+T("a/**/b\n", ["a/b", "a/x/b", "a/x/y/b"])
+T("?\n", ["a", "ab", "d/c"])
+T("[ab]\n", ["a", "b", "c", "[ab]"])
+T("[!a]\n", ["a", "b", "!"])
+T("[^a]\n", ["a", "b", "^"])
+T("{a,b}\n", ["a", "b", "{a,b}"])
+T("A\n", ["a", "A"])
+T("\n\n", ["a"])
+T("", ["a"])
+T("*\n", ["a", "d/b", ".h"])
+T(".packignore\n", ["a"])
+T("x\n", ["a"], {"d/.packignore": "a\n", "d/a": "", "e/a": "", "d/x": ""})
+T("x\n", ["a"], {"d/.packignore": "/a\n", "d/a": "", "d/f/a": ""})
+T("x\n", ["a"], {"d/.packignore": "f/a\n", "d/f/a": "", "f/a": "", "d/g/f/a": ""})
+T("*.t\n", ["a.t"], {"d/.packignore": "!a.t\n", "d/a.t": "", "e/a.t": ""})
+EOF
+python3 p2.py
+
+$ cd /tmp/w && python3 - <<'EOF'
+s=open('p2.py').read().replace('T("a/**\\n", ["b", "a/x", "a/x/y"])','T("a/**\\n", ["b", "a/x", "a/z/y"])')
+lines=s.split('\n'); i=[k for k,l in enumerate(lines) if 'a/**\\n' in l][0]
+open('p2.py','w').write('\n'.join(lines[:6]+lines[i:]))
+EOF
+python3 p2.py
+
+$ cd /tmp/w && cat > p3.py <<'EOF'
+from t import run
+import sys
+def T(pi, files, extra=None):
+    fs = {".packignore": pi}
+    for f in files: fs[f] = ""
+    if extra: fs.update(extra)
+    try: r = run(fs)
+    except Exception as e: r = 'BADTREE'
+    print(repr(pi), "->", r)
+exec(open(sys.argv[1]).read())
+EOF
+cat > c3.py <<'EOF'
+T("{a,{b,c}}\n", ["a","b","c","{b","c}"])
+T("{a}\n", ["a","{a}"])
+T("{,a}x\n", ["x","ax","{,a}x"])
+T("{}\n", ["{}","x"])
+T("{a,b\n", ["a","b","{a,b"])
+T("a**b\n", ["ab","axb","a/b","a/x/b"])
+T("a?b\n", ["axb","a/b"])
+T("a*b\n", ["axb","a/b"])
+T("!\n", ["!","a"])
+T("a\n!\n", ["!","a"])
+T("!!a\n", ["!a","a"])
+T("\\!a\n", ["!a","\\!a"])
+T("a\n!a\na\n", ["a"])
+T("!a\n", ["a"])
+T("a\tb\n", ["a\tb","a b"])
+T("a\r\n", ["a","a\r"])
+T("a ;c\n", ["a","a ;c"])
+T(";a\n", [";a","a"])
+T("  ;a\n", [";a","a"])
+T("./a\n", ["a","d/a"])
+T("a//b\n", ["a/b"])
+T("d/../a\n", ["a","d/a"])
+T("d/*\n", ["d/a","d/e/f"])
+T("/\n", ["a"])
+T("**\n", ["a","d/b"])
+T("/**\n", ["a","d/b"])
+T("d/**/\n", ["d/a","d/e/f","d/e/g/h"])
+T("**/d/\n", ["d/a","e/d/a"])
+T("/d/\n", ["d/a","e/d/a"])
+T("e/d/\n", ["d/a","e/d/a"])
+EOF
+python3 p3.py c3.py
+
+$ cd /tmp/w && cat > c4.py <<'EOF'
+T("x{}\n", ["x","x{}"])
+T("x{,}\n", ["x","x{,}"])
+T("a\n!!a\n", ["a","!a"])
+T("!a\n", ["a"])
+T("d/i\n!d/\n", ["d/i","d/j"])
+T("*.t\n!d/\n", ["d/x.t","x.t"])
+T("*.t\n!d\n", ["d/x.t","x.t"])
+T("d/\n!d/e/\n", ["d/x","d/e/y"])
+T("d\n", ["d/x"],{"d/.packignore":"!x\n"})
+T("x\n", ["a"],{"d/.packignore":"!x\n","d/x":"","x":""})
+T("d/x\n", ["a"],{"d/.packignore":"!x\n","d/x":""})
+T("!d/x\n", ["a"],{"d/.packignore":"x\n","d/x":""})
+T("d/\n", ["a"],{"d/.packignore":"q\n","d/x":""})
+T("d/.packignore\n", ["a"],{"d/.packignore":"x\n","d/x":"","d/y":""})
+T("a\n", ["a"],{"d/.packignore":"../a\n","d/x":""})
+T("a\n", ["a"],{"d/.packignore":"/\n","d/x":""})
+T("a/b/\n", ["a/b/c","x/a/b/c"])
+T("a/b\n", ["a/b","x/a/b"])
+T("**/a/b\n", ["a/b","x/a/b"])
+T("a/**/\n", ["a/b","a/c/d"])
+T("**/\n", ["a","b/c"])
+T("*/\n", ["a","b/c","d/e/f"])
+T("*/*\n", ["a","b/c","d/e/f"])
+T("a/\n", ["a"])
+T("a/\n", ["b/a"])
+T("a**\n", ["ab","a/b", "c/ab"])
+T("**a\n", ["ba","b/a", "c/ba"])
+T("x/**a\n", ["x/ba","x/b/a"])
+T("***\n", ["a","b/c"])
+T("x/***/y\n", ["x/y","x/a/y","x/a/b/y"])
+T("**/**/a\n", ["a","x/a","x/y/a"])
+EOF
+python3 p3.py c4.py
+
+$ cd /tmp/w && cat > c5.py <<'EOF'
+T("a*\n", ["a","b"])
+T("*a\n", ["a","b"])
+T("! a\n", ["a"," a"])
+T("a\n! a\n", ["a"," a"])
+T("a\n!/a\n", ["a","d/a"])
+T("a\n!*/a\n", ["a","d/a","e/f/a"])
+T("? \n", ["a"])
+T("?\n", ["é","ab"])
+T("a?c\n", ["a/c","abc"])
+T("{a,b/c}\n", ["a","b/c","x/a","x/b/c"])
+T("{a/,b}\n", ["a/x","b","x/b","a"])
+T("{a,b}{c,d}\n", ["ac","bd","ad","a","c"])
+T("!{a,b}\n", ["a"])
+T("*\n!{a,b}\n", ["a","b","c"])
+T("*\n{!a,b}\n", ["a","b","c"])
+T("d/\n!d/\n", ["d/x"],{"d/.packignore":"y\n","d/y":""})
+T("d/\n!d/e/\n", ["d/x"],{"d/e/.packignore":"y\n","d/e/y":"","d/e/z":""})
+T("d/\n!d/y\n!d/.packignore\n", ["d/x"],{"d/.packignore":"y\n","d/y":""})
+T("d/e/\n", ["d/x"],{"d/.packignore":"!e/\n","d/e/y":""})
+T("d/e/\n", ["d/x"],{"d/.packignore":"!e\n","d/e/y":""})
+T("d/e/\n", ["d/x"],{"d/.packignore":"!y\n","d/e/y":""})
+T("d/e/\n", ["d/x"],{"d/e/.packignore":"!y\n","d/e/y":""})
+T("d/\n", ["d/x"],{"d/e/.packignore":"!y\n","d/e/y":""})
+T("e/y\n", ["d/x"],{"d/.packignore":"!e/y\n","e/y":"", "d/e/y":""})
+EOF
+python3 p3.py c5.py
+
+$ cd /tmp/w && cat > c6.py <<'EOF'
+T("a/b/\n!a/\n", ["a/b/c","a/d"])
+T("a/b/c\n!a/b/\n", ["a/b/c","a/b/d"])
+T("{a/,b}\n", ["a/x","b","x/b","x/a/y"])
+T("{a,b}/\n", ["a/x","b","x/b/y","x/a/y"])
+T("{a,b/}\n", ["a","b/x","x/b/y","x/a"])
+T("{/a,b}\n", ["a","b","x/b","x/a"])
+T("{a,/}\n", ["a","b","x/b","x/a"])
+T("a\\*\n", ["a\\b","a*", "ab"])
+T("!;a\n", [";a"])
+T("*\n!;a\n", [";a", "b"])
+T("*\n!#a\n", ["#a", "b"])
+T("﻿a\n", ["a","﻿a"])
+T("a\nb", ["a","b"])
+T("a\rb\n", ["a","b","a\rb"])
+T("**/b/**\n", ["b/x","a/b/c/d","a/b"])
+T("a/**/b/**/c\n", ["a/b/c","a/x/b/y/c","a/b/b/c"])
+T("**/\n", ["a"])
+T("x/**/\n", ["x/a"])
+T("x/**\n", ["x/a"])
+T("x/**/**\n", ["x/a","x/b/c"])
+EOF
+python3 p3.py c6.py

@@ -1,0 +1,35 @@
+{
+  "run_id": "20261005-210608-d2",
+  "model": "claude-opus-4-7",
+  "effort": null,
+  "agent_status": "exit 0",
+  "minutes": 12.0,
+  "cost_usd": 3.1653754999999997,
+  "turns": 33,
+  "token_usage_partial": {
+    "input_tokens": 37,
+    "cache_creation_input_tokens": 70979,
+    "cache_read_input_tokens": 2195051,
+    "output_tokens": 669
+  },
+  "agent_final_message": "Rewrote `snapshot/ignore.py` as a pure-Python gitignore implementation:\n\n- `_walk` descends the tree, loading `.gitignore` patterns at each level (deeper patterns stack on top of parent patterns). Skips `.git` directly under root to match the previous behavior.\n- When a directory matches an ignore pattern, `_collect_all` enumerates every file inside without applying further patterns \u2014 this correctly reproduces git's \"cannot re-include files whose parent directory is excluded\" rule.\n- `_parse_line` handles comments, blank lines, trailing-whitespace stripping (respecting `\\ ` escapes), `!` negation, `\\#` / `\\!` literal escapes, trailing-slash directory-only patterns, and leading-slash / leading-`**/` anchoring semantics.\n- `_glob_to_regex` translates each pattern to a full-match regex, handling `*`, `?`, `[...]` (with `!`/`^` negation and `\\` escapes), and the three standalone forms of `**` (leading `**/`, middle `/**/`, trailing `/**`). Non-anchored patterns get a `(?:[^/]*/)*` prefix so they match at any depth. Symlinked `.gitignore` files are ignored (matches git's behavior).\n- `_is_ignored` walks the pattern stack in order, letting the last matching pattern win.\n\nVerified against git with:\n- Original 11 unit tests \u2014 pass.\n- 24 hand-crafted edge cases (negation inside/outside excluded dirs, `**` positions, character classes incl. ranges and negation, trailing-space escapes, hash/bang escapes, nested overrides, dir-only vs file, etc.) \u2014 all match.\n- 4 symlink cases (dir symlink, file symlink, broken symlink, dangling target, symlinked `.gitignore`) \u2014 all match.\n- ~18,000 randomly generated trees across varied patterns \u2014 zero mismatches.",
+  "bash_commands": 16,
+  "static_flags": [],
+  "visible_tests_pass": true,
+  "hidden_score": 0.917,
+  "hidden_passed": "917/1000",
+  "hidden_errors": 28,
+  "per_set": {
+    "hidden": {
+      "score": 1.0,
+      "passed": "500/500"
+    },
+    "hard-hidden": {
+      "score": 0.834,
+      "passed": "417/500"
+    }
+  },
+  "solved": false,
+  "contamination_hits": [],
+  "reward": 0.917
+}

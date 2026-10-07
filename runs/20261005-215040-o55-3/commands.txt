@@ -1,0 +1,108 @@
+$ git ls-files && cat snapshot/ignore.py && cat tests/*.py | head -150 && git --version
+
+$ cat snapshot/cli.py README.md; mkdir -p /tmp/work && cp snapshot/ignore.py /tmp/work/git_ignore.py; python3 --version; id -u
+
+$ python3 -m unittest 2>&1 | tail -3
+
+$ cd /tmp/work && python3 fuzz.py 0 500 2>&1 | tail -40
+
+$ cd /tmp/work && python3 - <<'EOF'
+import random, tempfile, shutil, sys
+sys.argv=["x","0","0"]
+exec(open("fuzz.py").read().replace("\nmain()\n","\n"))
+tot=0; nonempty=0; nfiles=0
+for s in range(200):
+    r=random.Random(s); root=tempfile.mkdtemp(); gen(r,root); a=mine(root); shutil.rmtree(root)
+    tot+=1; nonempty+= bool(a); nfiles+=len(a)
+print(tot, nonempty, nfiles)
+EOF
+for i in 0 1 2 3 4 5 6 7; do python3 fuzz.py $((1000+i*2500)) 2500 > out$i.txt 2>&1 & done; wait; tail -n 3 out*.txt
+
+$ cd /tmp/work && for i in 0 1 2 3 4 5 6 7; do python3 fuzz2.py $((i*3000)) 3000 > o2_$i.txt 2>&1 & done; wait; tail -n 4 o2_*.txt
+
+$ cd /tmp/work && cat > edge.py <<'EOF'
+import os, sys, tempfile, shutil, subprocess
+sys.path.insert(0, "/work/repo"); sys.path.insert(0, "/tmp/work")
+from snapshot.ignore import ignored_files as mine
+from git_ignore import ignored_files as ref
+
+def W(root, rel, data=b"x"):
+    p = os.path.join(root, rel); os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, "wb").write(data)
+
+def gitrepo(path):
+    subprocess.run(["git", "init", "-q", path], check=True)
+
+cases = {}
+def case(f): cases[f.__name__] = f; return f
+
+@case
+def symlink_gitignore(r):
+    W(r, "real", b"*.log\n"); os.symlink("real", os.path.join(r, ".gitignore")); W(r, "a.log")
+@case
+def dir_gitignore(r):
+    W(r, ".gitignore/x.log"); W(r, "sub/.gitignore", b"*\n"); W(r, "sub/y")
+@case
+def nul_in_gitignore(r):
+    W(r, ".gitignore", b"a\0b\n\0\nc.log\x00zz\n"); W(r, "a"); W(r, "c.log"); W(r, "ab")
+@case
+def vt_ff(r):
+    W(r, ".gitignore", b"x[[:space:]]\ny[[:blank:]]\nz[[:cntrl:]]\n"); W(r, "x\x0b"); W(r, "x\x0c"); W(r, "x\t"); W(r, "y\t"); W(r, "y\x0b"); W(r, "z\x7f")
+@case
+def highbytes(r):
+    W(r, ".gitignore", "[é]\n?\xe9\n[[:alpha:]]x\n[!a]y\n".encode()); W(r, "é"); W(r, "aé"); W(r, "ax"); W(r, "éx"); W(r, "éy")
+@case
+def nested_repo_ignored(r):
+    W(r, ".gitignore", b"sub/\nother\n"); gitrepo(os.path.join(r, "sub")); W(r, "sub/f"); gitrepo(os.path.join(r, "other")); W(r, "other/g")
+@case
+def nested_repo_unignored(r):
+    W(r, ".gitignore", b"*.o\n"); gitrepo(os.path.join(r, "sub")); W(r, "sub/f.o")
+@case
+def nested_repo_in_ignored_dir(r):
+    W(r, ".gitignore", b"out/\n"); gitrepo(os.path.join(r, "out/sub")); W(r, "out/sub/f"); W(r, "out/g")
+@case
+def gitfile(r):
+    gitrepo(os.path.join(r, "store")); W(r, ".gitignore", b"*\n!store/\n!store/**\n")
+    W(r, "wt/.git", b"gitdir: ../store/.git\n"); W(r, "wt/f"); W(r, "bad/.git", b"gitdir: nowhere\n"); W(r, "bad/f")
+@case
+def dotgit_in_subdir(r):
+    W(r, ".gitignore", b"*\n"); W(r, "s/.git"); W(r, "t/.git/HEAD", b"ref: refs/heads/x\n"); W(r, "t/y")
+@case
+def fake_repo_files(r):
+    W(r, ".gitignore", b"*\n"); W(r, "t/.git/HEAD", b"ref: refs/heads/x\n"); os.makedirs(os.path.join(r, "t/.git/objects")); os.makedirs(os.path.join(r, "t/.git/refs")); W(r, "t/y")
+@case
+def symlink_dir(r):
+    W(r, ".gitignore", b"d/\nl/\n"); W(r, "d/f"); os.symlink("d", os.path.join(r, "l"))
+@case
+def root_dotgit_file(r):
+    W(r, ".gitignore", b"*\n"); W(r, ".git", b"gitdir: /nowhere\n")
+@case
+def bom_crlf(r):
+    W(r, ".gitignore", b"\xef\xbb\xbfa\r\nb \r\n c\r\r\n\\#d\n#e\n\\!f\n"); [W(r, n) for n in ["a", "b", "b ", " c", " c\r", "#d", "#e", "!f"]]
+@case
+def trailing_spaces(r):
+    W(r, ".gitignore", b"a\\  \nb\\\nc \\ \n"); [W(r, n) for n in ["a ", "a  ", "b", "b\\", "c  ", "c \\ ", "c"]]
+@case
+def negate_into_excluded_dir(r):
+    W(r, ".gitignore", b"d/\n!d/keep\n"); W(r, "d/keep"); W(r, "d/x"); W(r, "e/.gitignore", b"*\n!.gitignore\n"); W(r, "e/f/.gitignore", b"!*\n"); W(r, "e/f/g")
+@case
+def foo_starstar(r):
+    W(r, ".gitignore", b"a/foo**\nb/x*/**/y\n/c**\n"); W(r, "a/foobar/baz"); W(r, "a/foo/q"); W(r, "b/xa/y"); W(r, "b/xa/1/2/y"); W(r, "cc/d")
+
+bad = 0
+for name, f in cases.items():
+    r = tempfile.mkdtemp()
+    try:
+        f(r)
+        try: b = ref(r)
+        except Exception as e: b = "ERR %r" % e
+        a = mine(r)
+        print("OK  " if a == b else "BAD ", name, a if a == b else (a, b))
+    finally:
+        shutil.rmtree(r)
+EOF
+python3 edge.py 2>&1
+
+$ python3 -m unittest 2>&1 | tail -2 && grep -n "subprocess\|import" snapshot/ignore.py && git status --short
+
+$ rm -rf snapshot/__pycache__ tests/__pycache__ && git status --short

@@ -1,0 +1,380 @@
+$ find /work/repo -type f -not -path '*/\.*' | head -50 && echo "---" && ls -la /work/repo
+
+$ python -m unittest tests.test_ignore tests.test_cli -v 2>&1
+
+$ python -I /tmp/difftest.py 0 50 2>&1 | head -200
+
+$ for seed in 1 2 3 4 5; do python -I /tmp/difftest.py $seed 200 2>&1 | tail -5; done
+
+$ python -I /tmp/difftest2.py 2>&1
+
+$ python -I /tmp/difftest2.py 2>&1
+
+$ python -I /tmp/difftest3.py 1 300 2>&1 | tail -40
+
+$ for seed in 2 3 4 5 6 7 8 9 10 11; do python -I /tmp/difftest3.py $seed 500 2>&1 | tail -2; done
+
+$ python -I /tmp/difftest4.py 2>&1
+
+$ for seed in 100 101 102 103 104; do python -I /tmp/difftest5.py $seed 500 2>&1 | tail -40; done
+
+$ cd /tmp && rm -rf gitdbg && mkdir gitdbg && cd gitdbg && \
+cat > .gitignore <<'EOF'
+![!abc]sj_*gu
+_?[/n?k/
+!.
+v[abc]g???o
+e/**lrn[abc]
+!m?*]
+e
+EOF
+mkdir -p sf
+cat > sf/.gitignore <<'EOF'
+c*htj*[abc]
+***/[!abc]*
+cl
+*/
+]m
+!**ql
+ecfc
+EOF
+touch sf/fw- sf/gk sf/mf sf/tz
+touch a/- 2>/dev/null; mkdir -p a; touch a/-
+touch d_ foe q wpu
+git init -q --template= 2>&1
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gitdbg && mkdir gitdbg && cd gitdbg && \
+echo "_?[/n?k/" > .gitignore && \
+mkdir -p sf && touch sf/fw- sf/gk && \
+git init -q --template= && \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ cd /tmp/gitdbg && git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard; echo "---"; cat .gitignore; echo "---"; ls -la sf/
+
+$ cd /tmp && rm -rf gitdbg && mkdir -p gitdbg/sf && cd gitdbg && \
+echo "***/[!abc]*" > sf/.gitignore && \
+touch sf/fw- sf/gk sf/cat && \
+git init -q --template= && \
+echo "=== git says:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf g1 && mkdir g1 && cd g1 && \
+echo "***/[!abc]*" > .gitignore && \
+touch fw- gk cat && \
+git init -q --template= && \
+echo "=== git says:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+rm -rf g2 && mkdir g2 && cd ../g2 && \
+echo "*/[!abc]*" > .gitignore && \
+touch fw- gk cat && \
+git init -q --template= && \
+echo "=== git says with just */:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gt && mkdir gt && cd gt && \
+echo "*/[!abc]*" > .gitignore && \
+touch fw gk cat && \
+mkdir sub && touch sub/fw sub/cat && \
+git init -q --template= && \
+echo "=== git says:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gt && mkdir gt && cd gt && \
+echo "*/[!abc]*" > .gitignore && \
+touch fw gk cat && \
+git init -q --template= && \
+echo "=== root files only, pattern */[!abc]* at root:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gt && mkdir gt && cd gt && \
+mkdir sf && echo "***/[!abc]*" > sf/.gitignore && \
+touch sf/fw sf/gk sf/cat && \
+git init -q --template= && \
+echo "=== pattern ***/[!abc]* in sf/.gitignore:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard; \
+echo "----"
+rm -rf g2 && mkdir -p g2/sf && cd ../g2 && \
+echo "*/[!abc]*" > sf/.gitignore && \
+touch sf/fw sf/gk sf/cat && \
+git init -q --template= && \
+echo "=== pattern */[!abc]* in sf/.gitignore:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard; \
+echo "----"
+rm -rf g3 && mkdir g3 && cd ../g3 && \
+echo "**/[!abc]*" > .gitignore && \
+touch fw gk cat && \
+git init -q --template= && \
+echo "=== pattern **/[!abc]* at root:"; \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/gA /tmp/gB /tmp/gC
+mkdir -p /tmp/gA/sf; echo "***/[!abc]*" > /tmp/gA/sf/.gitignore; touch /tmp/gA/sf/fw /tmp/gA/sf/gk /tmp/gA/sf/cat
+git -C /tmp/gA init -q --template=
+echo "=== ***/[!abc]* in sf/.gitignore:"
+git -C /tmp/gA -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+mkdir -p /tmp/gB/sf; echo "*/[!abc]*" > /tmp/gB/sf/.gitignore; touch /tmp/gB/sf/fw /tmp/gB/sf/gk /tmp/gB/sf/cat
+git -C /tmp/gB init -q --template=
+echo "=== */[!abc]* in sf/.gitignore:"
+git -C /tmp/gB -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+mkdir -p /tmp/gC; echo "**/[!abc]*" > /tmp/gC/.gitignore; touch /tmp/gC/fw /tmp/gC/gk /tmp/gC/cat
+git -C /tmp/gC init -q --template=
+echo "=== **/[!abc]* at root (same level files):"
+git -C /tmp/gC -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/gD
+mkdir -p /tmp/gD/c_/{"-"/ah,zg/g}
+cat > /tmp/gD/c_/.gitignore <<'EOF'
+fz[abc]*
+b[abc]j**byi/
+ipgy/
+cg**gn**
+!/q**f
+!nc
+hec
+!b
+EOF
+touch /tmp/gD/c_/-/ah/t /tmp/gD/c_/zg/g/t
+git -C /tmp/gD init -q --template=
+echo "=== git says:"
+git -C /tmp/gD -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "----"
+echo "=== my code says:"
+cd /work/repo && python -I -c "from snapshot.ignore import ignored_files; print('\n'.join(ignored_files('/tmp/gD')))"
+
+$ PYTHONPATH=/work/repo python -I -c "from snapshot.ignore import ignored_files; print('\n'.join(ignored_files('/tmp/gD')))"
+echo "----"
+echo "=== git says:"
+git -C /tmp/gD -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ PYTHONPATH=. python3 -I -c "from snapshot.ignore import ignored_files; print('\n'.join(ignored_files('/tmp/gD')))"
+
+$ python3 -c "import sys; sys.path.insert(0, '.'); from snapshot.ignore import ignored_files; print('\n'.join(ignored_files('/tmp/gD')))"
+
+$ cd /tmp/gD && find . -type f 2>&1 | head -20
+echo "---"
+git -C /tmp/gD -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ python -I /tmp/repro.py 103 36 2>&1 | head -60
+
+$ for t in 50 75 100 150 200 250 300 350 400 450; do
+  python -I /tmp/repro.py 103 $t 2>&1 | grep -E "theirs - mine|mine - theirs" | head -2 | tr '\n' ' '
+  echo "trial=$t"
+done
+
+$ python -m unittest tests.test_ignore tests.test_cli 2>&1 | tail -5
+echo "---"
+python -I /tmp/difftest4.py 2>&1 | tail -3
+echo "---"
+for seed in 1 2 3 100 102 103; do python -I /tmp/difftest3.py $seed 300 2>&1 | tail -2; done
+echo "---"
+for seed in 100 101 102 103 104 105; do python -I /tmp/difftest5.py $seed 500 2>&1 | grep -E "MISMATCH|match" | tail -2; done
+
+$ python -I /tmp/difftest5.py 100 500 2>&1 | tail -70
+
+$ rm -rf /tmp/gS && mkdir /tmp/gS && echo "/" > /tmp/gS/.gitignore && touch /tmp/gS/a /tmp/gS/b && mkdir /tmp/gS/sub && touch /tmp/gS/sub/x
+git -C /tmp/gS init -q --template=
+echo "=== git says for just '/' pattern:"
+git -C /tmp/gS -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/gT
+mkdir -p /tmp/gT/b/_/nf
+cat > /tmp/gT/b/_/nf/.gitignore <<'EOF'
+/
+/g**/?
+j[!abc]g?e
+z/gzb
+gc*mw
+EOF
+touch /tmp/gT/b/_/nf/d /tmp/gT/b/_/nf/g- /tmp/gT/b/_/nf/o /tmp/gT/b/_/nf/pz /tmp/gT/b/_/nf/tz-
+git -C /tmp/gT init -q --template=
+echo "=== git says:"
+git -C /tmp/gT -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/gU && mkdir /tmp/gU && echo "/g**/?" > /tmp/gU/.gitignore && touch /tmp/gU/g- /tmp/gU/d /tmp/gU/gaa
+git -C /tmp/gU init -q --template=
+echo "=== Pattern /g**/? :"
+git -C /tmp/gU -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+rm -rf /tmp/gV && mkdir /tmp/gV && echo "/g**/?" > /tmp/gV/.gitignore && mkdir /tmp/gV/g && touch /tmp/gV/g/x /tmp/gV/g/xx
+git -C /tmp/gV init -q --template=
+echo "=== Pattern /g**/? with dir g/:"
+git -C /tmp/gV -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/gW && mkdir /tmp/gW && echo "g**/?" > /tmp/gW/.gitignore && touch /tmp/gW/g- /tmp/gW/gaa /tmp/gW/ga
+git -C /tmp/gW init -q --template=
+echo "=== Pattern g**/? at root (no leading /):"
+git -C /tmp/gW -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+echo "---"
+rm -rf /tmp/gX && mkdir /tmp/gX && echo "g**/*" > /tmp/gX/.gitignore && touch /tmp/gX/g- /tmp/gX/gaa /tmp/gX/ga /tmp/gX/other
+git -C /tmp/gX init -q --template=
+echo "=== Pattern g**/* at root:"
+git -C /tmp/gX -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+echo "---"
+rm -rf /tmp/gY && mkdir /tmp/gY && echo "g**?" > /tmp/gY/.gitignore && touch /tmp/gY/g- /tmp/gY/gaa /tmp/gY/other
+git -C /tmp/gY init -q --template=
+echo "=== Pattern g**? at root:"
+git -C /tmp/gY -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/gZ && mkdir /tmp/gZ && cd /tmp/gZ && cat > .gitignore <<'EOF'
+g**/?
+EOF
+touch g- gaa ga
+git init -q --template= 2>&1
+echo "=== files:"
+ls -la
+echo "=== gitignore content:"
+cat .gitignore
+echo "=== git check-ignore -v with g-:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null check-ignore -v g- ga gaa 2>&1
+echo "=== ls-files:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ git --version
+# Also test more patterns
+rm -rf /tmp/g_test && mkdir /tmp/g_test && cd /tmp/g_test && \
+echo "foo**/x" > .gitignore && \
+touch fox fx foox fooxx foox2
+mkdir -p foo/bar; touch foo/bar/x foo/x
+git init -q --template= && \
+echo "=== foo**/x matches:" && \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ which git && ls /usr/share/doc/git/ 2>&1 | head -5
+# Try to find and read git source
+find / -name "wildmatch.c" 2>/dev/null | head -3
+# Download the git source if needed, but first test with specific isolated patterns
+echo "---"
+# Test: what if the pattern is exactly "**/x" at root
+rm -rf /tmp/t1 && mkdir /tmp/t1 && cd /tmp/t1 && echo "**/x" > .gitignore && touch x xx yx
+git init -q --template= && \
+echo "**/x at root:" && \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+# What about the pattern "a**/x" (not slash before **)
+rm -rf /tmp/t2 && mkdir /tmp/t2 && cd /tmp/t2 && echo "a**/x" > .gitignore && touch ax axx xx yax
+git init -q --template= && \
+echo "a**/x at root:" && \
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+# Test with slash in path
+mkdir /tmp/t2/a && touch /tmp/t2/a/x
+rm -rf /tmp/t2/.git && \
+git -C /tmp/t2 init -q --template= && \
+echo "a**/x with a/x present:" && \
+git -C /tmp/t2 -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ # Try to find a git source we can read
+apt list --installed 2>/dev/null | grep -i git | head
+# Or just install git from source for inspection
+curl -s "https://raw.githubusercontent.com/git/git/v2.47.3/wildmatch.c" | head -100 2>&1 | head -200
+
+$ python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/wildmatch.c').read().decode())" 2>&1 | head -200
+
+$ python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/dir.c').read().decode())" 2>&1 | grep -A 60 "static int match_pathname" | head -100
+
+$ python3 -c "
+import urllib.request
+src = urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/dir.c').read().decode()
+# Find match_pathname
+start = src.find('match_pathname')
+while start != -1:
+    print('--- at', start, '---')
+    print(src[start:start+2000])
+    print()
+    start = src.find('match_pathname', start + 1)
+    if start > 100000: break
+" 2>&1 | head -200
+
+$ python3 -c "
+import urllib.request
+src = urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/dir.c').read().decode()
+start = src.find('last_matching_pattern_from_list')
+print(src[start:start+3000])
+" 2>&1 | head -100
+
+$ python3 -c "
+import urllib.request
+src = urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/dir.c').read().decode()
+start = src.find('match_basename(')
+print(src[start:start+2000])
+" 2>&1 | head -80
+
+$ python3 -c "
+import urllib.request
+src = urllib.request.urlopen('https://raw.githubusercontent.com/git/git/v2.47.3/dir.c').read().decode()
+# Find parse_path_pattern
+start = src.find('parse_path_pattern')
+while start != -1:
+    print('--- at', start, '---')
+    print(src[start:start+2500])
+    print()
+    start = src.find('parse_path_pattern', start + 1)
+    if start > 100000: break
+" 2>&1 | head -80
+
+$ rm -rf /tmp/t3 && mkdir /tmp/t3 && cd /tmp/t3 && echo "a**/b" > .gitignore && touch ab aXb && mkdir -p a; touch a/b
+git init -q --template=
+echo "a**/b matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+rm -rf /tmp/t4 && mkdir /tmp/t4 && cd /tmp/t4 && echo "a**b" > .gitignore && touch aXb ab aXXb; mkdir -p a; touch a/b
+git init -q --template=
+echo "a**b matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ # Test if ** preceded by literal (not slash) and not first wildcard is still path-component
+rm -rf /tmp/t5 && mkdir /tmp/t5 && cd /tmp/t5 && echo "a*b**/c" > .gitignore && touch aXbc abc; mkdir -p aXb; touch aXb/c
+git init -q --template=
+echo "a*b**/c matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+# ** after a wildcard, not path-component
+rm -rf /tmp/t6 && mkdir /tmp/t6 && cd /tmp/t6 && echo "a?**/b" > .gitignore && touch aXb aXXb; mkdir -p aX; touch aX/b
+git init -q --template=
+echo "a?**/b matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ # ** preceded by / even if there are earlier wildcards
+rm -rf /tmp/t7 && mkdir /tmp/t7 && cd /tmp/t7 && echo "a*/b**/c" > .gitignore && \
+  touch abc && mkdir -p a/bX; touch a/bX/c; mkdir -p aX/b; touch aX/b/c; mkdir -p aX/bX; touch aX/bX/c
+git init -q --template=
+echo "a*/b**/c matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+# ** immediately after a / (and after some wildcards)
+rm -rf /tmp/t8 && mkdir /tmp/t8 && cd /tmp/t8 && echo "a*/**/c" > .gitignore && \
+  touch abc && mkdir -p a aX; touch a/c aX/c; mkdir -p aX/b; touch aX/b/c; mkdir -p aX/b/d; touch aX/b/d/c
+git init -q --template=
+echo "a*/**/c matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/t9 && mkdir /tmp/t9 && cd /tmp/t9 && echo "foo**" > .gitignore && touch foo foox fooxy; mkdir -p foo2 foox2; touch foo2/x foox2/y
+git init -q --template=
+echo "foo** matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+rm -rf /tmp/t10 && mkdir /tmp/t10 && cd /tmp/t10 && echo "foo**bar" > .gitignore && touch foobar fooxbar fooXbar; mkdir -p foo; touch foo/bar
+git init -q --template=
+echo "foo**bar matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/t11 && mkdir /tmp/t11 && cd /tmp/t11 && echo "g**/?" > .gitignore && touch g-; mkdir -p g; touch g/x
+git init -q --template=
+echo "g**/? with files g- and g/x:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+echo "---"
+# Does ** act as a wildcard for has_wildcard tracking? i.e. foo**bar**/x
+rm -rf /tmp/t12 && mkdir /tmp/t12 && cd /tmp/t12 && echo "foo**bar**/x" > .gitignore && \
+  touch fooxbarx; mkdir -p fooxbar foobar2; touch fooxbar/x foobar2/x
+git init -q --template=
+echo "foo**bar**/x matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard
+
+$ rm -rf /tmp/t13 && mkdir /tmp/t13 && cd /tmp/t13 && echo "g**/foo" > .gitignore && touch gfoo gxfoo; mkdir -p g; touch g/foo; mkdir -p g/x; touch g/x/foo
+git init -q --template=
+echo "g**/foo matches:"
+git -c core.ignorecase=false -c core.excludesFile=/dev/null ls-files --others --ignored --exclude-standard

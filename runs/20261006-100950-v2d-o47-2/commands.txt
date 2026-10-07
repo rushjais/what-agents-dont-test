@@ -1,0 +1,2629 @@
+$ ls -la /work/repo/
+
+$ ls -la /work/repo/snapshot /work/repo/docs /work/repo/tools
+
+$ curl -s http://127.0.0.1:8765/ 2>&1 | head -20; echo "---"; curl -s http://127.0.0.1:8765/health 2>&1 | head -20
+
+$ /work/repo/tools/packignore /work/repo 2>&1
+
+$ mkdir -p /tmp/pack_test1
+cd /tmp/pack_test1
+cat > .packignore <<EOF
+*.log
+!keep.log
+build/
+EOF
+mkdir -p build src
+echo "x" > a.log
+echo "x" > keep.log
+echo "x" > src/b.log
+echo "x" > src/c.txt
+echo "x" > build/output.o
+/work/repo/tools/packignore /tmp/pack_test1 2>&1
+
+$ cat /work/repo/snapshot/__main__.py /work/repo/snapshot/cli.py
+
+$ cat > /tmp/probe.py <<'PY'
+#!/usr/bin/env python3
+"""Probe packignore for its exact semantics by running it over tiny trees."""
+import os, shutil, subprocess, sys, tempfile
+
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(tree, patterns, label=""):
+    """tree: dict {'rel/path': 'content' or None (empty file)}, patterns: str for root .packignore"""
+    d = tempfile.mkdtemp(prefix="pack_")
+    try:
+        # extra files: dict of path->content (where '.packignore files are passed as content)
+        with open(os.path.join(d, ".packignore"), "w") as f:
+            f.write(patterns)
+        for rel, content in tree.items():
+            full = os.path.join(d, rel)
+            os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+            with open(full, "w") as f:
+                f.write(content if content is not None else "")
+        out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+        if label:
+            print(f"=== {label} ===")
+        if out.stderr:
+            print("STDERR:", out.stderr.strip())
+        for line in sorted(out.stdout.splitlines()):
+            print(" ", line)
+    finally:
+        shutil.rmtree(d)
+
+TREE = {
+    "a.log": None, "a.LOG": None, "a.txt": None,
+    "b/a.log": None, "b/a.txt": None, "b/c/a.log": None,
+    "build/x.o": None, "build/sub/y.o": None,
+    "deep/one/two/three/f.log": None,
+    "keep.log": None, "k.tmp": None, "important.tmp": None,
+    "sub/.packignore": "# nested\n*.inner\n",  # we may override
+    "sub/x.inner": None, "sub/y.outer": None,
+    "subA/sub/x.inner": None,
+    "foo-bar.txt": None, "foo_bar.txt": None,
+    "weird[0].txt": None,
+    "hidden/.gitignore": None,
+    ".hidden_file": None,
+    "src/node_modules/pkg/index.js": None,
+    "src/index.js": None,
+}
+
+# Try: basic star
+run(TREE, "*.log\n", "01-star-log")
+
+PY
+python3 /tmp/probe.py 2>&1 | head -60
+
+$ cat > /tmp/probe2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile, pprint
+PACKIGNORE = "/work/repo/tools/packignore"
+def mk(files):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f:
+            f.write(content or "")
+    return d
+
+def run_ignore(d):
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    if out.stderr: print("STDERR:", out.stderr)
+    return sorted(out.stdout.splitlines())
+
+def all_files(d):
+    out = []
+    for dp, dns, fns in os.walk(d):
+        if os.path.samefile(dp, d) and ".git" in dns:
+            dns.remove(".git")
+        for fn in fns:
+            rel = os.path.relpath(os.path.join(dp, fn), d).replace(os.sep, "/")
+            out.append(rel)
+    return sorted(out)
+
+# Basic *.log test
+d = mk({
+    ".packignore": "*.log\n",
+    "a.log": "", "a.LOG": "", "a.txt": "",
+    "b/a.log": "", "b/a.txt": "",
+    "b/c/a.log": "",
+    "deep/one/two/three/f.log": "",
+    "keep.log": "", "k.tmp": "",
+})
+print("ALL FILES:")
+pprint.pp(all_files(d))
+print("IGNORED:")
+pprint.pp(run_ignore(d))
+shutil.rmtree(d)
+PY
+python3 /tmp/probe2.py
+
+$ cat > /tmp/probe3.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+def mk(files):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write(content or "")
+    return d
+
+def run(label, files, patterns):
+    files = dict(files)
+    files[".packignore"] = patterns
+    d = mk(files)
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    for l in sorted(out.stdout.splitlines()): print(" ", l)
+    shutil.rmtree(d)
+
+# Test 1: Simple top-level matches
+run("one-top-level", {"a.log": ""}, "*.log\n")
+run("two-top-level", {"a.log": "", "b.log": ""}, "*.log\n")
+run("mixed", {"a.log": "", "a.txt": ""}, "*.log\n")
+run("literal-match", {"foo.txt": "", "bar.txt": ""}, "foo.txt\n")
+run("literal-match-deep", {"foo.txt": "", "sub/foo.txt": ""}, "foo.txt\n")
+run("star-exact", {"foo.txt": "", "bar.txt": ""}, "*\n")
+run("star-slash", {"foo.txt": "", "sub/x.txt": ""}, "/*.txt\n")
+run("slashed-anchored", {"foo.txt": "", "sub/foo.txt": ""}, "/foo.txt\n")
+run("neg-only", {"a.log": "", "b.log": ""}, "!a.log\n")
+run("tilde-order", {"a.log": "", "keep.log": ""}, "*.log\n!keep.log\n")
+PY
+python3 /tmp/probe3.py
+
+$ cat > /tmp/probe4.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+def mk(files):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write(content or "")
+    return d
+
+def run(label, files, patterns):
+    files = dict(files)
+    files[".packignore"] = patterns
+    d = mk(files)
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    for l in sorted(out.stdout.splitlines()): print(" ", l)
+    shutil.rmtree(d)
+
+# Reproduce the first test case
+TREE = {
+    "a.log": "", "a.LOG": "", "a.txt": "",
+    "b/a.log": "", "b/a.txt": "", "b/c/a.log": "",
+    "build/x.o": "", "build/sub/y.o": "",
+    "deep/one/two/three/f.log": "",
+    "keep.log": "", "k.tmp": "", "important.tmp": "",
+    "sub/.packignore": "# nested\n*.inner\n",
+    "sub/x.inner": "", "sub/y.outer": "",
+    "subA/sub/x.inner": "",
+    "foo-bar.txt": "", "foo_bar.txt": "",
+    "weird[0].txt": "",
+    "hidden/.gitignore": "",
+    ".hidden_file": "",
+    "src/node_modules/pkg/index.js": "",
+    "src/index.js": "",
+}
+run("first-test", TREE, "*.log\n")
+PY
+python3 /tmp/probe4.py
+
+$ cat > /tmp/probe5.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+def mk(files):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write(content or "")
+    return d
+
+def run(label, files, patterns):
+    files = dict(files)
+    files[".packignore"] = patterns
+    d = mk(files)
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    for l in sorted(out.stdout.splitlines()): print(" ", l)
+    shutil.rmtree(d)
+
+# Try smaller variants to isolate
+run("just-two-logs", {"a.log": "", "keep.log": ""}, "*.log\n")
+run("with-hidden", {"a.log": "", "keep.log": "", ".hidden_file": ""}, "*.log\n")
+run("with-dot-folder", {"a.log": "", "sub/x.inner": "", "sub/.packignore": "*.inner\n"}, "*.log\n")
+# Important: is subdirectory .packignore combining with root .packignore?
+run("inner-plus-root", 
+    {"a.log": "", "sub/x.inner": "", "sub/a.log": "", "sub/.packignore": "*.inner\n"}, 
+    "*.log\n")
+run("root-only-with-sub-no-nested", 
+    {"a.log": "", "sub/x.inner": "", "sub/a.log": ""}, 
+    "*.log\n")
+PY
+python3 /tmp/probe5.py
+
+$ cat > /tmp/probe6.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+def mk(files):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write(content or "")
+    return d
+
+def run(label, files, patterns):
+    files = dict(files)
+    files[".packignore"] = patterns
+    d = mk(files)
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    for l in sorted(out.stdout.splitlines()): print(" ", l)
+    shutil.rmtree(d)
+
+# Bisection: build up to the first-test tree
+TREE_BASE = {"a.log": "", "keep.log": ""}
+run("1", TREE_BASE, "*.log\n")
+
+T = dict(TREE_BASE)
+T.update({"a.LOG": "", "a.txt": ""})
+run("2+LOG+txt", T, "*.log\n")
+
+T.update({"b/a.log": "", "b/a.txt": "", "b/c/a.log": ""})
+run("3+bdir", T, "*.log\n")
+
+T.update({"build/x.o": "", "build/sub/y.o": ""})
+run("4+build", T, "*.log\n")
+
+T.update({"deep/one/two/three/f.log": ""})
+run("5+deep", T, "*.log\n")
+
+T.update({"sub/.packignore": "# nested\n*.inner\n"})
+run("6+subpackignore", T, "*.log\n")
+
+T.update({"sub/x.inner": "", "sub/y.outer": ""})
+run("7+subfiles", T, "*.log\n")
+
+T.update({"subA/sub/x.inner": ""})
+run("8+subA", T, "*.log\n")
+
+T.update({"foo-bar.txt": "", "foo_bar.txt": "", "weird[0].txt": ""})
+run("9+misc", T, "*.log\n")
+
+T.update({"hidden/.gitignore": "", ".hidden_file": ""})
+run("10+hidden", T, "*.log\n")
+
+T.update({"src/node_modules/pkg/index.js": "", "src/index.js": ""})
+run("11+src", T, "*.log\n")
+
+T.update({"k.tmp": "", "important.tmp": ""})
+run("12+tmp", T, "*.log\n")
+PY
+python3 /tmp/probe6.py
+
+$ cat > /tmp/probe7.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filenames, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for n in filenames:
+        full = os.path.join(d, n)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write("")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label} ===")
+    for l in sorted(out.stdout.splitlines()): print(" ", l)
+    shutil.rmtree(d)
+
+# Isolate the issue
+run("A: a.log, keep.log", ["a.log", "keep.log"], "*.log\n")
+run("B: a.log, a.LOG, keep.log", ["a.log", "a.LOG", "keep.log"], "*.log\n")
+run("C: a.log, a.txt, keep.log", ["a.log", "a.txt", "keep.log"], "*.log\n")
+run("D: a.log, a.txt", ["a.log", "a.txt"], "*.log\n")
+run("E: a.log, a.LOG", ["a.log", "a.LOG"], "*.log\n")
+# Does case matter? Or filename ordering?
+run("F: Z.log, a.log", ["Z.log", "a.log"], "*.log\n")
+run("G: just a.log in deep", ["x/a.log", "a.log"], "*.log\n")
+# Maybe it's a count-based thing: more than N files hide something?
+run("H: 10 files", [f"file{i}.log" for i in range(10)], "*.log\n")
+run("I: tons", ["a.log", "b.log", "c.log", "d.log", "e.log"], "*.log\n")
+PY
+python3 /tmp/probe7.py
+
+$ cd /tmp && mkdir -p pack_fs_test && cd pack_fs_test && rm -f a.log a.LOG && touch a.log && touch a.LOG && ls -la
+echo "---"
+echo "test: are a.log and a.LOG the same file?"
+ls -i a.log a.LOG 2>&1
+rm -rf /tmp/pack_fs_test
+
+$ cat > /tmp/probe8.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filenames, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for n in filenames:
+        full = os.path.join(d, n)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write("")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label} ===")
+    for l in sorted(out.stdout.splitlines()): print(" ", l)
+    shutil.rmtree(d)
+
+run("E1: a.log + a.LOG", ["a.log", "a.LOG"], "*.log\n")
+run("E2: a.log + A.log", ["a.log", "A.log"], "*.log\n")
+run("E3: Up pattern", ["a.log", "a.LOG"], "*.LOG\n")
+run("E4: both patterns", ["a.log", "a.LOG"], "*.log\n*.LOG\n")
+run("E5: same name case diff", ["a.LOG", "a.log", "a.Log"], "*\n")
+run("E6: star all", ["a.LOG", "a.log"], "*\n")
+run("E7: star all more", ["foo", "bar"], "*\n")
+run("E8: a vs A", ["a", "A"], "a\n")
+run("E9: a vs A pattern A", ["a", "A"], "A\n")
+run("E10: aa.log, AA.log", ["aa.log", "AA.log"], "*.log\n")
+run("E11: all upper", ["A.LOG", "B.LOG"], "*.log\n")
+run("E12: all upper pattern upper", ["A.LOG", "B.LOG"], "*.LOG\n")
+run("E13: upper pattern-match-both", ["a.log", "A.log"], "*.log\n")
+PY
+python3 /tmp/probe8.py
+
+$ cat > /tmp/probe9.py <<'PY'
+#!/usr/bin/env python3
+import os, json
+d = "/tmp/probe9dir"
+os.makedirs(d, exist_ok=True)
+for n in ["a.log", "a.LOG", ".packignore"]:
+    with open(os.path.join(d, n), "w") as f: f.write("")
+# Mimic client
+files = {}
+for dp, dns, fns in os.walk(d):
+    for name in fns:
+        full = os.path.join(dp, name)
+        rel = os.path.relpath(full, d).replace(os.sep, "/")
+        files[rel] = open(full, newline="").read() if name == ".packignore" else None
+print("DICT:", files)
+print("JSON:", json.dumps({"files": files}))
+import shutil
+shutil.rmtree(d)
+PY
+python3 /tmp/probe9.py
+
+$ cat > /tmp/probe_main.py <<'PY'
+#!/usr/bin/env python3
+"""Comprehensive probe of packignore behavior."""
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns=""):
+    """filespec: dict {relpath: content_or_None}, or list (empty files)."""
+    d = tempfile.mkdtemp(prefix="pack_")
+    if patterns is not None:
+        with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        os.makedirs(os.path.dirname(full) or d, exist_ok=True)
+        with open(full, "w") as f: f.write(content or "")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# COMMENTS
+run("hash-comment", ["a", "b"], "# comment\na\n")
+run("semi-comment", ["a", "b"], "; comment\na\n")
+run("hash-mid-line", ["a", "a#b"], "a#b\n")
+run("semi-mid-line", ["a", "a;b"], "a;b\n")
+run("hash-leading-space", ["a", "b"], " # comment\na\n")
+run("comment-escape-hash", ["#a"], "\\#a\n")
+run("literal-#file", ["#a"], "#a\n")
+run("empty-lines", ["a", "b"], "\n\na\n\n")
+
+# BLANK PATTERNS
+run("just-slash", ["a", "b"], "/\n")
+run("just-bang", ["a"], "!\n")
+
+# BASIC STAR
+run("star-prefix", ["abc.txt", "xyz.txt"], "abc*\n")
+run("star-mid", ["abc.txt", "axc.txt", "abxxc.txt"], "a*c.txt\n")
+run("question-mark", ["a.txt", "ab.txt"], "?.txt\n")
+run("question-mult", ["abc", "ab", "abcd"], "???\n")
+
+# SLASHES AND ANCHORING
+run("leading-slash", {"a": None, "b/a": None}, "/a\n")
+run("no-slash-matches-anywhere", {"a": None, "b/a": None, "b/c/a": None}, "a\n")
+run("mid-slash-anchors", {"b/a": None, "c/b/a": None}, "b/a\n")
+run("mid-slash-plain", {"a": None, "sub/a": None}, "sub/a\n")
+
+# TRAILING SLASH
+run("dir-only", {"foo": None, "foo/bar": None}, "foo/\n")
+run("dir-only-nondir-doesnt-match", {"foo": None}, "foo/\n")
+run("dir-only-anchored", {"sub/foo": None, "sub/foo/x": None, "foo": None, "foo/y": None}, "/foo/\n")
+
+# STARSTAR
+run("ss-prefix", {"a.txt": None, "sub/a.txt": None, "sub/sub/a.txt": None}, "**/a.txt\n")
+run("ss-suffix", {"foo/x": None, "foo/sub/x": None, "foo/x/sub/y": None, "bar/x": None}, "foo/**\n")
+run("ss-middle", {"a/x": None, "a/b/x": None, "a/b/c/x": None, "x": None}, "a/**/x\n")
+run("double-ss", {"a/b/c/d": None, "a/d": None}, "**/a/**/d\n")
+
+# NEGATION
+run("neg-reinclude", {"a.log": None, "keep.log": None}, "*.log\n!keep.log\n")
+run("neg-first-only", {"a.log": None}, "!a.log\n")
+run("neg-reinclude-in-excluded-dir", 
+    {"build/x": None, "build/keep": None}, "build/\n!build/keep\n")
+run("neg-reinclude-deep", {"a/b/c/d.log": None, "a/b/c/keep.log": None}, 
+    "*.log\n!keep.log\n")
+
+# NESTED packignore
+run("nested-basic", 
+    {".packignore": "a.log\n", "sub/.packignore": "b.log\n",
+     "a.log": None, "b.log": None, "sub/a.log": None, "sub/b.log": None,
+     "sub/sub/a.log": None, "sub/sub/b.log": None}, patterns=None)
+run("nested-override", 
+    {".packignore": "*.log\n", "sub/.packignore": "!keep.log\n",
+     "a.log": None, "sub/a.log": None, "sub/keep.log": None}, patterns=None)
+
+# SPECIAL CHARACTERS
+run("brackets", ["a[0].txt", "a0.txt", "ax.txt"], "a[0].txt\n")
+run("bracket-class", ["a.txt", "b.txt", "c.txt"], "[ab].txt\n")
+PY
+python3 /tmp/probe_main.py 2>&1
+
+$ cat > /tmp/probe_main2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns=""):
+    d = tempfile.mkdtemp(prefix="pack_")
+    if patterns is not None:
+        with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    for rel, content in files.items():
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        os.makedirs(parent, exist_ok=True)
+        with open(full, "w") as f: f.write(content or "")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# TRAILING SLASH
+run("dir-only", {"foo/bar": None}, "foo/\n")
+run("dir-only-file-exists", {"foo-file": None}, "foo-file/\n")  # pattern "foo-file/" vs file "foo-file"
+run("dir-only-sub", {"sub/foo/x": None, "foo/y": None}, "foo/\n")
+run("dir-anchored", {"sub/foo/x": None, "foo/y": None}, "/foo/\n")
+
+# STARSTAR
+run("ss-prefix", {"a.txt": None, "sub/a.txt": None, "sub/sub/a.txt": None}, "**/a.txt\n")
+run("ss-suffix", {"foo/x": None, "foo/sub/x": None, "foo/x/sub/y": None, "bar/x": None}, "foo/**\n")
+run("ss-middle", {"a/x": None, "a/b/x": None, "a/b/c/x": None, "x": None}, "a/**/x\n")
+run("double-ss", {"a/b/c/d": None, "a/d": None}, "**/a/**/d\n")
+run("ss-zero", {"a.txt": None}, "**/a.txt\n")  # zero dirs match **?
+run("ss-only-at-start", {"a.txt": None, "b/a.txt": None}, "**a.txt\n")  # ** without slash
+run("ss-middle-no-slash", {"foo/bar": None, "foobar": None}, "foo**bar\n")
+
+# NEGATION
+run("neg-reinclude", {"a.log": None, "keep.log": None}, "*.log\n!keep.log\n")
+run("neg-first-only", {"a.log": None}, "!a.log\n")
+run("neg-reinclude-in-excluded-dir", 
+    {"build/x": None, "build/keep": None}, "build/\n!build/keep\n")
+run("neg-after-dir-ex", {"build/x": None, "build/keep": None}, "build\n!build/keep\n")
+run("neg-reinclude-deep", {"a/b/c/d.log": None, "a/b/c/keep.log": None}, "*.log\n!keep.log\n")
+
+# NESTED packignore
+run("nested-basic", 
+    {".packignore": "a.log\n", "sub/.packignore": "b.log\n",
+     "a.log": None, "b.log": None, "sub/a.log": None, "sub/b.log": None,
+     "sub/sub/a.log": None, "sub/sub/b.log": None}, patterns=None)
+run("nested-override", 
+    {".packignore": "*.log\n", "sub/.packignore": "!keep.log\n",
+     "a.log": None, "sub/a.log": None, "sub/keep.log": None}, patterns=None)
+run("nested-anchoring", 
+    {".packignore": "", "sub/.packignore": "/a.log\n",
+     "sub/a.log": None, "sub/x/a.log": None, "a.log": None}, patterns=None)
+
+# SPECIAL CHARACTERS
+run("brackets", ["a[0].txt", "a0.txt", "ax.txt"], "a[0].txt\n")
+run("bracket-class", ["a.txt", "b.txt", "c.txt"], "[ab].txt\n")
+run("escape-star", ["a*b", "axb"], "a\\*b\n")
+run("backslash", ["ab", "a\\b"], "a\\\\b\n")  # pattern a\\b
+
+# WHITESPACE
+run("trailing-space", ["a", "a "], "a \n")
+run("leading-space", ["a", " a"], " a\n")
+run("tabs", ["a", "ab"], "a\t\n")
+PY
+python3 /tmp/probe_main2.py 2>&1
+
+$ cat > /tmp/probe_main3.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns=""):
+    d = tempfile.mkdtemp(prefix="pack_")
+    if patterns is not None:
+        with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    # Sort by depth so parents are created first
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        content = files[rel]
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(content or "")
+        except (NotADirectoryError, FileExistsError) as e:
+            print(f"  !! SKIP {rel}: {e}")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# STARSTAR
+run("ss-suffix", {"foo/x": None, "foo/sub/x": None, "foo/sub/y": None, "bar/x": None}, "foo/**\n")
+run("ss-middle", {"a/x": None, "a/b/x": None, "a/b/c/x": None, "x": None}, "a/**/x\n")
+run("ss-zero", {"a.txt": None}, "**/a.txt\n")
+run("ss-only-at-start", {"a.txt": None, "b/a.txt": None}, "**a.txt\n")
+run("ss-middle-no-slash", {"foo/bar": None, "foobar": None, "foo/sub/bar": None}, "foo**bar\n")
+
+# NEGATION
+run("neg-reinclude-in-excluded-dir", {"build/x": None, "build/keep": None}, "build/\n!build/keep\n")
+run("neg-after-dir-ex-no-slash", {"build/x": None, "build/keep": None}, "build\n!build/keep\n")
+run("neg-reinclude-deep", {"a/b/c/d.log": None, "a/b/c/keep.log": None}, "*.log\n!keep.log\n")
+run("neg-doesnt-reinclude-into-dir", {"build/x": None}, "build/\n!build/x\n")
+
+# NESTED packignore
+run("nested-basic", 
+    {".packignore": "a.log\n", "sub/.packignore": "b.log\n",
+     "a.log": None, "b.log": None, "sub/a.log": None, "sub/b.log": None,
+     "sub/sub/a.log": None, "sub/sub/b.log": None}, patterns=None)
+run("nested-override", 
+    {".packignore": "*.log\n", "sub/.packignore": "!keep.log\n",
+     "a.log": None, "sub/a.log": None, "sub/keep.log": None, "keep.log": None}, patterns=None)
+run("nested-anchoring", 
+    {".packignore": "", "sub/.packignore": "/a.log\n",
+     "sub/a.log": None, "sub/x/a.log": None, "a.log": None}, patterns=None)
+run("nested-no-escape-up", 
+    {".packignore": "", "sub/.packignore": "../a.log\n",
+     "sub/a.log": None, "a.log": None}, patterns=None)
+
+# SPECIAL CHARACTERS
+run("brackets", ["a[0].txt", "a0.txt", "ax.txt"], "a[0].txt\n")
+run("bracket-class", ["a.txt", "b.txt", "c.txt"], "[ab].txt\n")
+run("escape-star", ["a*b", "axb"], "a\\*b\n")
+
+# WHITESPACE
+run("trailing-space", ["a", "a "], "a \n")
+run("leading-space", ["a", " a"], " a\n")
+run("tabs", ["a", "ab"], "a\t\n")
+PY
+python3 /tmp/probe_main3.py 2>&1
+
+$ cat > /tmp/probe_main4.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns=""):
+    d = tempfile.mkdtemp(prefix="pack_")
+    if patterns is not None:
+        with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        content = files[rel]
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(content or "")
+        except (NotADirectoryError, FileExistsError) as e:
+            print(f"  !! SKIP {rel}: {e}")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    if out.stderr: print("STDERR:", out.stderr.strip())
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# More ** tests
+run("ss-trailing", {"a.txt": None, "sub/a.txt": None, "sub/b.txt": None}, "**\n")
+run("ss-trailing-slash", {"a.txt": None, "sub/a.txt": None}, "**/\n")
+run("ss-leading-slash", {"a.txt": None, "sub/a.txt": None}, "/**/a.txt\n")
+run("ss-abc", {"a.txt": None, "x/a.txt": None, "x/y/a.txt": None}, "/**/**/a.txt\n")
+run("ss-both-ends", {"a/x/b": None, "a/b": None, "a/y/z/b": None, "b": None}, "a/**/b\n")
+
+# Order and precedence
+run("order-ex-reex", {"a.log": None}, "*.log\n!a.log\n*.log\n")
+run("order-reex-ex", {"a.log": None}, "!a.log\n*.log\n")
+run("mult-matches-last-wins", {"a.log": None}, "!*.log\n*.log\n")
+
+# Inline comments?
+run("inline-comment", {"a": None, "a #c": None}, "a #comment\n")
+run("semi-inline", {"a": None}, "a ;comment\n")
+
+# Line endings
+run("crlf", {"a": None, "b": None}, "a\r\nb\r\n")
+run("mixed-eol", {"a": None, "b": None}, "a\nb\n")
+
+# Trailing slash + file (not dir): behavior
+run("dir-pattern-matches-only-dir", {"foo-file": None, "sub/foo-file": None, "sub/foo-file/x": None}, "foo-file/\n")
+
+# Non-slash pattern - matches dirs too
+run("basename-dir", {"logs/a": None, "logs": None, "x/logs/b": None}, "logs\n")
+run("basename-file-and-dir", {"foo": None, "foo/x": None}, "foo\n")
+
+# Escaped bang
+run("escape-bang", {"!a": None}, "\\!a\n")
+
+# ! with trailing slash
+run("neg-dir", {"build/x": None, "src/x": None}, "*\n!src/\n")
+
+# empty tree
+run("empty-tree", {}, "*\n")
+
+# .packignore at root with ! that affects everything
+run("star-plus-reinclude", {"a.txt": None, "sub/a.txt": None, "sub/b.txt": None}, "*\n!a.txt\n")
+
+# Multiple nested
+run("multi-nested", 
+    {".packignore": "*.log\n",
+     "a/.packignore": "!a.log\n",
+     "a/b/.packignore": "a.log\n",
+     "a.log": None, "a/a.log": None, "a/b/a.log": None, "a/b/c/a.log": None},
+    patterns=None)
+
+# When .packignore is in a directory that is itself ignored, does it still apply?
+run("packignore-in-ignored-dir",
+    {".packignore": "sub/\n",
+     "sub/.packignore": "!keep\n",
+     "sub/keep": None, "sub/other": None},
+    patterns=None)
+PY
+python3 /tmp/probe_main4.py 2>&1
+
+$ cat > /tmp/probe_neg.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(files[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Investigate negation precedence
+run("1-last-wins?", ["a.log"], "*.log\n!a.log\n")        # expected excluded? result?
+run("2-reex-after-ex", ["a.log"], "*.log\n!a.log\n")
+run("3-ex-after-reex", ["a.log"], "!a.log\n*.log\n")
+run("4-triple", ["a.log"], "*.log\n!a.log\n*.log\n")
+run("5-quad", ["a.log"], "*.log\n!a.log\n*.log\n!a.log\n")
+
+# What if ! pattern is glob
+run("6-glob-neg", ["a.log"], "*.log\n!*.log\n")
+run("7-glob-neg-rev", ["a.log"], "!*.log\n*.log\n")
+run("8-glob-neg-last", ["a.log"], "*.log\n!*.log\n*.log\n")
+
+# different pattern types
+run("9-ex-dir-reex-file", ["dir/a"], "dir/\n!dir/a\n")
+run("10-ex-file-reex-dir", ["dir/a"], "*\n!dir/\n")  # already seen
+run("11-ex-glob-reex-literal", ["a.log"], "*.log\n!a.log\n")
+run("12-ex-literal-reex-glob", ["a.log"], "a.log\n!*.log\n")
+run("13-ex-literal-reex-literal", ["a.log"], "a.log\n!a.log\n")
+run("14-ex-glob-reex-glob", ["a.log", "b.log"], "*.log\n!a.*\n")
+
+# ** with negation
+run("15-ss-neg", {"a/b/c.log": None, "a/b/keep.log": None}, "**/*.log\n!**/keep.log\n")
+PY
+python3 /tmp/probe_neg.py 2>&1
+
+$ cat > /tmp/probe_star.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(files[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Does * cross dots?
+run("1", ["a.log"], "a.*\n")
+run("2", ["a.log", "a.b.c"], "a.*\n")
+run("3", ["a.log"], "a*\n")
+run("4", ["aNoDot"], "a*\n")
+
+# ! with literal that is file name only
+run("5", ["a.log"], "a.log\n!a.log\n")  # should not exclude
+run("6", ["a.log"], "!a.log\n")  # just negation
+run("7", ["a.log"], "!a.log\n*.log\n")  # 
+run("8", ["a.log"], "*.log\n!a.log\n")
+run("9", ["a.log", "b.log"], "*.log\n!a.log\n!b.log\n")
+
+# Specifically test "pattern matching" for inclusion
+run("10", ["a.log"], "a.log\n")
+run("11", ["a.log"], "a.*\n")
+run("12", ["a.log"], "*.log\n")
+run("13", ["a.log"], "a*\n")
+
+# Negation at start
+run("14", ["a.log"], "!*.log\n*.log\n")
+run("15", ["a.log"], "!a.*\n*.log\n")
+run("16", ["a.log"], "!a.log\n*.log\n")
+
+# Only ! patterns  
+run("17", ["a.log"], "!a.log\n!*.log\n")
+PY
+python3 /tmp/probe_star.py 2>&1
+
+$ cat > /tmp/probe_lit.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(files[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Test literal vs glob behavior
+# Theory: literal patterns (no * ?) override globs; globs just update glob-state
+run("A", ["a.b"], "a.b\n!a.*\n")       # literal exclude, glob re-include. Expect: excluded
+run("B", ["a.b"], "a.*\n!a.b\n")       # glob exclude, literal re-include. Expect: not excluded
+run("C", ["a.b"], "!a.b\na.*\n")       # literal re-include first, glob exclude. Expect: not excluded (literal wins)
+run("D", ["a.b"], "!a.*\na.b\n")       # glob re-include, literal exclude. Expect: excluded
+
+# Test last-literal-wins vs first
+run("E", ["a.b"], "a.b\n!a.b\na.b\n")
+run("F", ["a.b"], "!a.b\na.b\n!a.b\n")
+
+# Does ** count as glob?
+run("G", {"sub/a.b": None}, "**/a.b\n!sub/a.b\n")   # glob ex, literal reinc. Expect: not excluded
+run("H", {"sub/a.b": None}, "sub/a.b\n!**/a.b\n")   # literal ex, glob reinc. Expect: excluded
+
+# Trailing slash
+run("I", {"dir/a": None}, "dir/\n!dir/\n")           # both dir patterns
+run("J", {"dir/a": None, "subdir/dir/a": None}, "dir/\n!/dir/\n")  # dir patterns
+
+# ? counts as glob
+run("K", ["a.b"], "a.?\n!a.b\n")      # glob ex, literal reinc. Expect: not excluded
+run("L", ["a.b"], "a.b\n!a.?\n")      # literal ex, glob reinc. Expect: excluded
+
+# literal override with anchored path
+run("M", {"sub/x": None}, "sub/x\n!/sub/x\n")  # both literal/path. Last wins? Expect: not excluded
+run("N", {"sub/x": None}, "/sub/x\n!sub/x\n")
+
+# Nested packignore - literal/glob state scoping?
+run("O", {".packignore": "a.b\n", "sub/.packignore": "!a.b\n",
+          "a.b": None, "sub/a.b": None}, "")
+
+PY
+python3 /tmp/probe_lit.py 2>&1
+
+$ cat > /tmp/probe_nest.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns=None):
+    d = tempfile.mkdtemp(prefix="pack_")
+    files = filespec if isinstance(filespec, dict) else {n: None for n in filespec}
+    if patterns is not None:
+        files[".packignore"] = patterns
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(files[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Does deeper packignore override parent's literal with glob?
+run("deep-glob-vs-parent-literal",
+    {".packignore": "sub/a.b\n",
+     "sub/.packignore": "!*\n",
+     "sub/a.b": None})
+
+run("deep-literal-vs-parent-glob",
+    {".packignore": "*\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None, "sub/b.b": None})
+
+# Order: parent first, nested second
+run("parent-neg-then-sub-pos",
+    {".packignore": "!a.b\n",
+     "sub/.packignore": "a.b\n",
+     "a.b": None, "sub/a.b": None})
+
+run("parent-pos-sub-neg",
+    {".packignore": "a.b\n",
+     "sub/.packignore": "!a.b\n",
+     "a.b": None, "sub/a.b": None})
+
+# When no root .packignore - is this valid?
+run("sub-only",
+    {"sub/.packignore": "a.b\n",
+     "sub/a.b": None, "a.b": None})
+
+# Does the sub-.packignore pattern "a.b" (basename) apply to sub only?
+run("sub-basename-scope",
+    {"sub/.packignore": "a.b\n",
+     "sub/a.b": None, "sub/deep/a.b": None, "a.b": None})
+
+# What about deeper
+run("three-deep",
+    {".packignore": "a.b\n",
+     "x/.packignore": "!a.b\n",
+     "x/y/.packignore": "a.b\n",
+     "a.b": None, "x/a.b": None, "x/y/a.b": None, "x/y/z/a.b": None})
+
+# Does the pattern in parent cross all children?
+run("parent-dir-pattern",
+    {".packignore": "x/\n",
+     "x/a": None, "x/sub/a": None})
+
+run("parent-dir-pattern-reex-in-sub",
+    {".packignore": "x/\n",
+     "x/.packignore": "!a\n",
+     "x/a": None, "x/sub/a": None})
+
+# .packignore in root with empty content
+run("empty-root",
+    {".packignore": "",
+     "a": None, "b": None})
+
+# No .packignore at all
+run("no-packignore",
+    {"a": None, "b": None})
+PY
+python3 /tmp/probe_nest.py 2>&1
+
+$ cat > /tmp/probe_nest2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    files = filespec
+    for rel in sorted(files, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(files[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Test different negation forms in nested
+run("P1-sub-neg-glob",
+    {".packignore": "*\n",
+     "sub/.packignore": "!*.b\n",
+     "sub/a.b": None, "sub/a.c": None})
+
+run("P2-sub-neg-literal",
+    {".packignore": "*\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None, "sub/a.c": None})
+
+run("P3-sub-neg-star",
+    {".packignore": "*\n",
+     "sub/.packignore": "!*\n",
+     "sub/a.b": None, "sub/a.c": None})
+
+# Try without the universal exclude - just see what sub's pattern does
+run("P4-sub-only-neg",
+    {".packignore": "a.b\n",
+     "sub/.packignore": "!a.b\n",
+     "a.b": None, "sub/a.b": None})
+
+# Does parent's literal survive sub's literal?
+run("P5-both-literal",
+    {".packignore": "sub/a.b\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+run("P6-both-glob",
+    {".packignore": "*.b\n",
+     "sub/.packignore": "!*.b\n",
+     "sub/a.b": None})
+
+# Parent/child patterns together
+run("P7-par-literal-child-glob-neg",
+    {".packignore": "sub/a.b\n",
+     "sub/.packignore": "!*.b\n",
+     "sub/a.b": None})
+
+run("P8-par-glob-child-literal-neg",
+    {".packignore": "*.b\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+run("P9-par-glob-child-glob-neg-matching",
+    {".packignore": "*.b\n",
+     "sub/.packignore": "!a.*\n",
+     "sub/a.b": None})
+PY
+python3 /tmp/probe_nest2.py 2>&1
+
+$ cat > /tmp/probe_nest3.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Theory: if parent excludes the directory, sub's .packignore is NOT applied
+# Test: parent excludes "sub" (dir), sub has `!a.b`
+run("A-parent-ex-sub-dir",
+    {".packignore": "sub\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+run("B-parent-ex-sub-slash",
+    {".packignore": "sub/\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+# What if parent excludes files inside sub but not sub itself
+run("C-parent-ex-files",
+    {".packignore": "sub/*\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+# What if parent excludes a file in sub (not dir)
+run("D-parent-ex-specific",
+    {".packignore": "sub/a.b\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+# What about parent `*.b` which matches sub/a.b but not the directory?
+run("E-parent-ex-basename-glob",
+    {".packignore": "*.b\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+# ** patterns
+run("F-parent-ss",
+    {".packignore": "**\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+# Parent re-includes sub dir
+run("G-parent-ex-reinclude-dir",
+    {".packignore": "*\n!sub/\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None, "sub/other": None})
+
+run("H-parent-ex-reinclude-dir-no-child",
+    {".packignore": "*\n!sub/\n",
+     "sub/a.b": None, "sub/other": None})
+PY
+python3 /tmp/probe_nest3.py 2>&1
+
+$ cat > /tmp/probe_nest4.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Testing dir-exclusion model
+# Parent sub/* excludes files in sub, child re-includes
+run("X1",
+    {".packignore": "sub/*\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None, "sub/b.b": None, "sub/c.b": None})
+
+# Child decides include, parent decides include too (deeper wins over no-match)
+run("X2",
+    {".packignore": "*.b\n",
+     "sub/.packignore": "!*.c\n",
+     "sub/a.b": None, "sub/a.c": None})
+
+# Multi-level with directory re-include
+run("X3",
+    {".packignore": "sub\n",
+     "sub/.packignore": "!a.b\n",   # unreachable
+     "sub/a.b": None})
+
+# `/sub` anchored, matches only root-level dir sub
+run("X4",
+    {".packignore": "/sub\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None})
+
+# Parent re-includes dir, child un-ignores file
+run("X5",
+    {".packignore": "**\n!sub/\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None, "sub/other": None})
+
+# Does negation of dir make dir re-included for descent?
+run("X6",
+    {".packignore": "*/\n!sub/\n",
+     "sub/a.b": None, "x/y": None})
+
+# Negation of file pattern vs dir re-include
+run("X7",
+    {".packignore": "*\n!sub/\n",
+     "sub/a": None, "sub/.packignore": "!a\n"})
+
+# Does the .packignore itself get excluded by *?
+run("X8",
+    {".packignore": "*\n",
+     "a.b": None})
+
+# What if nested packignore has literal that re-includes but parent excluded dir
+run("X9",
+    {".packignore": "sub\n",
+     "sub/.packignore": "!/a.b\n",
+     "sub/a.b": None})
+
+# Anchored at nested .packignore level
+run("X10",
+    {".packignore": "",
+     "sub/.packignore": "/a.b\n",
+     "sub/a.b": None, "sub/b/a.b": None})
+PY
+python3 /tmp/probe_nest4.py 2>&1
+
+$ cat > /tmp/probe_dir.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Directory inclusion/exclusion behavior
+run("D1-nested-dirs",
+    {".packignore": "a/\n",
+     "a/b/c": None, "a/b/.packignore": "!c\n"})
+
+run("D2-parent-ex-reex-dir",
+    {".packignore": "a/\n!a/\n",
+     "a/x": None})
+
+run("D3-parent-ex-reex-file",
+    {".packignore": "a/\n!a/x\n",
+     "a/x": None, "a/y": None})
+
+# Does packignore descend into dirs that were tentatively excluded then re-included?
+run("D4-descent-after-reex",
+    {".packignore": "a\n!a\n",   # literal dir match then re-include
+     "a/x": None})
+
+# How does ** apply to directory decisions
+run("D5-ss-dir",
+    {".packignore": "a/**\n",
+     "a/b/c": None, "a/x": None, "b/x": None})
+
+# Multiple levels of exclusion
+run("D6-double-exclude",
+    {".packignore": "a/\n",
+     "a/.packignore": "*.b\n",
+     "a/x.b": None, "a/x.c": None})
+
+# Multi-nested
+run("D7-nested-reinclude-glob",
+    {".packignore": "*.log\n",
+     "a/.packignore": "!*.log\n",
+     "x.log": None, "a/x.log": None, "a/b/x.log": None})
+
+# Simpler forms  
+run("D8-parent-glob-exc-child-literal-neg",
+    {".packignore": "*.log\n",
+     "a/.packignore": "!x.log\n",
+     "a/x.log": None, "a/y.log": None})
+
+# Within same packignore - re-verify negation types
+run("D9-within-glob-pattern-neg",
+    {".packignore": "*.log\n!*.log\n",
+     "a.log": None})
+
+run("D10-within-literal-pattern-neg",
+    {".packignore": "a.log\n!a.log\n",
+     "a.log": None})
+
+run("D11-within-mixed",
+    {".packignore": "a.log\n!*.log\n",   # literal exc, glob neg
+     "a.log": None})
+PY
+python3 /tmp/probe_dir.py 2>&1
+
+$ cat > /tmp/probe_dir2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Same semantics - both patterns in root
+run("Y1-root-same-as-DLvPG",
+    {".packignore": "*\n!sub/a.b\n",
+     "sub/a.b": None, "sub/b.b": None})
+
+run("Y2-root-both",
+    {".packignore": "*\n!a.b\n",
+     "sub/a.b": None, "sub/b.b": None, "a.b": None})
+
+# Same as Y2 but with dir re-include
+run("Y3-both-dir",
+    {".packignore": "*\n!sub/\n!a.b\n",
+     "sub/a.b": None, "sub/b.b": None, "a.b": None})
+
+# vs sub (DLvPG replica)
+run("Y4-DLvPG-replica",
+    {".packignore": "*\n",
+     "sub/.packignore": "!a.b\n",
+     "sub/a.b": None, "sub/b.b": None})
+
+# What if parent uses * and we access from sub? Did parent `*` apply to the SUB directory itself?
+# When root pattern `*` matches basename, it matches EVERY file at every depth, and every dir
+# So the sub dir is "matched by *" at the parent level.
+# If dir-exclusion short-circuit is used ONLY ACROSS .packignore boundaries, then:
+# - Parent excludes sub (dir). Don't descend. Sub/.packignore not loaded.
+# - All files in sub excluded.
+run("Y5-parent-no-child-pack",
+    {".packignore": "*\n",
+     "sub/a.b": None, "sub/b.b": None})
+
+# This should give the same as Y4 (child .packignore not applied)
+
+# But vs same-file re-include:
+run("Y6-root-same-file-reinclude",
+    {".packignore": "*\n!a.b\n",
+     "sub/a.b": None, "sub/b.b": None})
+PY
+python3 /tmp/probe_dir2.py 2>&1
+
+$ cat > /tmp/probe_dir_sem.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Test: dir re-include with !foo (no slash)
+run("Z1-neg-no-slash-dir",
+    {".packignore": "*\n!sub\n",     # ! without slash
+     "sub/a": None, "sub/b": None})
+
+# Test: !<non-slash> can it re-include files inside?
+run("Z2-neg-matches-file-not-dir",
+    {".packignore": "*\n!a\n",   # !a - re-include basename a
+     "a": None, "sub/a": None, "sub/b": None})
+
+# Does `!a` matching parent dir a work to re-include file a/x?
+run("Z3-neg-basename-matches-ancestor",
+    {".packignore": "a/\n!a\n",
+     "a/x": None, "a/y": None})
+
+# Non-dir-only neg on dir vs file
+run("Z4-neg-slash-dir",
+    {".packignore": "sub/\n!sub\n",
+     "sub/a": None})
+
+run("Z5-ex-no-slash-dir-neg-slash",
+    {".packignore": "sub\n!sub/\n",
+     "sub/a": None})
+
+# Deep file re-include via basename
+run("Z6-deep-reinclude",
+    {".packignore": "sub/\n!x\n",
+     "sub/x": None, "sub/y": None})
+
+# Direct path re-include into excluded dir
+run("Z7-path-reinclude-into-excluded",
+    {".packignore": "sub/\n!sub/x\n",
+     "sub/x": None, "sub/y": None})
+
+# What about deep paths?
+run("Z8-deep-path-reinclude",
+    {".packignore": "sub/\n!sub/deep/x\n",
+     "sub/deep/x": None, "sub/deep/y": None})
+
+# Does /** work differently from **
+run("Z9-slash-slash-star-star",
+    {".packignore": "/**\n!a\n",
+     "a": None, "sub/a": None, "b": None})
+
+# Combined test
+run("Z10-combined",
+    {".packignore": "*\n!a.b\n!sub/\n",
+     "a.b": None, "sub/a.b": None, "sub/c.b": None, "other": None})
+PY
+python3 /tmp/probe_dir_sem.py 2>&1
+
+$ cat > /tmp/probe_v.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Deep file in excluded dir with re-include anchored to the dir
+run("V1-deep-with-dir-reinc",
+    {".packignore": "a/\n!a/x\n",
+     "a/x/y": None, "a/x/z": None, "a/other": None})
+
+# Deep file with ** 
+run("V2-deep-ss",
+    {".packignore": "a/\n!a/x/**\n",
+     "a/x/y": None, "a/x/z": None})
+
+# Nested re-include
+run("V3-nested-reinc",
+    {".packignore": "a/\n!a/x/\n",
+     "a/x/y": None, "a/other": None})
+
+# Does `!a/x/` (dir reinclude) help files inside?
+run("V4-dir-reinc-helps-children",
+    {".packignore": "a/\n!a/x/\n",
+     "a/x/y": None, "a/x/z": None, "a/other": None})
+
+# Pattern order matters within level
+run("V5-order-same-level",
+    {".packignore": "!a.log\n*.log\n",
+     "a.log": None})
+
+run("V6-order-same-level2",
+    {".packignore": "*.log\n!a.log\n",
+     "a.log": None})
+
+# Deep file with /path pattern
+run("V7-root-slash-path",
+    {".packignore": "/a/x\n",
+     "a/x": None, "sub/a/x": None, "a/x/y": None})
+
+# Pattern starting with / matching dir
+run("V8-root-slash-dir",
+    {".packignore": "/a/\n",
+     "a/x": None, "sub/a/y": None})
+
+# Does ! work on patterns like a/*
+run("V9-neg-glob-dir",
+    {".packignore": "a/*\n!a/b\n",
+     "a/b": None, "a/c": None})
+
+# ** at nested packignore
+run("V10-ss-at-nested",
+    {".packignore": "",
+     "sub/.packignore": "**/x.log\n",
+     "sub/a/x.log": None, "sub/x.log": None, "x.log": None})
+
+# Pattern with ! and anchor
+run("V11-anchored-neg",
+    {".packignore": "*\n!/a\n",
+     "a": None, "b": None, "sub/a": None})
+
+# Compare patterns at different levels of nested packignore
+run("V12-nested-glob-same-level-neg",
+    {".packignore": "*.log\n",
+     "sub/.packignore": "**/*.log\n!a.log\n",
+     "sub/a.log": None, "sub/b.log": None, "sub/deep/a.log": None})
+
+# Pattern with /**/ 
+run("V13-middle-ss",
+    {".packignore": "a/**/c\n",
+     "a/c": None, "a/b/c": None, "a/b/d/c": None, "c": None})
+PY
+python3 /tmp/probe_v.py 2>&1
+
+$ cat > /tmp/probe_level.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Levels and matching
+run("L1", {".packignore": "*\n!/sub/\n", "sub/x": None, "sub/y": None, "x": None})
+run("L2", {".packignore": "*\n!sub\n", "sub/x": None, "x": None})
+run("L3", {".packignore": "*/\n!sub/\n", "sub/x": None, "x/y": None})
+
+# What about non-dir-only negation when exclude is dir-only?
+run("L4", {".packignore": "sub/\n!sub\n", "sub/x": None})
+
+# What if there's no file match at level 0 but ancestor level has match?
+run("L5", {".packignore": "sub/\n", "sub/x": None, "x": None})
+run("L6", {".packignore": "sub\n", "sub/x": None})
+
+# ONE level with mixed matches
+run("L7", {".packignore": "*.log\n!deep.log\n", "deep.log": None, "a.log": None})
+
+# ancestor dir level matching with multiple patterns
+run("L8", {".packignore": "a/\n!a\n", "a/x": None, "a/y": None})
+run("L9", {".packignore": "a\n!a/\n", "a/x": None, "a/y": None})
+
+# multiple levels agreeing
+run("L10", {".packignore": "a/\n!a/x\n", "a/x": None})
+run("L11", {".packignore": "a/\n!a/x\n!a\n", "a/x": None, "a/y": None})
+PY
+python3 /tmp/probe_level.py 2>&1
+
+$ cat > /tmp/probe_final.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Child scope with ancestor-only negation
+run("F1-child-ancestor-neg",
+    {".packignore": "*\n!sub/\n",   # parent excludes * but not sub dir
+     "sub/.packignore": "!a\n",
+     "sub/a/x": None, "sub/other": None, "sub/a/y": None})
+
+# Where child's negation applies via ancestor
+run("F2",
+    {".packignore": "*\n!sub/\n",
+     "sub/.packignore": "!a\n",
+     "sub/a": None, "sub/b": None})  # files a, b at sub
+
+# What if ! doesn't match basename but matches ancestor dir
+run("F3",
+    {".packignore": "*.log\n",
+     "sub/.packignore": "!deep\n",
+     "sub/deep/x.log": None, "sub/other.log": None})
+
+# Negation of path pattern
+run("F4",
+    {".packignore": "*\n!sub/\n",
+     "sub/.packignore": "!deep/x\n",
+     "sub/deep/x": None, "sub/deep/y": None})
+
+# escape chars - what does `\!x` do?
+run("F5-escape",
+    {".packignore": "\\!x\n",   # escape-bang
+     "!x": None, "x": None, "\\!x": None})
+
+# Does \\ in pattern mean literal \?
+run("F6",
+    {".packignore": "a\\b\n",
+     "a\\b": None, "ab": None, "a/b": None})
+
+# Semicolon in middle of line
+run("F7",
+    {".packignore": "a;b\n",
+     "a;b": None, "a": None})
+
+# Hash in middle of line
+run("F8",
+    {".packignore": "a#b\n",
+     "a#b": None, "a": None})
+
+# Comment with ; and content after
+run("F9",
+    {".packignore": "; this is a comment\na\n",
+     "a": None, "b": None})
+
+# Empty comment lines
+run("F10",
+    {".packignore": "#\n;\na\n",
+     "a": None, "b": None})
+
+# Just whitespace line
+run("F11",
+    {".packignore": "   \na\n",
+     "a": None})
+
+# Mixed CRLF and LF
+run("F12",
+    {".packignore": "a\r\nb\n",
+     "a": None, "b": None, "c": None})
+
+# Does `/foo/*` match sub/foo/x?
+run("F13",
+    {".packignore": "/foo/*\n",
+     "foo/x": None, "sub/foo/x": None})
+
+# `foo/*` without leading slash - still anchored?
+run("F14",
+    {".packignore": "foo/*\n",
+     "foo/x": None, "sub/foo/x": None, "foo/sub/y": None})
+PY
+python3 /tmp/probe_final.py 2>&1
+
+$ cat > /tmp/probe_cross.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Cross-depth scope decisions
+run("C1-parent-anchored-child-neg",
+    {".packignore": "foo/x\n",
+     "foo/.packignore": "!x\n",
+     "foo/x": None, "foo/y": None})
+
+# Parent dir-only non-matching for dir, child neg
+run("C2-parent-no-dir-match",
+    {".packignore": "foo/x\n",   # specific file path
+     "foo/.packignore": "!x\n!y\n",
+     "foo/x": None, "foo/y": None})
+
+# Deep file, child ancestor-only match
+run("C3-child-ancestor-only",
+    {".packignore": "sub/a\n",   # specific path, doesn't match dir sub
+     "sub/.packignore": "!a\n",
+     "sub/a": None, "sub/b": None})
+
+# Child's deep ancestor negation
+run("C4",
+    {".packignore": "*.log\n",
+     "sub/.packignore": "!keep\n",   # keep as basename
+     "sub/keep/x.log": None, "sub/other/y.log": None})
+
+# What if child reinclude is at deeper level than parent exclude
+run("C5",
+    {".packignore": "*.log\n",   # parent matches at depth 0
+     "sub/.packignore": "!keep/x.log\n",   # specific path, depth 0
+     "sub/keep/x.log": None, "sub/keep/y.log": None})
+
+# Child reinclude at ancestor level vs parent at depth 0
+run("C6",
+    {".packignore": "*.log\n",
+     "sub/.packignore": "!keep\n",
+     "sub/keep.log": None, "sub/keep/x.log": None})
+
+# Multiple scope levels
+run("C7-triple-nested",
+    {".packignore": "*.log\n",
+     "a/.packignore": "!b.log\n",
+     "a/b/.packignore": "c.log\n",
+     "a/x.log": None, "a/b.log": None, "a/b/x.log": None, "a/b/c.log": None})
+
+# What about pattern matching behavior for anchored dir-only with sub paths
+run("C8-dir-anchored-matches-sub",
+    {".packignore": "/sub/\n",
+     "sub/a": None, "sub/b/c": None, "other/a": None})
+PY
+python3 /tmp/probe_cross.py 2>&1
+
+$ cat > /tmp/probe_ss_edge.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# ** edge cases
+run("S1", {".packignore": "foo/**\n", "foo": None, "bar": None})
+run("S2", {".packignore": "foo/**\n", "fooBAR": None})
+run("S3", {".packignore": "**/foo\n", "foo": None, "bar/foo": None})
+run("S4", {".packignore": "**\n", "a": None})
+run("S5", {".packignore": "/**\n", "a": None, "sub/b": None})
+run("S6", {".packignore": "a/**/b\n", "a/b": None})
+run("S7", {".packignore": "a/**/b\n", "a/b/x/b": None, "a/x/b": None, "a/b": None})
+
+# What about ** segments followed by more
+run("S8", {".packignore": "**/\n", "a": None, "sub/a": None})  # Already tested but recheck
+run("S9", {".packignore": "/**/\n", "a": None, "sub/a": None})
+run("S10", {".packignore": "a/**\n", "a": None})
+
+# Multi ** 
+run("S11", {".packignore": "**/a/**\n", "a/x": None, "x/a/y": None, "x/a/y/z": None, "a": None})
+
+# Pattern with slash patterns and brackets
+run("S12", {".packignore": "a[0-9].log\n", "a1.log": None, "a[0-9].log": None})
+PY
+python3 /tmp/probe_ss_edge.py 2>&1
+
+$ cat > /tmp/probe_ss2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, debug=False):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError) as e:
+            print(f"  !! SKIP {rel}: {e}")
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    if debug:
+        print("  all files:")
+        for dp, dns, fns in os.walk(d):
+            for fn in sorted(fns):
+                rel = os.path.relpath(os.path.join(dp, fn), d).replace(os.sep, "/")
+                print(f"    {rel}")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Re-test with proper setup for a/b/x/b
+run("SS1", {".packignore": "a/**/b\n",
+            "a/b2/x/b": "", "a/x/b": "", "a/c": ""}, debug=True)
+
+# Make sure a/b/x/b exists
+run("SS2", {".packignore": "a/**/b\n",
+            "a/b/x/b": ""}, debug=True)
+
+# tests for ** semantics
+run("SS3", {".packignore": "a/**/b\n", 
+            "a/b": None, "a/x/b": None, "a/x/y/b": None, "ac/b": None}, debug=True)
+PY
+python3 /tmp/probe_ss2.py 2>&1
+
+$ cat > /tmp/probe_comment.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Comment prefix tests
+run("ws-hash", {".packignore": "   # comment\n", "a": None, "   # comment": None})  # file with literal name - probably won't exist
+run("ws-semi", {".packignore": "   ; comment\n", "a": None})
+run("tab-hash", {".packignore": "\t# comment\n", "a": None})
+# Does a line like "a # comment" match file "a #comment" or file "a"?
+run("inline-hash", {".packignore": "a #comment\n", "a": None, "a #comment": None, "a #c": None})
+# "a;b" we saw matches file "a;b"
+run("literal-a", {".packignore": "a\n", "a": None, "a #c": None})
+
+# Just comment chars as patterns
+run("just-hash", {".packignore": "#\n", "a": None, "#": None})
+run("just-semi", {".packignore": ";\n", "a": None, ";": None})
+# escaped?
+run("backslash-hash", {".packignore": "\\#\n", "#": None, "\\#": None})
+# Patterns with slashes
+run("hash-with-slash", {".packignore": "a/#b\n", "a/#b": None, "a/b": None})
+PY
+python3 /tmp/probe_comment.py 2>&1
+
+$ cat > /tmp/probe_comment2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+run("just-#", {".packignore": "#\n", "#": None, "a": None})
+run("just-;", {".packignore": ";\n", ";": None, "a": None})
+run("# space", {".packignore": "# \n", "#": None, "# ": None, "#x": None})
+run("#x", {".packignore": "#x\n", "#": None, "#x": None, "a": None})
+run("#x then a", {".packignore": "#x\na\n", "#x": None, "a": None})
+run("; semi then x", {".packignore": ";x\n", ";": None, ";x": None, "a": None})
+run("; then a", {".packignore": ";x\na\n", ";x": None, "a": None})
+run("### many", {".packignore": "###\n", "###": None, "a": None})
+run("more hash", {".packignore": "# comment\n#x\na\n", "#x": None, "a": None, "# comment": None})
+# Tab/space between # and content
+run("# TAB x", {".packignore": "#\tx\n", "#": None, "a": None})
+PY
+python3 /tmp/probe_comment2.py 2>&1
+
+$ cat > /tmp/probe_comment3.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Does ';' at line start really count as comment?
+run("mid-semi", {".packignore": "a ;c\n", "a ;c": None, "a": None})
+run("mid-hash", {".packignore": "a #c\n", "a #c": None, "a": None})
+run("start-semi-space", {".packignore": " ;c\n", ";c": None, " ;c": None, "a": None})
+run("start-semi-no-content", {".packignore": ";\n", ";": None, "a": None})
+run("just-ws", {".packignore": "   \n", "   ": None, "a": None})
+# Patterns leading tab
+run("tab-start-semi", {".packignore": "\t;c\n", ";c": None, "a": None})
+
+# Multiple ';' as pattern
+run("multi-semi", {".packignore": ";;;\n", ";;;": None})
+run("non-ws-leading-semi", {".packignore": "a;c\n;b\n", "a;c": None, ";b": None, "b": None})
+
+# Is `;` really the only comment marker? Or does something else work too?
+run("double-slash", {".packignore": "// comment\n", "// comment": None, "a": None})
+# What if ; is in middle - is it treated normally?
+run("mid-no-ws", {".packignore": "a;b\n", "a;b": None})
+PY
+python3 /tmp/probe_comment3.py 2>&1
+
+$ cat > /tmp/probe_ss3.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Check ** behavior in segments
+run("U1", {".packignore": "a/b**\n", "a/b": None, "a/bar": None, "a/baz/x": None})
+run("U2", {".packignore": "**b**\n", "ab": None, "abc": None, "x/b": None})
+# Anchored patterns with ** in middle of segment
+run("U3", {".packignore": "a/**b/c\n", "a/b/c": None, "a/axb/c": None})
+# Trailing / with **
+run("U4", {".packignore": "a/**/\n", "a/x/y": None, "a/x": None})
+
+# Empty segment patterns like "a//b" or "/"
+run("U5", {".packignore": "a//b\n", "a/b": None, "a//b": None})
+
+# Just empty line between content
+run("U6", {".packignore": "\n\n\n", "a": None})
+
+# Special patterns at line start
+run("U7", {".packignore": "!\n", "a": None})
+run("U8", {".packignore": "/\n", "a": None})
+run("U9", {".packignore": "!!a\n", "!a": None, "a": None})
+
+# What if ! has trailing /?
+run("U10", {".packignore": "sub\n!sub/\n", "sub/x": None})
+PY
+python3 /tmp/probe_ss3.py 2>&1
+
+$ cat > /tmp/fuzz.py <<'PY'
+#!/usr/bin/env python3
+"""Fuzz test: compare my implementation against packignore across many random trees."""
+import os, random, shutil, subprocess, sys, tempfile
+sys.path.insert(0, "/work/repo")
+
+PACKIGNORE = "/work/repo/tools/packignore"
+
+from snapshot.ignore import ignored_files as mine
+
+def run_pkg(root):
+    out = subprocess.run([PACKIGNORE, root], capture_output=True, text=True, check=True)
+    return sorted(line for line in out.stdout.splitlines() if line)
+
+NAMES = ["a", "b", "c", "x", "y", "sub", "deep", "foo", "bar", "keep", "src", "build", "a.log", "b.log", "keep.log", "x.txt", "y.txt", "a.b", "a.c"]
+GLOB_SEGS = ["*", "a", "*.log", "*.b", "sub", "deep", "a*", "?.b", "**", "x", "y"]
+LITERAL_SEGS = ["a", "b", "sub", "deep", "foo", "bar", "keep", "a.log", "a.b", "x.txt"]
+
+def rand_file_tree(rng, depth=0, max_depth=3, max_entries=5):
+    """Returns dict of {relpath: content_or_None}."""
+    tree = {}
+    n = rng.randint(1, max_entries)
+    for _ in range(n):
+        kind = rng.choice(["file", "file", "file", "dir"])
+        name = rng.choice(NAMES)
+        if kind == "file":
+            tree[name] = None
+        elif depth < max_depth:
+            sub = rand_file_tree(rng, depth+1, max_depth, max_entries)
+            for k, v in sub.items():
+                tree[name + "/" + k] = v
+    return tree
+
+def rand_pattern(rng):
+    # Build a pattern
+    is_neg = rng.random() < 0.3
+    use_slash = rng.random() < 0.5
+    use_leading_slash = rng.random() < 0.2
+    use_dir = rng.random() < 0.25
+    n_segs = 1 if not use_slash else rng.randint(2, 3)
+    segs = [rng.choice(GLOB_SEGS) for _ in range(n_segs)]
+    pat = "/".join(segs)
+    if use_leading_slash:
+        pat = "/" + pat
+    if use_dir:
+        pat = pat + "/"
+    if is_neg:
+        pat = "!" + pat
+    return pat
+
+def rand_packignore(rng):
+    n = rng.randint(0, 5)
+    lines = []
+    for _ in range(n):
+        if rng.random() < 0.1:
+            lines.append("")
+        elif rng.random() < 0.1:
+            lines.append("; comment")
+        else:
+            lines.append(rand_pattern(rng))
+    return "\n".join(lines) + "\n"
+
+def mk_tree(tree, patterns, nested_packignores):
+    d = tempfile.mkdtemp(prefix="fuzz_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    # nested_packignores: dict of {reldir: patterns}
+    for reldir, pat in nested_packignores.items():
+        subd = os.path.join(d, reldir)
+        os.makedirs(subd, exist_ok=True)
+        with open(os.path.join(subd, ".packignore"), "w") as f: f.write(pat)
+    for rel in sorted(tree, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            with open(full, "w") as f: f.write(tree[rel] or "")
+        except (NotADirectoryError, FileExistsError):
+            pass
+    return d
+
+def main():
+    rng = random.Random(42)
+    failures = 0
+    for i in range(100):
+        tree = rand_file_tree(rng)
+        patterns = rand_packignore(rng)
+        # Maybe some nested packignores
+        nested = {}
+        all_dirs = set()
+        for rel in tree:
+            parts = rel.split("/")
+            for k in range(1, len(parts)):
+                all_dirs.add("/".join(parts[:k]))
+        for d in all_dirs:
+            if rng.random() < 0.3:
+                nested[d] = rand_packignore(rng)
+        d = mk_tree(tree, patterns, nested)
+        try:
+            expected = run_pkg(d)
+            actual = mine(d)
+            if expected != actual:
+                failures += 1
+                print(f"=== CASE {i} FAIL ===")
+                print(f"ROOT .packignore: {patterns!r}")
+                for sd, pat in nested.items():
+                    print(f"  {sd}/.packignore: {pat!r}")
+                files = []
+                for dp, dns, fns in os.walk(d):
+                    for fn in sorted(fns):
+                        rel = os.path.relpath(os.path.join(dp, fn), d).replace(os.sep, "/")
+                        files.append(rel)
+                print(f"Files: {sorted(files)}")
+                print(f"Expected: {expected}")
+                print(f"Actual:   {actual}")
+                print(f"Dir: {d}")
+                if failures >= 5:
+                    return
+        finally:
+            if failures < 5:
+                shutil.rmtree(d)
+    print(f"\n{100 - failures}/100 cases passed")
+
+main()
+PY
+python3 /tmp/fuzz.py 2>&1 | head -100
+
+$ cat > /tmp/fuzz.py <<'PY'
+#!/usr/bin/env python3
+"""Fuzz test: compare my implementation against packignore across many random trees."""
+import os, random, shutil, subprocess, sys, tempfile
+sys.path.insert(0, "/work/repo")
+
+PACKIGNORE = "/work/repo/tools/packignore"
+
+from snapshot.ignore import ignored_files as mine
+
+def run_pkg(root):
+    out = subprocess.run([PACKIGNORE, root], capture_output=True, text=True, check=True)
+    return sorted(line for line in out.stdout.splitlines() if line)
+
+NAMES = ["a", "b", "c", "x", "y", "sub", "deep", "foo", "bar", "keep", "src", "build", "a.log", "b.log", "keep.log", "x.txt", "y.txt", "a.b", "a.c"]
+GLOB_SEGS = ["*", "a", "*.log", "*.b", "sub", "deep", "a*", "?.b", "**", "x", "y"]
+
+def rand_file_tree(rng, depth=0, max_depth=3, max_entries=5):
+    tree = {}
+    n = rng.randint(1, max_entries)
+    for _ in range(n):
+        kind = rng.choice(["file", "file", "file", "dir"])
+        name = rng.choice(NAMES)
+        if kind == "file":
+            tree[name] = None
+        elif depth < max_depth:
+            sub = rand_file_tree(rng, depth+1, max_depth, max_entries)
+            for k, v in sub.items():
+                tree[name + "/" + k] = v
+    return tree
+
+def rand_pattern(rng):
+    is_neg = rng.random() < 0.3
+    use_slash = rng.random() < 0.5
+    use_leading_slash = rng.random() < 0.2
+    use_dir = rng.random() < 0.25
+    n_segs = 1 if not use_slash else rng.randint(2, 3)
+    segs = [rng.choice(GLOB_SEGS) for _ in range(n_segs)]
+    pat = "/".join(segs)
+    if use_leading_slash:
+        pat = "/" + pat
+    if use_dir:
+        pat = pat + "/"
+    if is_neg:
+        pat = "!" + pat
+    return pat
+
+def rand_packignore(rng):
+    n = rng.randint(0, 5)
+    lines = []
+    for _ in range(n):
+        if rng.random() < 0.1:
+            lines.append("")
+        elif rng.random() < 0.1:
+            lines.append("; comment")
+        else:
+            lines.append(rand_pattern(rng))
+    return "\n".join(lines) + "\n"
+
+def mk_tree(tree, patterns, nested_packignores):
+    d = tempfile.mkdtemp(prefix="fuzz_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for reldir, pat in nested_packignores.items():
+        subd = os.path.join(d, reldir)
+        try:
+            os.makedirs(subd, exist_ok=True)
+        except (NotADirectoryError, FileExistsError):
+            continue
+        try:
+            with open(os.path.join(subd, ".packignore"), "w") as f: f.write(pat)
+        except IsADirectoryError:
+            pass
+    for rel in sorted(tree, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full):
+                continue
+            with open(full, "w") as f: f.write(tree[rel] or "")
+        except (NotADirectoryError, FileExistsError, IsADirectoryError):
+            pass
+    return d
+
+def main():
+    rng = random.Random(42)
+    failures = 0
+    total = 300
+    for i in range(total):
+        tree = rand_file_tree(rng)
+        patterns = rand_packignore(rng)
+        nested = {}
+        all_dirs = set()
+        for rel in tree:
+            parts = rel.split("/")
+            for k in range(1, len(parts)):
+                all_dirs.add("/".join(parts[:k]))
+        for d_ in all_dirs:
+            if rng.random() < 0.3:
+                nested[d_] = rand_packignore(rng)
+        d = mk_tree(tree, patterns, nested)
+        try:
+            expected = run_pkg(d)
+            actual = mine(d)
+            if expected != actual:
+                failures += 1
+                print(f"=== CASE {i} FAIL ===")
+                print(f"ROOT .packignore: {patterns!r}")
+                for sd, pat in nested.items():
+                    print(f"  {sd}/.packignore: {pat!r}")
+                files = []
+                for dp, dns, fns in os.walk(d):
+                    for fn in sorted(fns):
+                        rel = os.path.relpath(os.path.join(dp, fn), d).replace(os.sep, "/")
+                        files.append(rel)
+                print(f"Files: {sorted(files)}")
+                print(f"Expected: {expected}")
+                print(f"Actual:   {actual}")
+                diff_add = set(actual) - set(expected)
+                diff_rem = set(expected) - set(actual)
+                print(f"Extra in actual: {sorted(diff_add)}")
+                print(f"Missing in actual: {sorted(diff_rem)}")
+                if failures >= 3:
+                    return
+        finally:
+            if failures < 3:
+                shutil.rmtree(d)
+    print(f"\n{total - failures}/{total} cases passed")
+
+main()
+PY
+python3 /tmp/fuzz.py 2>&1 | head -200
+
+$ cat > /tmp/isolate_case.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except (NotADirectoryError, FileExistsError, IsADirectoryError): pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Isolate case 47
+run("A", {"a.log": None, "keep.log": None}, "!*.log\n**\n")
+run("B", {"a.log": None}, "!*.log\n**\n")
+run("C", {"a.log": None}, "**\n!*.log\n")
+run("D", {"a.log": None, "x": None}, "!*.log\n**\n")
+run("E", {"a.log": None, "x": None}, "**\n!*.log\n")
+
+# Reproduce case 47 fully
+run("F47", {"a.log": None, "foo": None, "keep.log": None, "y": None}, 
+    "!*.log\n**\n!sub/*.log\n*.b/\n!*/sub\n")
+
+# What about `*` instead of `**`?
+run("G", {"a.log": None}, "!*.log\n*\n")
+run("H", {"a.log": None}, "*\n!*.log\n")
+
+# Does ** differ from *.log?
+run("I", {"a.log": None}, "!*.log\n*.log\n")
+run("J", {"a.log": None}, "*.log\n!*.log\n")
+PY
+python3 /tmp/isolate_case.py 2>&1
+
+$ cat > /tmp/isolate2.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except Exception: pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Investigate glob specificity rules
+run("1", {"a.log": None}, "!a.log\n*\n")      # literal neg, * ex. Expected: not ex?
+run("2", {"a.log": None}, "!a.log\n*.log\n")  # literal neg, glob ex (same specificity?)
+run("3", {"a.log": None}, "!*.log\n*\n")      # glob neg, * ex. Not ex.
+run("4", {"a.log": None}, "!*.log\n*.log\n")  # glob neg, glob same. Excluded.
+run("5", {"a.log": None}, "!*.l*g\n*.log\n")  # multi-wildcard neg, glob ex.
+run("6", {"a.log": None}, "!**\n*\n")         # ** neg, * ex.
+run("7", {"a.log": None}, "!*\n*.log\n")      # * neg, more specific ex.
+run("8", {"a.log": None}, "!*.log\n*.lo*\n")  # less-specific neg, more-specific-ish ex.
+run("9", {"a.log": None}, "*.log\n!*\n")      # ex, less-specific neg.
+run("10", {"a.log": None}, "*\n!*.log\n")     # less-specific ex, more-specific neg.
+run("11", {"a.log": None}, "!a*\n*.log\n")    # glob neg (prefix), glob ex (ext).
+run("12", {"a.log": None}, "!a.*\n*.log\n")   # a.* neg, *.log ex.
+run("13", {"a.log": None}, "!a.*\n**\n")      # a.* neg, ** ex.
+run("14", {"a.log": None}, "!a*\n**\n")       # a* neg, ** ex.
+run("15", {"a.log": None}, "**\n!a*\n")       # ** ex, a* neg.
+PY
+python3 /tmp/isolate2.py 2>&1
+
+$ cat > /tmp/isolate3.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except Exception: pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Test specificity metric
+# Same number of literal chars but different patterns
+run("1", {"a.log": None}, "!a.log\na.log\n")  # both literal, last wins = ex
+run("2", {"a.log": None}, "a.log\n!a.log\n")  # both literal, last wins = inc
+run("3", {"a.log": None}, "!*.log\n*.log\n")  # both glob 4chars, last wins = ex
+run("4", {"a.log": None}, "*.log\n!*.log\n")  # last wins = inc
+run("5", {"a.log": None}, "!a.l?g\n*.log\n")  # !pat has 3 lit + ?=glob, * has 4 lit = ? more specific? 
+run("6", {"a.log": None}, "!*.log\na.lo*\n")  # 4 vs 4, last wins
+run("7", {"a.log": None}, "!a.lo?\n*.log\n")  # 4 lit vs 4 lit, last wins
+run("8", {"a.log": None}, "!*.log\n*log*\n")  # 4 vs 3 lit, !*.log wins
+run("9", {"a.log": None}, "!*log\n*.log\n")   # 3 lit + 1 non-match vs 4
+run("10", {"a.log": None}, "!a.*\na.?\n")   # 2 vs 3 (a, .) and (a, ., ?)? a.? has 2 lit (a, .) and 1 ?. Hmm.
+
+# Measure: count of non-wildcard chars?
+run("11", {"xyz.log": None}, "!xyz.*\n*.log\n")  # 4 (xyz.) vs 4 (.log) - tie, last wins = ex
+run("12", {"xyz.log": None}, "!xyz*\n*.log\n")   # 3 (xyz) vs 4 (.log)
+run("13", {"xyz.log": None}, "!*.log\nxyz*\n")   # 4 vs 3
+
+# Does length matter or just literal count?
+run("14", {"a.log": None}, "!a.lo*\n*b*c*.log\n")  # 4 vs ???
+
+# Within same literal count
+run("15", {"a.log": None}, "!*.log\n*log*\n")  # 4 vs 3
+
+# What about anchored patterns?
+run("16", {"a.log": None}, "!/*.log\n/*.log\n")
+
+# Negation of literal + glob exclude
+run("17", {"a.log": None}, "!a.log\n*.log\n")  # literal neg wins over glob
+run("18", {"a.log": None}, "*.log\n!a.log\n")  # literal neg wins
+run("19", {"a.log": None}, "a.log\n!*.log\n")  # literal ex wins over glob neg
+
+# What about priority ordering: tags/scores
+run("20", {"a.log": None}, "!a.log\na.log\n*.log\n")  # literal last wins = ex
+run("21", {"a.log": None}, "!*.log\n*.log\n!*.log\n")  # last wins = inc
+run("22", {"a.log": None}, "!*.log\n*.log\n!a.log\n")  # !a.log literal wins over all globs = inc
+
+# How about combining with order
+run("23", {"a.log": None}, "a.log\n!a.log\n*.log\n")  # literal order: inc; glob ex. Combined?
+PY
+python3 /tmp/isolate3.py 2>&1
+
+$ cat > /tmp/isolate4.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except Exception: pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Does slash count toward specificity?
+run("1", {"a/b": None}, "!a/b\n*/b\n")       # literal neg vs glob ex (slash on both)
+run("2", {"a/b": None}, "!a/*\n*/b\n")       # 1 lit vs 1 lit (both have `a` or `b` and `/`)
+run("3", {"a/b": None}, "a/*\n!*/b\n")       # 1 lit ex vs 1 lit neg - last wins = neg?
+run("4", {"a/b": None}, "!a/*\n*b\n")        # 1 lit (/a) vs 1 lit (b)
+run("5", {"a/b": None}, "*/b\n!*b\n")        # 1 lit vs 1 lit
+run("6", {"a/b": None}, "!*\n*/b\n")         # 0 lit vs 1 lit
+# `/` as path sep: is it counted?
+run("7", {"a/b": None}, "!a*\n*/b\n")        # a* (1) vs */b (1)
+
+# Test with ** as whole segment
+run("8", {"a/b": None}, "!**/b\n**\n")       # 1 vs 0
+run("9", {"a/b": None}, "!**\n**/b\n")       # 0 vs 1
+run("10", {"a/x/b": None}, "!**/b\n**/x/**\n")
+
+# Does trailing / affect specificity?
+run("11", {"a/x": None}, "!a/\na/x\n")       # literal dir-only neg vs literal file ex
+run("12", {"a/x": None}, "a/\n!a/x\n")       # literal dir-only ex vs literal file neg
+
+# What if negations don't change class
+# E.g., !pattern has specificity based on pattern (minus !)
+run("13", {"a.log": None}, "!*\na.log\n")    # 0 vs literal 5 - lit always wins
+run("14", {"a.log": None}, "a.log\n!*\n")    # literal vs 0 glob - lit wins
+PY
+python3 /tmp/isolate4.py 2>&1
+
+$ cat > /tmp/isolate5.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except Exception: pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Verify specificity counting
+# Mix of chars
+run("A", {"a.log": None}, "!a?\n*.l*\n")       # !a? has 1 (a). *.l* has 2 (., l). *.l* more specific = ex
+run("B", {"a.log": None}, "!a.?\n*.l*\n")      # !a.? has 2 (a, .). *.l* has 2 (., l). Tie, last = ex
+run("C", {"a.log": None}, "!a.??\n*.l*\n")     # !a.?? has 2 (a, .). same as B
+run("D", {"a.log": None}, "!a.??*\n*.l*\n")    # !a.??* has 2. same as B
+
+# Does slash in anchored patterns count?
+run("E", {"a/b.log": None}, "!a/b.*\n*/*.log\n")   # !a/b.* has 3 (a,b,.). */*.log has 4 (.,l,o,g). More specific = ex
+run("F", {"a/b.log": None}, "!a/*.log\n*/b.*\n")   # !a/*.log has 4 (a,.,l,o,g=5!). hmm let me count. *.log part: 4. plus 'a'. =5. */b.* has 2 (b, .). !a/*.log more specific = neg
+
+# Multi-level
+run("G", {"a/b.log": None}, "!a/*.log\n*/b.log\n") # 5 vs 4 (?). Actually counting carefully: !a/*.log = a + . + l + o + g = 5 chars. */b.log = b + . + l + o + g = 5. Tie. Last = ex.
+
+# Does the pattern-match-ability matter?
+run("H", {"a.log": None}, "!x.log\n*.log\n")   # x.log doesn't match. Only *.log matches = ex. 
+run("I", {"a.log": None}, "!a.log\nx.log\n")   # Only !a.log matches = inc.
+
+# Classes - literal class wins
+run("J", {"a.log": None}, "a.log\n!*.l*g\n")   # literal ex vs glob neg - literal wins = ex
+run("K", {"a.log": None}, "!a.log\n*.l*g\n")   # literal neg vs glob ex - literal wins = inc
+
+# What about !pattern with multiple **?
+run("L", {"a/b/c": None}, "!**/**/c\n**/c\n")  # 1 vs 1 lit. Both match.
+run("M", {"a/b/c": None}, "!**/**\n**\n")      # 0 vs 0. Last = ex.
+PY
+python3 /tmp/isolate5.py 2>&1
+
+$ cat > /tmp/isolate6.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec):
+    d = tempfile.mkdtemp(prefix="pack_")
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except Exception: pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Cross-scope specificity
+run("A", {".packignore": "!*.log\n", "sub/.packignore": "*\n", "sub/a.log": None})
+# Parent !*.log (spec 4 neg), child * (spec 0 ex). Child wins or spec wins?
+run("B", {".packignore": "*.log\n", "sub/.packignore": "!*\n", "sub/a.log": None})
+# Parent spec 4 ex, child spec 0 neg. Child wins or spec wins?
+
+# Within same scope - verify high-spec always wins over low-spec
+run("C", {".packignore": "**\n!*.log\n*\n", "a.log": None})
+# Globs: ** (0 ex), !*.log (4 neg), * (0 ex). Highest spec: !*.log. Decision: neg.
+run("D", {".packignore": "!*.log\n*.l*g\n", "a.log": None})
+# !*.log (4 neg), *.l*g (3 ex). Highest spec: !*.log. Decision: neg.
+
+# Interaction with directory decision
+run("E", {".packignore": "!a*\n*\n", "a": None, "a/b": None, "b": None})
+# `a` and `a/b` and `b`.
+# For a (file): !a* spec 1 neg, * spec 0 ex. !a* wins → neg.
+# For dir a: !a* spec 1 neg (matches basename a), * spec 0 ex. !a* wins → neg. Descend into a.
+# For a/b: at depth 0 "a/b": !a* basename "b" vs "a*" - no match. * matches. Spec 0 ex. Decision: ex.
+# At depth 1 "a": !a* matches, * matches. !a* wins neg. (But deepest match is depth 0 ex.)
+# Final: ex.
+# For b: !a* no match, * matches. ex.
+
+# Negation specificity edge
+run("F", {".packignore": "a/*.log\n!a/b.log\n", "a/b.log": None, "a/c.log": None})
+# a/*.log glob spec 4, !a/b.log literal. Literal wins neg for b.log. 
+# For c.log: !a/b.log doesn't match. a/*.log matches. ex.
+
+# Pattern specificity when there's only literal
+run("G", {".packignore": "!a/*\n*/x\n*/b\n", "a/x": None, "a/b": None, "c/x": None, "c/b": None})
+# All globs. 
+# For a/x: !a/* matches (spec 1), */x matches (spec 1), */b no match. Tie, last = */x ex.
+# For a/b: !a/* matches (spec 1), */b matches (spec 1). Tie, last = */b ex. But wait: */b has spec 1 (b). !a/* has spec 1 (a). Tie, last pattern = */b ex. 
+# For c/x: !a/* no, */x matches, */b no. Only */x ex.
+# For c/b: !a/* no, */x no, */b matches ex.
+PY
+python3 /tmp/isolate6.py 2>&1
+
+$ cat > /tmp/isolate7.py <<'PY'
+#!/usr/bin/env python3
+import os, shutil, subprocess, tempfile
+PACKIGNORE = "/work/repo/tools/packignore"
+
+def run(label, filespec, patterns):
+    d = tempfile.mkdtemp(prefix="pack_")
+    with open(os.path.join(d, ".packignore"), "w") as f: f.write(patterns)
+    for rel in sorted(filespec, key=lambda x: x.count("/")):
+        full = os.path.join(d, rel)
+        parent = os.path.dirname(full) or d
+        try:
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full, "w") as f: f.write(filespec[rel] or "")
+        except Exception: pass
+    out = subprocess.run([PACKIGNORE, d], capture_output=True, text=True)
+    print(f"=== {label!r} patterns={patterns!r} ===")
+    print("  excluded:", sorted(out.stdout.splitlines()))
+    shutil.rmtree(d)
+
+# Test unified specificity
+run("U1", {"a.log": None}, "a.log\n!*.log\n**\n")   # 5 ex, 4 neg, 0 ex. Max 5 ex.
+run("U2", {"a.log": None}, "!a.log\n*.log\n**\n")   # 5 neg, 4 ex, 0 ex. Max 5 neg.
+run("U3", {"a.log": None}, "!a.log\na.log\n")       # Both 5. Last wins = ex.
+run("U4", {"a.log": None}, "a.log\n!a.log\n")       # Both 5. Last wins = neg.
+# Does literal class have higher spec than any glob?
+run("U5", {"a": None}, "a\n!*\n")                   # a is 1 lit, * is 0 glob. a wins ex.
+run("U6", {"a": None}, "!a\n*\n")                   # !a 1 lit, * 0 glob. !a wins neg.
+# What if glob has MORE lit chars than literal pattern body?
+run("U7", {"abc.log": None}, "ab\n!*.log\n")        # literal ab doesn't match, !*.log glob matches = neg.
+run("U8", {"abc.log": None}, "a\n!*.log\n")         # literal `a` doesn't match (basename abc.log vs a - no). !*.log matches = neg.
+# Does literal `a` match basename `a` only? Yes - no wildcard.
+run("U9", {"abc": None}, "abc\n!*.log\n")           # abc matches, !*.log doesn't. ex.
+# What if literal matches as ANCESTOR?
+run("U10", {"a/b": None}, "a\n*/*\n")              # a matches dir a (basename). */* matches path. 
+
+# What if literal has only 1 char vs glob with 10 lit?
+run("U11", {"a": None}, "a\n!*.l*o*g*\n")           # literal a vs glob !*.l*o*g* (3 lit). lit wins? 
+run("U12", {"a.log": None}, "a\n!a.log*\n")         # literal `a` doesn't match a.log basename. !a.log* glob neg = neg.
+
+# What about anchored literal?
+run("U13", {"a/b": None}, "/a/b\n!*/*\n")           # anchored literal 2 lit, !*/* 0 glob. Lit wins ex.
+
+# Pure glob
+run("U14", {"a.log": None}, "*.l?g\n!*.lo?\n")      # 3 vs 3. Tie, last = neg.
+PY
+python3 /tmp/isolate7.py 2>&1
+
+$ python3 /tmp/fuzz.py 2>&1 | tail -60
+
+$ cat > /tmp/fuzz2.py <<'PY'
+#!/usr/bin/env python3
+import os, random, shutil, subprocess, sys, tempfile
+sys.path.insert(0, "/work/repo")
+PACKIGNORE = "/work/repo/tools/packignore"
+from snapshot.ignore import ignored_files as mine
+
+def run_pkg(root):
+    out = subprocess.run([PACKIGNORE, root], capture_output=True, text=True, check=True)
+    return sorted(line for line in out.stdout.splitlines() if line)
+
+NAMES = ["a","b","c","x","y","sub","deep","foo","bar","keep","src","build","a.log","b.log","keep.log","x.txt","y.txt","a.b","a.c",".hidden","file"]
+GLOB_SEGS = ["*","a","*.log","*.b","sub","deep","a*","?.b","**","x","y","*.*","?","**/","a/*","foo","a*b"]
+
+def rand_file_tree(rng,depth=0,max_depth=4,max_entries=6):
+    tree={}
+    n=rng.randint(1,max_entries)
+    for _ in range(n):
+        kind=rng.choice(["file","file","file","dir","dir"])
+        name=rng.choice(NAMES)
+        if kind=="file":
+            tree[name]=None
+        elif depth<max_depth:
+            sub=rand_file_tree(rng,depth+1,max_depth,max_entries)
+            for k,v in sub.items():
+                tree[name+"/"+k]=v
+    return tree
+
+def rand_pattern(rng):
+    is_neg = rng.random()<0.3
+    use_slash = rng.random()<0.5
+    use_leading = rng.random()<0.3
+    use_dir = rng.random()<0.25
+    nsegs = 1 if not use_slash else rng.randint(2,4)
+    segs=[rng.choice(GLOB_SEGS) for _ in range(nsegs)]
+    pat="/".join(segs)
+    if use_leading: pat="/"+pat
+    if use_dir: pat=pat+"/"
+    if is_neg: pat="!"+pat
+    return pat
+
+def rand_packignore(rng):
+    n=rng.randint(0,8)
+    lines=[]
+    for _ in range(n):
+        r=rng.random()
+        if r<0.08: lines.append("")
+        elif r<0.14: lines.append("; comment")
+        else: lines.append(rand_pattern(rng))
+    return "\n".join(lines)+"\n"
+
+def mk_tree(tree, root_pat, nested):
+    d=tempfile.mkdtemp(prefix="fuzz_")
+    with open(os.path.join(d,".packignore"),"w") as f: f.write(root_pat)
+    for sd,pat in nested.items():
+        subd=os.path.join(d,sd)
+        try:
+            os.makedirs(subd,exist_ok=True)
+            with open(os.path.join(subd,".packignore"),"w") as f: f.write(pat)
+        except Exception: pass
+    for rel in sorted(tree,key=lambda x:x.count("/")):
+        full=os.path.join(d,rel)
+        parent=os.path.dirname(full) or d
+        try:
+            os.makedirs(parent,exist_ok=True)
+            if os.path.exists(full): continue
+            with open(full,"w") as f: f.write(tree[rel] or "")
+        except Exception: pass
+    return d
+
+seed = int(sys.argv[1]) if len(sys.argv)>1 else 1
+total = int(sys.argv[2]) if len(sys.argv)>2 else 500
+rng=random.Random(seed)
+failures=0
+for i in range(total):
+    tree=rand_file_tree(rng)
+    pat=rand_packignore(rng)
+    nested={}
+    all_dirs=set()
+    for rel in tree:
+        parts=rel.split("/")
+        for k in range(1,len(parts)):
+            all_dirs.add("/".join(parts[:k]))
+    for d_ in all_dirs:
+        if rng.random()<0.4: nested[d_]=rand_packignore(rng)
+    d=mk_tree(tree,pat,nested)
+    try:
+        expected=run_pkg(d)
+        actual=mine(d)
+        if expected!=actual:
+            failures+=1
+            print(f"=== CASE {i} FAIL (seed {seed}) ===")
+            print(f"root: {pat!r}")
+            for sd,p in nested.items(): print(f"  {sd}: {p!r}")
+            files=[]
+            for dp,dns,fns in os.walk(d):
+                for fn in sorted(fns):
+                    rel=os.path.relpath(os.path.join(dp,fn),d).replace(os.sep,"/")
+                    files.append(rel)
+            print(f"files: {sorted(files)}")
+            print(f"expected: {expected}")
+            print(f"actual:   {actual}")
+            diff_add=set(actual)-set(expected)
+            diff_rem=set(expected)-set(actual)
+            print(f"extra:   {sorted(diff_add)}")
+            print(f"missing: {sorted(diff_rem)}")
+            if failures>=3: 
+                print(f"dir: {d}")
+                break
+    finally:
+        if failures<3:
+            shutil.rmtree(d)
+print(f"{total-failures}/{total} seed={seed}")
+PY
+for seed in 1 2 3 4 5 6 7 8; do
+    python3 /tmp/fuzz2.py $seed 300 2>&1 | tail -40
+done
+
+$ cat > /tmp/debug1.py <<'PY'
+#!/usr/bin/env python3
+import os, sys, shutil, tempfile, subprocess
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import ignored_files, _parse, _is_excluded, _pattern_matches, _match_full
+
+# Reproduce case 31
+d = tempfile.mkdtemp(prefix="dbg_")
+root_pat = '!x\n*/**//\n\n/*.*/deep/*.log/**/\n'
+with open(os.path.join(d, ".packignore"), "w") as f: f.write(root_pat)
+os.makedirs(os.path.join(d, "sub"), exist_ok=True)
+with open(os.path.join(d, "sub/.packignore"), "w") as f: f.write("\n")
+for name in [".packignore", "a.log"]:
+    with open(os.path.join(d, name) if name != ".packignore" else os.path.join(d, "a.log"), "w") as f:
+        f.write("")
+with open(os.path.join(d, "a.log"), "w") as f: f.write("")
+with open(os.path.join(d, "sub/.hidden"), "w") as f: f.write("")
+with open(os.path.join(d, "sub/keep.log"), "w") as f: f.write("")
+
+PACKIGNORE = "/work/repo/tools/packignore"
+expected = sorted(subprocess.run([PACKIGNORE, d], capture_output=True, text=True).stdout.splitlines())
+actual = ignored_files(d)
+print(f"expected: {expected}")
+print(f"actual:   {actual}")
+
+# Debug: parse patterns
+for line in root_pat.splitlines():
+    print(f"  parse({line!r}): {_parse(line)}")
+
+shutil.rmtree(d)
+PY
+python3 /tmp/debug1.py 2>&1

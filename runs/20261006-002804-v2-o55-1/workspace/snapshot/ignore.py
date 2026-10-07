@@ -1,0 +1,200 @@
+"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine. docs/PACKIGNORE.md describes the syntax loosely; the rules below are the
+ones packignore actually applies:
+
+- The file is split with str.splitlines() and each line is str.strip()ped.
+  Empty lines are skipped. There are no comments ("#" is an ordinary
+  character) and no escapes (neither is a backslash).
+- A leading "!" negates the pattern. Only one "!" is removed and nothing is
+  stripped after it, so "! a" negates the name " a".
+- Trailing "/"s make the pattern match directories only and are removed.
+  Leading "/"s are removed. If a "/" is left (or there was a leading one), the
+  pattern is anchored to the directory holding the .packignore; otherwise it
+  matches a name at any depth.
+- Braces are expanded into alternatives: the first "{" and the first "}"
+  after it delimit a comma-separated list, and the rest of the pattern after
+  the "}" is expanded the same way. Anchoring and directory-only are decided
+  before expansion.
+- In each "/"-separated segment, "*" matches any run of characters and "?"
+  exactly one. A segment that is exactly "**" matches zero to three
+  segments (not more). Everything else, including "[", "]" and "\\", is
+  literal. Matching is case-sensitive.
+- A path is decided level by level from the root: each directory and then the
+  file itself is matched on its own, and a level with no matching pattern
+  inherits its parent's state. So a match on a deeper level always wins, and
+  anything inside an excluded directory can be re-included.
+- When several patterns match at one level, the winner is the one from the
+  deepest .packignore; then the one with the highest score (the number of
+  characters other than "*?{},/" in the pattern after "!" and leading and
+  trailing "/" are removed); then the one that comes last.
+- A .packignore is only read if its directory is not excluded. If it is a
+  directory (with files in it), IsADirectoryError is raised, as packignore
+  fails on such trees.
+"""
+
+import errno
+import os
+import re
+
+_BRACES = re.compile(r"\{([^}]*)\}")
+_GLOBSTAR_MAX = 3  # "**" matches at most this many segments
+
+
+def _expand(pat):
+    m = _BRACES.search(pat)
+    if not m:
+        return [pat]
+    rests = _expand(pat[m.end():])
+    return [pat[:m.start()] + alt + rest for alt in m.group(1).split(",") for rest in rests]
+
+
+def _match_glob(glob, name):
+    """Match one segment: "*" is any run of characters, "?" is one character.
+
+    Uses the usual backtrack-to-the-last-star scan, so it is linear-ish rather
+    than exponential on patterns like "a*a*a*a*b".
+    """
+    g = n = 0
+    star = mark = -1
+    while n < len(name):
+        if g < len(glob) and (glob[g] == "?" or glob[g] == name[n]) and glob[g] != "*":
+            g += 1
+            n += 1
+        elif g < len(glob) and glob[g] == "*":
+            star, mark = g, n
+            g += 1
+        elif star >= 0:
+            g = star + 1
+            mark += 1
+            n = mark
+        else:
+            return False
+    while g < len(glob) and glob[g] == "*":
+        g += 1
+    return g == len(glob)
+
+
+class _Pattern:
+    def __init__(self, negate, dir_only, anchored, alternatives, score):
+        self.negate = negate
+        self.score = score
+        self.dir_only = dir_only
+        self.anchored = anchored
+        # Each alternative is a list of segments: None for "**", else a glob.
+        self.alternatives = alternatives
+
+    def matches(self, parts, is_dir):
+        """Whether the pattern matches the path `parts`, relative to its base."""
+        if self.dir_only and not is_dir:
+            return False
+        if self.anchored:
+            return any(_match_segments(alt, 0, parts, 0) for alt in self.alternatives)
+        name = parts[-1]
+        for alt in self.alternatives:
+            if len(alt) == 1 and (alt[0] is None or _match_glob(alt[0], name)):
+                return True
+        return False
+
+
+def _match_segments(pat, i, parts, j):
+    while i < len(pat):
+        seg = pat[i]
+        if seg is None:
+            return any(_match_segments(pat, i + 1, parts, k)
+                       for k in range(j, min(j + _GLOBSTAR_MAX, len(parts)) + 1))
+        if j >= len(parts) or not _match_glob(seg, parts[j]):
+            return False
+        i += 1
+        j += 1
+    return j == len(parts)
+
+
+def _parse(text):
+    patterns = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        negate = line.startswith("!")
+        if negate:
+            line = line[1:]
+        dir_only = line.endswith("/")
+        line = line.rstrip("/")
+        anchored = "/" in line
+        line = line.lstrip("/")
+        if not line:
+            continue
+        score = sum(c not in "*?{},/" for c in line)
+        alternatives = [[None if seg == "**" else seg for seg in alt.split("/")]
+                        for alt in _expand(line)]
+        patterns.append(_Pattern(negate, dir_only, anchored, alternatives, score))
+    return patterns
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .packignore files exclude.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. A `.git` directory directly
+    under `root` is skipped.
+    """
+    files = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            rel = os.path.relpath(os.path.join(dirpath, name), root).replace(os.sep, "/")
+            files.append(rel)
+
+    # Directory (as a tuple of parts) -> its .packignore text.
+    sources = {}
+    # Directories holding a non-empty directory named .packignore. packignore
+    # fails with IsADirectoryError when it tries to read one of those.
+    bad_sources = set()
+    for rel in files:
+        parts = tuple(rel.split("/"))
+        if parts[-1] == ".packignore":
+            with open(os.path.join(root, *parts), newline="") as f:
+                sources[parts[:-1]] = f.read()
+        for i, part in enumerate(parts[:-1]):
+            if part == ".packignore":
+                bad_sources.add(parts[:i])
+
+    parsed = {}
+    excluded = {}  # directory parts -> whether it is excluded
+
+    def rules(dir_parts):
+        """Patterns from dir_parts' .packignore, or [] if it isn't read."""
+        if dir_parts not in sources and dir_parts not in bad_sources:
+            return []
+        if dir_parts and is_excluded(dir_parts, True):
+            return []
+        if dir_parts not in parsed:
+            if dir_parts in bad_sources:
+                path = os.path.join(root, *dir_parts, ".packignore")
+                raise IsADirectoryError(errno.EISDIR, os.strerror(errno.EISDIR), path)
+            parsed[dir_parts] = _parse(sources[dir_parts])
+        return parsed[dir_parts]
+
+    def decide(parts, is_dir, inherited):
+        best = None
+        for depth in range(len(parts)):
+            for index, pattern in enumerate(rules(parts[:depth])):
+                if pattern.matches(parts[depth:], is_dir):
+                    key = (depth, pattern.score, index)
+                    if best is None or key > best[0]:
+                        best = (key, pattern)
+        return inherited if best is None else not best[1].negate
+
+    def is_excluded(parts, is_dir):
+        if is_dir and parts in excluded:
+            return excluded[parts]
+        inherited = is_excluded(parts[:-1], True) if len(parts) > 1 else False
+        result = decide(parts, is_dir, inherited)
+        if is_dir:
+            excluded[parts] = result
+        return result
+
+    return sorted(rel for rel in files if is_excluded(tuple(rel.split("/")), False))

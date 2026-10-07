@@ -1,0 +1,199 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..e0935c1 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,7 @@
+-"""Decide which files in a project tree are excluded by its .packignore files.
+-
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
+-"""
++"""Decide which files in a project tree are excluded by its .packignore files."""
+ 
+ import os
+-import subprocess
+-import sys
+-
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++import re
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +11,170 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    excluded = set()
++    _walk(root, "", [], excluded, True)
++    return sorted(excluded)
++
++
++def _walk(root, rel_dir, scopes, excluded, is_root):
++    full_dir = os.path.join(root, rel_dir) if rel_dir else root
++    pack = os.path.join(full_dir, ".packignore")
++    patterns = []
++    if os.path.isfile(pack):
++        with open(pack, "r", newline="") as f:
++            text = f.read()
++        for line in text.splitlines():
++            p = _parse(line)
++            if p is not None:
++                patterns.append(p)
++    new_scopes = scopes + [(rel_dir, patterns)]
++
++    try:
++        entries = os.listdir(full_dir)
++    except OSError:
++        return
++
++    for name in entries:
++        if is_root and name == ".git":
++            continue
++        full_entry = os.path.join(full_dir, name)
++        rel = (rel_dir + "/" + name) if rel_dir else name
++        is_dir = os.path.isdir(full_entry) and not os.path.islink(full_entry)
++        if is_dir:
++            if _is_excluded(rel, True, new_scopes):
++                _walk_sealed(root, rel, new_scopes, excluded)
++            else:
++                _walk(root, rel, new_scopes, excluded, False)
++        else:
++            if _is_excluded(rel, False, new_scopes):
++                excluded.add(rel)
++
++
++def _walk_sealed(root, rel_dir, scopes, excluded):
++    """Walk a subtree without loading further .packignore files."""
++    full_dir = os.path.join(root, rel_dir)
++    try:
++        entries = os.listdir(full_dir)
++    except OSError:
++        return
++    for name in entries:
++        full_entry = os.path.join(full_dir, name)
++        rel = rel_dir + "/" + name
++        is_dir = os.path.isdir(full_entry) and not os.path.islink(full_entry)
++        if is_dir:
++            _walk_sealed(root, rel, scopes, excluded)
++        else:
++            if _is_excluded(rel, False, scopes):
++                excluded.add(rel)
++
++
++def _is_excluded(rel, is_dir, scopes):
++    all_segs = rel.split("/")
++    n = len(all_segs)
++    for depth in range(n):
++        path_segs = all_segs[: n - depth]
++        entry_is_dir = is_dir if depth == 0 else True
++        decision = None
++        for scope_rel, patterns in scopes:
++            scope_segs = scope_rel.split("/") if scope_rel else []
++            if len(path_segs) <= len(scope_segs):
++                continue
++            if path_segs[: len(scope_segs)] != scope_segs:
++                continue
++            scoped = path_segs[len(scope_segs):]
++            best = None
++            for idx, p in enumerate(patterns):
++                if _pattern_matches(p, scoped, entry_is_dir):
++                    key = (p["spec"], idx)
++                    if best is None or key >= (best[0], best[1]):
++                        best = (p["spec"], idx, p["negate"])
++            if best is None:
++                continue
++            decision = not best[2]
++        if decision is not None:
++            return decision
++    return False
++
++
++def _parse(line):
++    line = line.strip()
++    if not line or line.startswith(";"):
++        return None
++    negate = False
++    if line.startswith("!"):
++        negate = True
++        line = line[1:]
++    if not line:
++        return None
++    dir_only = False
++    if line.endswith("/"):
++        dir_only = True
++        line = line[:-1]
++    if not line:
++        return None
++    anchored = line.startswith("/") or "/" in line.rstrip("/")
++    if line.startswith("/"):
++        line = line[1:]
++    if not line:
++        return None
++    if "/" in line:
++        anchored = True
++    spec = sum(1 for c in line if c not in "*?/")
++    segs = line.split("/")
++    return {
++        "negate": negate,
++        "dir_only": dir_only,
++        "anchored": anchored,
++        "spec": spec,
++        "segs": segs,
++    }
++
++
++def _pattern_matches(p, path_segs, is_dir):
++    if p["dir_only"] and not is_dir:
++        return False
++    if p["anchored"]:
++        return _match_full(p["segs"], path_segs)
++    if not path_segs:
++        return False
++    return _seg_match(p["segs"][0], path_segs[-1])
++
++
++def _match_full(pat_segs, path_segs):
++    if not pat_segs:
++        return not path_segs
++    head = pat_segs[0]
++    if head == "**":
++        for i in range(len(path_segs) + 1):
++            if _match_full(pat_segs[1:], path_segs[i:]):
++                return True
++        return False
++    if not path_segs:
++        return False
++    if _seg_match(head, path_segs[0]):
++        return _match_full(pat_segs[1:], path_segs[1:])
++    return False
++
++
++_SEG_CACHE = {}
++
++
++def _seg_match(pat, seg):
++    rx = _SEG_CACHE.get(pat)
++    if rx is None:
++        parts = []
++        i = 0
++        while i < len(pat):
++            c = pat[i]
++            if c == "*":
++                while i + 1 < len(pat) and pat[i + 1] == "*":
++                    i += 1
++                parts.append("[^/]*")
++            elif c == "?":
++                parts.append("[^/]")
++            else:
++                parts.append(re.escape(c))
++            i += 1
++        rx = re.compile("".join(parts) + r"\Z")
++        _SEG_CACHE[pat] = rx
++    return rx.match(seg) is not None
+
+# untracked files:
+snapshot/__pycache__/__init__.cpython-311.pyc
+snapshot/__pycache__/ignore.cpython-311.pyc

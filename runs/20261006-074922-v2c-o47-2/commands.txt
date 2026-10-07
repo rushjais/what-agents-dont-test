@@ -1,0 +1,277 @@
+$ ls -la /work/repo
+
+$ cat /work/repo/README.md /work/repo/.packignore
+
+$ ls /work/repo/snapshot /work/repo/tools
+
+$ file /work/repo/tools/packignore; wc -c /work/repo/tools/packignore
+
+$ cd /tmp && mkdir -p test1 && cd test1 && mkdir -p a/b && echo "foo" > a/b/x.txt && echo "bar" > a/b/y.pyc && echo "baz" > a/x.pyc && cat > .packignore << 'EOF'
+*.pyc
+EOF
+/work/repo/tools/packignore /tmp/test1
+
+$ mkdir -p /tmp/test2 && cd /tmp/test2 && echo "a" > a.txt && echo "b" > b.txt && cat > .packignore << 'EOF'
+; this is a semicolon comment
+# this is a hash comment  
+a.txt
+EOF
+/work/repo/tools/packignore /tmp/test2
+
+$ mkdir -p /tmp/test3 && cd /tmp/test3 && echo "a" > "#a.txt" && echo "b" > ";b.txt" && echo "c" > " c.txt" && echo "d" > "d.txt" && cat > .packignore << 'EOF'
+#a.txt
+;b.txt
+ c.txt
+d.txt
+EOF
+/work/repo/tools/packignore /tmp/test3
+
+$ mkdir -p /tmp/test4 && cd /tmp/test4 && echo "a" > "a.txt" && echo "b" > "b.txt" && printf "a.txt \nb.txt\t\n" > .packignore && /work/repo/tools/packignore /tmp/test4
+echo "---"
+rm -rf /tmp/test5 && mkdir -p /tmp/test5 && cd /tmp/test5 && echo "a" > "a.txt" && echo "b" > " b.txt" && printf "a.txt\n b.txt\n" > .packignore && /work/repo/tools/packignore /tmp/test5
+
+$ rm -rf /tmp/test6 && mkdir -p /tmp/test6/sub/deep && cd /tmp/test6 && echo a > a.txt && echo a > a/b.txt 2>/dev/null; mkdir -p sub && echo a > sub/a.txt && echo a > sub/deep/a.txt && echo a > sub/deep/x.pyc && echo a > "sub/deep/qweasd.py" && cat > .packignore << 'EOF'
+*.txt
+EOF
+/work/repo/tools/packignore /tmp/test6
+echo "---"
+cat > .packignore << 'EOF'
+sub/*.txt
+EOF
+/work/repo/tools/packignore /tmp/test6
+echo "---"
+cat > .packignore << 'EOF'
+/a.txt
+EOF
+/work/repo/tools/packignore /tmp/test6
+echo "---"
+cat > .packignore << 'EOF'
+**/a.txt
+EOF
+/work/repo/tools/packignore /tmp/test6
+echo "---"
+cat > .packignore << 'EOF'
+sub/**/a.txt
+EOF
+/work/repo/tools/packignore /tmp/test6
+
+$ rm -rf /tmp/t7 && mkdir -p /tmp/t7/sub/deep && cd /tmp/t7 && echo a > sub/a.txt && echo a > sub/deep/a.txt && cat > .packignore << 'EOF'
+sub/**/a.txt
+EOF
+/work/repo/tools/packignore /tmp/t7
+echo "---"
+cat > .packignore << 'EOF'
+**/sub/**
+EOF
+/work/repo/tools/packignore /tmp/t7
+echo "---"
+cat > .packignore << 'EOF'
+a?.txt
+EOF
+rm -f sub/a.txt sub/deep/a.txt
+echo a > ab.txt && echo b > ac.txt && echo c > abc.txt
+/work/repo/tools/packignore /tmp/t7
+
+$ rm -rf /tmp/t8 && mkdir -p /tmp/t8/build/x /tmp/t8/sub/build/y && cd /tmp/t8
+echo a > a.txt && echo a > build/a && echo a > build/x/b && echo a > sub/a.txt && echo a > sub/build/c && echo a > sub/build/y/d
+cat > .packignore << 'EOF'
+build/
+EOF
+/work/repo/tools/packignore /tmp/t8
+echo "---"
+cat > .packignore << 'EOF'
+build
+EOF
+/work/repo/tools/packignore /tmp/t8
+echo "---"
+cat > .packignore << 'EOF'
+/build/
+EOF
+/work/repo/tools/packignore /tmp/t8
+echo "---"
+rm -rf /tmp/t8/build /tmp/t8/sub
+mkdir -p /tmp/t8/build && echo a > /tmp/t8/build && echo "wait that's a file"
+rm /tmp/t8/build
+# Test: 'build' as a pattern - does it match a FILE named build?
+mkdir -p /tmp/t8/a && echo a > /tmp/t8/a/build && echo a > /tmp/t8/build.txt
+cat > /tmp/t8/.packignore << 'EOF'
+build
+EOF
+/work/repo/tools/packignore /tmp/t8
+
+$ rm -rf /tmp/t9 && mkdir -p /tmp/t9/sub && cd /tmp/t9
+echo a > build && echo a > sub/build && mkdir subdir && echo a > subdir/a.txt
+cat > .packignore << 'EOF'
+build
+EOF
+/work/repo/tools/packignore /tmp/t9
+echo "---files-only matched---"
+cat > .packignore << 'EOF'
+build/
+EOF
+/work/repo/tools/packignore /tmp/t9  # expect nothing: build is a file
+echo "---"
+# directory version 
+rm build sub/build
+mkdir build sub/build
+echo a > build/x && echo a > sub/build/y
+cat > .packignore << 'EOF'
+build/
+EOF
+/work/repo/tools/packignore /tmp/t9
+
+$ rm -rf /tmp/t10 && mkdir -p /tmp/t10 && cd /tmp/t10
+# Test negation
+echo a > a.tmp && echo b > b.tmp && echo c > important.tmp
+cat > .packignore << 'EOF'
+*.tmp
+!important.tmp
+EOF
+/work/repo/tools/packignore /tmp/t10
+echo "---"
+# Order matters
+cat > .packignore << 'EOF'
+!important.tmp
+*.tmp
+EOF
+/work/repo/tools/packignore /tmp/t10
+echo "---"
+# Negation under excluded directory
+rm *.tmp
+mkdir build && echo a > build/keep.me && echo a > build/x.o
+cat > .packignore << 'EOF'
+build/
+!build/keep.me
+EOF
+/work/repo/tools/packignore /tmp/t10
+echo "---"
+cat > .packignore << 'EOF'
+build/*
+!build/keep.me
+EOF
+/work/repo/tools/packignore /tmp/t10
+
+$ rm -rf /tmp/t11 && mkdir -p /tmp/t11/build/sub && cd /tmp/t11
+echo a > build/sub/x.txt && echo a > build/sub/y.log && echo a > build/z
+cat > .packignore << 'EOF'
+build/
+!build/sub/
+EOF
+/work/repo/tools/packignore /tmp/t11
+echo "---"
+cat > .packignore << 'EOF'
+build/
+!build/sub/x.txt
+EOF
+/work/repo/tools/packignore /tmp/t11
+echo "---"
+# gitignore classic case: re-include subdir file when parent excluded
+cat > .packignore << 'EOF'
+build/**
+!build/sub/x.txt
+EOF
+/work/repo/tools/packignore /tmp/t11
+
+$ rm -rf /tmp/t12 && mkdir -p /tmp/t12/sub && cd /tmp/t12
+echo a > a.txt && echo a > a.log && echo a > sub/b.txt && echo a > sub/b.log
+cat > .packignore << 'EOF'
+*.txt
+EOF
+cat > sub/.packignore << 'EOF'
+*.log
+EOF
+/work/repo/tools/packignore /tmp/t12
+echo "---"
+# Can nested .packignore re-include something root excludes?
+cat > sub/.packignore << 'EOF'
+!b.txt
+EOF
+/work/repo/tools/packignore /tmp/t12
+echo "---"
+# What about root excluding something, nested dir not re-including it
+rm sub/.packignore
+cat > .packignore << 'EOF'
+sub/
+EOF
+cat > sub/.packignore << 'EOF'
+!b.txt
+EOF
+/work/repo/tools/packignore /tmp/t12
+
+$ rm -rf /tmp/t13 && mkdir -p /tmp/t13/build/sub && cd /tmp/t13
+echo a > build/sub/x.txt
+# Test if re-include works through gitignore-forbidden path (parent excluded)
+cat > .packignore << 'EOF'
+build/
+!build/sub/x.txt
+EOF
+/work/repo/tools/packignore /tmp/t13
+echo "---"
+# What about parent-excluded, deeper re-include where parent of parent is excluded
+mkdir -p build/a/b
+echo a > build/a/b/deep.txt
+cat > .packignore << 'EOF'
+build/
+!build/a/b/deep.txt
+EOF
+/work/repo/tools/packignore /tmp/t13
+
+$ rm -rf /tmp/t14 && mkdir -p /tmp/t14/sub && cd /tmp/t14
+echo a > sub/x.txt
+cat > .packignore << 'EOF'
+!sub/x.txt
+EOF
+cat > sub/.packignore << 'EOF'
+x.txt
+EOF
+/work/repo/tools/packignore /tmp/t14
+echo "--- (nested should win: x.txt excluded)---"
+cat > .packignore << 'EOF'
+sub/x.txt
+EOF
+cat > sub/.packignore << 'EOF'
+!x.txt
+EOF
+/work/repo/tools/packignore /tmp/t14
+echo "--- (nested should win: x.txt not excluded)---"
+
+$ rm -rf /tmp/t15 && mkdir -p /tmp/t15 && cd /tmp/t15
+echo a > a.txt && echo b > b.txt && echo c > c.txt && echo d > "[a].txt"
+cat > .packignore << 'EOF'
+[ab].txt
+EOF
+/work/repo/tools/packignore /tmp/t15
+echo "---"
+cat > .packignore << 'EOF'
+[a-c].txt
+EOF
+/work/repo/tools/packignore /tmp/t15
+echo "---"
+cat > .packignore << 'EOF'
+\[a\].txt
+EOF
+/work/repo/tools/packignore /tmp/t15
+echo "---"
+cat > .packignore << 'EOF'
+[a].txt
+EOF
+/work/repo/tools/packignore /tmp/t15
+
+$ rm -rf /tmp/t16 && mkdir -p /tmp/t16 && cd /tmp/t16
+echo a > "a?.txt" && echo b > "ab.txt" && echo c > "a.txt"
+cat > .packignore << 'EOF'
+a?.txt
+EOF
+/work/repo/tools/packignore /tmp/t16
+echo "---"
+cat > .packignore << 'EOF'
+\?
+EOF
+echo d > "?.txt" 
+/work/repo/tools/packignore /tmp/t16
+echo "---"
+cat > .packignore << 'EOF'
+a*b*c
+EOF
+echo a > "abc" && echo a > "aXbYc" && echo a > "ab"
+/work/repo/tools/packignore /tmp/t16

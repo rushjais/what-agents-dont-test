@@ -1,0 +1,131 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && ls -la tools
+
+$ cat tools/packignore; cat .packignore README.md snapshot/cli.py
+
+$ echo $PACKIGNORE_URL; tools/packignore . ; mkdir -p /tmp/probe && cat > /tmp/probe/q.py <<'EOF'
+import json, sys, urllib.request, os
+URL = os.environ.get("PACKIGNORE_URL", "http://127.0.0.1:8765")
+def q(files):
+    req = urllib.request.Request(URL + "/ignored", data=json.dumps({"files": files}).encode(),
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)["ignored"]
+    except urllib.error.HTTPError as e:
+        return "ERR:" + str(json.load(e))
+def t(pi, paths, extra=None):
+    files = {".packignore": pi}
+    for p in paths: files[p] = None
+    if extra: files.update(extra)
+    return q(files)
+EOF
+echo ok
+
+$ cd /tmp/probe && curl -s -m5 $PACKIGNORE_URL/ ; echo; curl -s -m5 $PACKIGNORE_URL/version; echo; curl -s -m5 -X POST $PACKIGNORE_URL/ignored -d '{}'; echo; python3 -I -c '
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import t
+P=["a.tmp","x/a.tmp","important.tmp","build/x","x/build/y","build","a;b","c#d", "#e", ";f"]
+for pi in ["*.tmp","# c\n*.tmp","; c\n*.tmp","build/","build","/build","x/build","!x","*.tmp\n!important.tmp","\\#e","\;f","#e",";f","**","x/**","**/y", "a.tmp ", " a.tmp","a.tmp\r\n"]:
+    print(repr(pi), t(pi,P))
+'
+
+$ cd /tmp/probe && cat > p1.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import t
+P=["a.tmp","x/a.tmp","important.tmp","build/x","x/build/y","bld","a;b","c#d", "#e", ";f","a.tmp ","!x","x/!y"]
+for pi in ["*.tmp","# c\n*.tmp","; c\n*.tmp","build/","build","/build","x/build","!x","*.tmp\n!important.tmp","\\#e","\;f","#e",";f","**","x/**","**/y", "a.tmp ", " a.tmp","a.tmp\r\n","\\!x","bld/","/x/a.tmp","x/"]:
+    print(repr(pi), t(pi,P))
+EOF
+python3 -I p1.py
+
+$ cd /tmp/probe && cat > p2.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import t
+P=["a\\b","ab","a*b","a?b","axb","[ab]","a","b","c","A","B.TXT","b.txt","x/y/z","x/z","z","y/x/z","dir.d/f","foo","fo","fooo","a b", "\\!x","!x"]
+tests = ["a\\b","a\\*b","a\\?b","[ab]","\\[ab]","[!a]","[^a]","[a-c]","[]","[","a*b","a?b","*","?","b.txt","B.TXT","x/*/z","x/**/z","**/z","x/**","z/**","*.d/","fo*","fo?","fo[o]","a b","a  b","\\!x","!","!!x","x/y/","/","//","/z","*/z","**/","x//z","./z","../z","x/./z","[[:alpha:]]","{a,b}","f*o*"]
+for pi in tests:
+    print(repr(pi), t(pi,P))
+EOF
+python3 -I p2.py
+
+$ cd /tmp/probe && cat > p3.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import t
+P=["a","b","c","ab","ac","a,b","{a,b}","{a}","{}","a{","x/a","x/b","y/c","x/y/a","axb","a/b/c", "abc", "a;b", "a ;b"]
+tests = ["{a}","{}","{a,}","{,a}","{a,b,c}","a{b,c}","{a,b}{b,c}","{a,{b,c}}","{a","a}","{x,y}/a","{x/a,c}","x/{a,b}","a**b","a**","**a","***","a/**/c","a/**/b/c","a;b","a ;b","a{,x}b","\\{a,b}","{a\\,b}","{{a}}","{a,b","a,b","x/**/","**/**/a","x/**/**/a","a\tb"]
+for pi in tests:
+    print(repr(pi), t(pi,P))
+EOF
+python3 -I p3.py
+
+$ cd /tmp/probe && sed -i 's#"a/b/c", #"q/b/c","q/x/b/c", #; s#"a/\*\*/c","a/\*\*/b/c"#"q/**/c","q/**/b/c"#' p3.py && python3 -I p3.py
+
+$ cd /tmp/probe && cat > p4.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import t
+P=["a","b","c","{a","a{","a}","{a,b}","b}","x/a","x/b","d/a","d/b","d/e/a","a "," a"]
+tests = ["{a","a{","a}","{a,b","{a,b}}","}{a}","{a}}","{,}","{,}a","\ta","a\rb","a\x0bb","a\x0cb","a\x1cb","a b","a\x85b"," a","a ","　a","﻿a","a\x00",
+"d/\n!d/a","d\n!d/a","d\n!a","*\n!d/","*\n!d","*\n!d/\n!d/*","d/\n!d/","a\n!a\na","!a\na", "d/**\n!d/a","d/*\n!d/e/","d/*\n!d/e","d/*\n!d/e/a","d/*\n!d/e\n!d/e/a"," ; x\na","a ; x","a;"]
+for pi in tests:
+    print(repr(pi), t(pi,P))
+EOF
+python3 -I p4.py
+
+$ cd /tmp/probe && cat > p5.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import t
+P=["a","a;","a ;","a;b","a ;b","a ; b","a; b",";a","b;"]
+tests = ["a;","a; ","a ;","a ;b","a;b","a ; b","a; b",";a"," ;a","a\n;x\nb;","a*","*;","*;*","a;*","a;\nb;","\;a","a#b"]
+for pi in tests:
+    print(repr(pi), t(pi,P))
+EOF
+python3 -I p5.py
+
+$ cd /tmp/probe && cat > p6.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import q
+base=["a","d/a","d/b","d/e/a","d/e/b","x/a",".a","d/.a"]
+def T(root, sub, subpath="d/.packignore", extra=()):
+    f={p:None for p in base+list(extra)}
+    if root is not None: f[".packignore"]=root
+    f[subpath]=sub
+    return q(f)
+cases=[(None,"a"),(None,"/a"),(None,"e/a"),(None,"d/a"),(None,"**/a"),(None,"*"),("a","!a"),("!a","a"),("d/a","!a"),("a","!/a"),("d/e/","!a"),("!d/a","a"),("*","!*"),(None,"/e/"),(None,"../a"),(None,"e/"),("d/e/a","!e/a"),
+ (None,".packignore"),("d/.packignore",None), ("*.a"," "), (".*",""), ("*a",""), ("?a","")]
+for r,s in cases:
+    print(repr(r),repr(s), T(r,s if s is not None else ""))
+print(T(None,"a","d/e/.packignore"))
+print(T("a","!a","d/e/.packignore"))
+print(T(None,"!a\n","d/e/.packignore",))
+print(q({"d/.packignore":"e","d/e/.packignore":"!a","d/e/a":None,"d/e/b":None}))
+print(q({"d/.packignore":"e/","d/e/.packignore":"!a","d/e/a":None,"d/e/b":None}))
+print(q({".packignore":"d","d/.packignore":"!a","d/a":None,"d/b":None}))
+EOF
+python3 -I p6.py
+
+$ cd /tmp/probe && cat > p7.py <<'EOF'
+import sys; sys.path.insert(0,"/tmp/probe")
+from q import q
+def Q(**kw):
+    f={"a":None,"d/a":None,"d/b":None,"d/e/a":None,"d/e/b":None}
+    for k,v in kw.items(): f[k.replace("_","/").replace("PI",".packignore")]=v
+    return q(f)
+print(1,Q(PI="", d_PI=".packignore\na"))
+print(2,Q(PI="*\n!.packignore", d_PI="!a"))
+print(3,Q(PI="*\n!.packignore\n!d/", d_PI="!a"))
+print(4,Q(PI="d\n!.packignore", d_PI="!a"))
+print(5,Q(PI="d\n!d/.packignore", d_PI="!a"))
+print(6,Q(PI="d/\n!d/.packignore", d_PI="!a"))
+print(7,Q(PI="d/.packignore\n!d/.packignore", d_PI="a"))
+print(8,Q(PI="", d_PI="!.packignore\na", d_e_PI="b"))
+print(9,Q(PI="", d_PI="e/.packignore", d_e_PI="b"))
+print(10,Q(PI="", d_PI="e", d_e_PI="!b\n!.packignore"))
+print(11,Q(PI="! a"))
+print(12,Q(PI="!\ta"))
+print(13,Q(PI="!/a"))
+print(14,Q(PI="a\n! a"))
+print(15,Q(PI="a\n!{a,b}"))
+print(16,Q(PI="{!a,b}"))
+print(17,Q(PI="a\n{!a,b}"))
+EOF
+python3 -I p7.py

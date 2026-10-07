@@ -1,0 +1,7 @@
+; packaging excludes for snapshot itself
+; keep in sync with the release script
+__pycache__/
+*.pyc
+
+; local scratch output
+tmp/

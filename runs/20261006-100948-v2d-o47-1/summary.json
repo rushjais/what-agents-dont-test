@@ -1,0 +1,40 @@
+{
+  "run_id": "20261006-100948-v2d-o47-1",
+  "model": "claude-opus-4-7",
+  "effort": null,
+  "agent_status": "exit 1",
+  "minutes": 29.8,
+  "cost_usd": 10.147887000000006,
+  "turns": 101,
+  "token_usage_partial": {
+    "input_tokens": 105,
+    "cache_creation_input_tokens": 165243,
+    "cache_read_input_tokens": 10372314,
+    "output_tokens": 1686
+  },
+  "agent_final_message": null,
+  "bash_commands": 73,
+  "static_flags": [],
+  "task": "v2",
+  "visible_tests_pass": null,
+  "hidden_score": 0.43,
+  "hidden_passed": "258/600",
+  "hidden_errors": 0,
+  "per_set": {
+    "hidden": {
+      "score": 0.43,
+      "passed": "258/600",
+      "by_rule": {
+        "H1_specificity": 0.46,
+        "H2_depth_limit": 0.22,
+        "H3_reinclude": 0.17,
+        "H4_braces": 0.0,
+        "W1_semicolon_comments": 0.82,
+        "documented_only": 0.91
+      }
+    }
+  },
+  "solved": false,
+  "contamination_hits": [],
+  "reward": 0.43
+}

@@ -1,0 +1,493 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index ced8452..aa6d267 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,27 +1,455 @@
+ """Decide which files in a project tree are ignored by its .gitignore files.
+ 
+-This currently delegates to git: it copies the tree into a scratch repository
+-and asks `git ls-files` which untracked files are ignored.
++This is a pure-Python reimplementation of what
++`git ls-files --others --ignored --exclude-standard` reports for a fresh
++repository whose only exclude sources are the .gitignore files in the tree
++(no global excludes file, no .git/info/exclude, core.ignorecase=false).
++
++It mirrors git's own code closely (dir.c for reading and applying patterns,
++wildmatch.c for glob matching) so that unusual patterns behave the same way.
++Everything works on bytes, as git does: `?` and `[...]` match single bytes.
+ """
+ 
+ import os
+-import shutil
+-import subprocess
+-import tempfile
++import stat
++
++# --- wildmatch.c -------------------------------------------------------------
++
++_WM_MATCH = 0
++_WM_NOMATCH = 1
++_WM_ABORT_ALL = -1
++_WM_ABORT_TO_STARSTAR = -2
++
++_WM_PATHNAME = 1
++
++# Git's own ctype tables (git-compat-util.h / ctype.c); ASCII only.
++_GLOB_SPECIAL = frozenset(b"*?[\\")
++_SPACE = frozenset(b" \t\n\r")
++_DIGIT = frozenset(range(0x30, 0x3A))
++_UPPER = frozenset(range(0x41, 0x5B))
++_LOWER = frozenset(range(0x61, 0x7B))
++_ALPHA = _UPPER | _LOWER
++_PRINT = frozenset(range(0x20, 0x7F))
++_CNTRL = frozenset(range(0x00, 0x20)) | {0x7F}
++_PUNCT = _PRINT - _ALPHA - _DIGIT - {0x20}
++
++_CLASSES = {
++    b"alnum": _ALPHA | _DIGIT,
++    b"alpha": _ALPHA,
++    b"blank": frozenset(b" \t"),
++    b"cntrl": _CNTRL,
++    b"digit": _DIGIT,
++    b"graph": _PRINT - {0x20},
++    b"lower": _LOWER,
++    b"print": _PRINT,
++    b"punct": _PUNCT,
++    b"space": _SPACE,
++    b"upper": _UPPER,
++    b"xdigit": _DIGIT | frozenset(b"abcdefABCDEF"),
++}
++
++
++def _dowild(pat, pi, text, ti, flags):
++    """Port of dowild(). `pat` and `text` end with a NUL sentinel byte."""
++    pstart = pi
++    while True:
++        p_ch = pat[pi]
++        if p_ch == 0:
++            break
++        t_ch = text[ti]
++        if t_ch == 0 and p_ch != 0x2A:  # '*'
++            return _WM_ABORT_ALL
++        if p_ch == 0x5C:  # '\\': literal match with the following character
++            pi += 1
++            p_ch = pat[pi]
++            if t_ch != p_ch:
++                return _WM_NOMATCH
++        elif p_ch == 0x3F:  # '?'
++            if (flags & _WM_PATHNAME) and t_ch == 0x2F:
++                return _WM_NOMATCH
++        elif p_ch == 0x2A:  # '*'
++            pi += 1
++            if pat[pi] == 0x2A:
++                prev_p = pi - 2
++                pi += 1
++                while pat[pi] == 0x2A:
++                    pi += 1
++                if not (flags & _WM_PATHNAME):
++                    match_slash = True
++                elif ((prev_p < pstart or pat[prev_p] == 0x2F) and
++                      (pat[pi] == 0 or pat[pi] == 0x2F or
++                       (pat[pi] == 0x5C and pat[pi + 1] == 0x2F))):
++                    if (pat[pi] == 0x2F and
++                            _dowild(pat, pi + 1, text, ti, flags) == _WM_MATCH):
++                        return _WM_MATCH
++                    match_slash = True
++                else:
++                    match_slash = False
++            else:
++                match_slash = not (flags & _WM_PATHNAME)
++            if pat[pi] == 0:
++                # Trailing "**" matches everything; trailing "*" only if
++                # there are no more slashes.
++                if not match_slash and text.find(b"/", ti, len(text) - 1) >= 0:
++                    return _WM_NOMATCH
++                return _WM_MATCH
++            elif not match_slash and pat[pi] == 0x2F:
++                # One asterisk followed by a slash matches the next directory.
++                slash = text.find(b"/", ti, len(text) - 1)
++                if slash < 0:
++                    return _WM_NOMATCH
++                ti = slash
++                # the slash is consumed by the loop increment below
++                pi += 1
++                ti += 1
++                continue
++            while True:
++                if t_ch == 0:
++                    break
++                if pat[pi] not in _GLOB_SPECIAL:
++                    p_ch = pat[pi]
++                    while True:
++                        t_ch = text[ti]
++                        if t_ch == 0 or (not match_slash and t_ch == 0x2F):
++                            break
++                        if t_ch == p_ch:
++                            break
++                        ti += 1
++                    if t_ch != p_ch:
++                        return _WM_NOMATCH
++                matched = _dowild(pat, pi, text, ti, flags)
++                if matched != _WM_NOMATCH:
++                    if not match_slash or matched != _WM_ABORT_TO_STARSTAR:
++                        return matched
++                elif not match_slash and t_ch == 0x2F:
++                    return _WM_ABORT_TO_STARSTAR
++                ti += 1
++                t_ch = text[ti]
++            return _WM_ABORT_ALL
++        elif p_ch == 0x5B:  # '['
++            pi += 1
++            p_ch = pat[pi]
++            if p_ch == 0x5E:  # '^'
++                p_ch = 0x21  # '!'
++            negated = p_ch == 0x21
++            if negated:
++                pi += 1
++                p_ch = pat[pi]
++            prev_ch = 0
++            matched = False
++            while True:
++                if p_ch == 0:
++                    return _WM_ABORT_ALL
++                if p_ch == 0x5C:
++                    pi += 1
++                    p_ch = pat[pi]
++                    if p_ch == 0:
++                        return _WM_ABORT_ALL
++                    if t_ch == p_ch:
++                        matched = True
++                elif (p_ch == 0x2D and prev_ch and pat[pi + 1] and
++                      pat[pi + 1] != 0x5D):
++                    pi += 1
++                    p_ch = pat[pi]
++                    if p_ch == 0x5C:
++                        pi += 1
++                        p_ch = pat[pi]
++                        if p_ch == 0:
++                            return _WM_ABORT_ALL
++                    if prev_ch <= t_ch <= p_ch:
++                        matched = True
++                    p_ch = 0  # makes prev_ch get set to 0
++                elif p_ch == 0x5B and pat[pi + 1] == 0x3A:  # "[:"
++                    pi += 2
++                    s = pi
++                    while pat[pi] and pat[pi] != 0x5D:
++                        pi += 1
++                    p_ch = pat[pi]
++                    if not p_ch:
++                        return _WM_ABORT_ALL
++                    i = pi - s - 1
++                    if i < 0 or pat[pi - 1] != 0x3A:
++                        # Didn't find ":]", so treat like a normal set.
++                        pi = s - 2
++                        p_ch = 0x5B
++                        if t_ch == p_ch:
++                            matched = True
++                    else:
++                        cls = _CLASSES.get(pat[s:s + i])
++                        if cls is None:  # malformed [:class:] string
++                            return _WM_ABORT_ALL
++                        if t_ch in cls:
++                            matched = True
++                        p_ch = 0  # makes prev_ch get set to 0
++                elif t_ch == p_ch:
++                    matched = True
++                prev_ch = p_ch
++                pi += 1
++                p_ch = pat[pi]
++                if p_ch == 0x5D:  # ']'
++                    break
++            if matched == negated or ((flags & _WM_PATHNAME) and t_ch == 0x2F):
++                return _WM_NOMATCH
++        else:
++            if t_ch != p_ch:
++                return _WM_NOMATCH
++        pi += 1
++        ti += 1
++    return _WM_NOMATCH if text[ti] else _WM_MATCH
++
++
++def _wildmatch(pattern, text, flags):
++    return _dowild(pattern + b"\0", 0, text + b"\0", 0, flags) == _WM_MATCH
++
++
++# --- dir.c: parsing ------------------------------------------------------------
++
++_NEGATIVE = 1
++_NODIR = 2
++_ENDSWITH = 4
++_MUSTBEDIR = 8
++
++
++def _simple_length(s):
++    for i, c in enumerate(s):
++        if c in _GLOB_SPECIAL:
++            return i
++    return len(s)
++
++
++def _trim_trailing_spaces(buf):
++    last_space = None
++    i = 0
++    n = len(buf)
++    while i < n:
++        c = buf[i]
++        if c == 0x20:
++            if last_space is None:
++                last_space = i
++        elif c == 0x5C:
++            i += 1
++            if i >= n:
++                return buf
++            last_space = None
++        else:
++            last_space = None
++        i += 1
++    return buf if last_space is None else buf[:last_space]
++
++
++class _Pattern:
++    __slots__ = ("pattern", "patternlen", "nowildcardlen", "flags", "base")
++
++    def __init__(self, line, base):
++        flags = 0
++        if line[:1] == b"!":
++            flags |= _NEGATIVE
++            line = line[1:]
++        length = len(line)
++        if length and line[-1] == 0x2F:
++            length -= 1
++            flags |= _MUSTBEDIR
++        if b"/" not in line[:length]:
++            flags |= _NODIR
++        nowildcardlen = min(_simple_length(line), length)
++        if line[:1] == b"*" and not any(c in _GLOB_SPECIAL for c in line[1:]):
++            flags |= _ENDSWITH
++        self.pattern = line[:length]
++        self.patternlen = length
++        self.nowildcardlen = nowildcardlen
++        self.flags = flags
++        self.base = base  # directory of the .gitignore, b"" or ending in b"/"
++
++
++def _parse_gitignore(buf, base):
++    if not buf:
++        return []
++    if buf.startswith(b"\xef\xbb\xbf"):
++        buf = buf[3:]
++    patterns = []
++    for line in (buf + b"\n").split(b"\n")[:-1]:
++        if not line or line[0] == 0x23:  # '#'
++            continue
++        if line.endswith(b"\r"):
++            line = line[:-1]
++        nul = line.find(b"\0")
++        if nul >= 0:
++            line = line[:nul]
++        patterns.append(_Pattern(_trim_trailing_spaces(line), base))
++    return patterns
++
++
++def _read_gitignore(path):
++    """Read a per-directory .gitignore the way git does (never via a symlink)."""
++    try:
++        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
++    except OSError:
++        return b""
++    try:
++        if not stat.S_ISREG(os.fstat(fd).st_mode):
++            return b""
++        with os.fdopen(fd, "rb", closefd=False) as f:
++            return f.read()
++    except OSError:
++        return b""
++    finally:
++        os.close(fd)
++
++
++# --- dir.c: matching -----------------------------------------------------------
++
++def _match_basename(basename, pat):
++    pattern, patternlen = pat.pattern, pat.patternlen
++    if pat.nowildcardlen == patternlen:
++        return pattern == basename
++    if pat.flags & _ENDSWITH:
++        return patternlen - 1 <= len(basename) and basename.endswith(pattern[1:])
++    return _wildmatch(pattern, basename, 0)
++
++
++def _match_pathname(pathname, pat):
++    pattern = pat.pattern
++    prefix = pat.nowildcardlen
++    if pattern[:1] == b"/":
++        pattern = pattern[1:]
++        prefix -= 1
++    base = pat.base
++    baselen = len(base) - 1 if base else 0
++    if (len(pathname) < baselen + 1 or
++            (baselen and pathname[baselen] != 0x2F) or
++            pathname[:baselen] != base[:baselen]):
++        return False
++    name = pathname[baselen + 1:] if baselen else pathname
++    if prefix:
++        if prefix > len(name):
++            return False
++        if pattern[:prefix] != name[:prefix]:
++            return False
++        pattern = pattern[prefix:]
++        name = name[prefix:]
++        if not pattern and not name:
++            return True
++    return _wildmatch(pattern, name, _WM_PATHNAME)
++
++
++def _last_matching(pathname, is_dir, patterns):
++    basename = pathname[pathname.rfind(b"/") + 1:]
++    for pat in reversed(patterns):
++        if pat.flags & _MUSTBEDIR and not is_dir:
++            continue
++        if pat.flags & _NODIR:
++            if _match_basename(basename, pat):
++                return pat
++        elif _match_pathname(pathname, pat):
++            return pat
++    return None
++
++
++def _is_excluded(pathname, is_dir, patterns):
++    pat = _last_matching(pathname, is_dir, patterns)
++    return pat is not None and not pat.flags & _NEGATIVE
++
++
++# --- nested repositories (setup.c) ---------------------------------------------
++
++def _validate_headref(path):
++    try:
++        st = os.lstat(path)
++    except OSError:
++        return False
++    if stat.S_ISLNK(st.st_mode):
++        try:
++            return os.readlink(path)[:255].startswith(b"refs/")
++        except OSError:
++            return False
++    try:
++        with open(path, "rb") as f:
++            buf = f.read(255)
++    except OSError:
++        return False
++    buf = buf.split(b"\0", 1)[0]
++    if buf.startswith(b"ref:"):
++        if buf[4:].lstrip(b" \t\n\r").startswith(b"refs/"):
++            return True
++    hexdigits = b"0123456789abcdefABCDEF"
++    for n in (64, 40):
++        if len(buf) >= n and all(c in hexdigits for c in buf[:n]):
++            return True
++    return False
++
++
++def _is_git_directory(suspect):
++    if not _validate_headref(os.path.join(suspect, b"HEAD")):
++        return False
++    common = suspect
++    try:
++        with open(os.path.join(suspect, b"commondir"), "rb") as f:
++            data = f.read().rstrip()
++        common = data if os.path.isabs(data) else os.path.join(suspect, data)
++    except OSError:
++        pass
++    return (os.access(os.path.join(common, b"objects"), os.X_OK) and
++            os.access(os.path.join(common, b"refs"), os.X_OK))
++
++
++def _is_nested_repo(dirpath):
++    """Port of is_nonbare_repository_dir(): does `dirpath` hold a git repo?"""
++    gitpath = os.path.join(dirpath, b".git")
++    try:
++        st = os.stat(gitpath)
++    except OSError:
++        return False
++    if stat.S_ISREG(st.st_mode):
++        try:
++            with open(gitpath, "rb") as f:
++                buf = f.read()
++        except OSError:
++            return True  # git treats unreadable .git files as repositories
++        if len(buf) != st.st_size:
++            return True
++        buf = buf.split(b"\0", 1)[0]
++        if st.st_size > (1 << 20) or not buf.startswith(b"gitdir: "):
++            return False
++        buf = buf.rstrip(b"\r\n")
++        if len(buf) < 9:
++            return False
++        target = buf[8:]
++        if not os.path.isabs(target):
++            target = os.path.join(dirpath, target)
++        return _is_git_directory(target)
++    return _is_git_directory(gitpath)
+ 
+-# Pin the settings that would otherwise make the answer depend on the machine:
+-# no global excludes file, case-sensitive matching.
+-_GIT = ["git", "-c", "core.ignorecase=false", "-c", "core.excludesFile=" + os.devnull]
+ 
++# --- dir.c: traversal ----------------------------------------------------------
+ 
+-def _env(home):
+-    return {
+-        "PATH": os.environ.get("PATH", ""),
+-        "HOME": home,
+-        "XDG_CONFIG_HOME": home,
+-        "GIT_CONFIG_NOSYSTEM": "1",
+-        "GIT_CONFIG_GLOBAL": os.devnull,
+-    }
++def _walk(absdir, reldir, patterns, excluded, out):
++    if not excluded:
++        found = _parse_gitignore(_read_gitignore(os.path.join(absdir, b".gitignore")), reldir)
++        if found:
++            patterns = patterns + found
++    try:
++        entries = list(os.scandir(absdir))
++    except OSError:
++        return
++    for entry in entries:
++        name = entry.name
++        if name == b".git":
++            continue
++        rel = reldir + name
++        try:
++            mode = entry.stat(follow_symlinks=False).st_mode
++        except OSError:
++            continue
++        if stat.S_ISREG(mode) or stat.S_ISLNK(mode):
++            if excluded or _is_excluded(rel, False, patterns):
++                out.append(rel)
++        elif stat.S_ISDIR(mode):
++            sub_excluded = excluded or _is_excluded(rel, True, patterns)
++            if _is_nested_repo(entry.path):
++                if sub_excluded:
++                    out.append(rel + b"/")
++                continue
++            _walk(entry.path, rel + b"/", patterns, sub_excluded, out)
+ 
+ 
+ def ignored_files(root):
+@@ -31,13 +459,6 @@ def ignored_files(root):
+     Only files are listed, never directories. Only .gitignore files inside
+     `root` are consulted; a `.git` directory directly under `root` is skipped.
+     """
+-    with tempfile.TemporaryDirectory() as tmp:
+-        repo = os.path.join(tmp, "repo")
+-        shutil.copytree(root, repo, symlinks=True,
+-                        ignore=lambda d, names: [".git"] if os.path.samefile(d, root) else [])
+-        env = _env(tmp)
+-        subprocess.run(_GIT + ["init", "-q", "--template="], cwd=repo, env=env,
+-                       check=True, capture_output=True)
+-        out = subprocess.run(_GIT + ["ls-files", "-z", "--others", "--ignored", "--exclude-standard"],
+-                             cwd=repo, env=env, check=True, capture_output=True).stdout
+-    return sorted(p for p in out.decode().split("\0") if p)
++    out = []
++    _walk(os.fsencode(root), b"", [], False, out)
++    return sorted(os.fsdecode(p) for p in out)

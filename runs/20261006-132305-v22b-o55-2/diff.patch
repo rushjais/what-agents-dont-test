@@ -1,0 +1,295 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..6343841 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,249 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. docs/PACKIGNORE.md describes the basics; the rules below are what the
++engine actually does, including the parts the docs leave out.
++
++The tree
++--------
++The engine sees the regular files under the root (symlinks and special files
++are skipped, as is a `.git` directory directly under the root), visited in
++`os.walk` order. It stores them on a case-insensitive, normalization-insensitive
++filesystem: two paths whose components are canonically caseless-equal
++(NFD + full case folding) are the same entry. The first path seen supplies the
++name; the last one supplies the content and mode. A file colliding with a
++directory is an error, and so are a file name that is not valid UTF-8 and a
++second hard link to the same file.
++
++.packignore syntax
++------------------
++- The file is UTF-8 (strict, no BOM handling) and split with str.splitlines().
++  Each line is str.strip()ped. Empty lines and lines starting with `;` are
++  skipped. `#` is NOT a comment.
++- A leading `!` negates (re-includes); the rest of the line is the pattern,
++  taken as is.
++- Trailing `/`s mean "directories only" and are removed. Leading `/`s are
++  removed. If the pattern contains a `/` (including a removed leading one) it
++  is anchored: matched against the whole path relative to the directory
++  holding the .packignore. Otherwise it matches a file or directory name at
++  any depth below that directory.
++- `*` matches any run of characters except `/`, `?` exactly one. A path
++  segment that is exactly `**` matches zero to three segments (not more: the
++  engine has always capped it). Everything else,
++  including `[`, `]` and `\\`, is literal. Matching is case-sensitive.
++- After the above, `{a,b}` groups are expanded: a group runs from a `{` to
++  the next `}` (no nesting; an unclosed `{` is literal), alternatives are
++  split on `,`, and expansion continues in the rest of the pattern. `!`,
++  trailing/leading `/` and anchoring are decided for the whole line, before
++  expansion.
++
++Precedence
++----------
++A file is decided by the deepest path (the file itself, else its nearest
++ancestor directory) that any pattern matches. Among the patterns matching that
++path, the winner is the one from the deepest .packignore, then the one with
++the most literal characters (counted over the whole line before brace
++expansion: everything except `*`, `?`, `/`, `{`, `}` and `,`), then the
++last one in the file. A negated winner keeps the path, any other winner
++excludes it.
++
++If no pattern matches the file itself, it is still excluded when it is
++executable (any x bit) or its first line (up to the first b"\\n") contains
++`@generated`.
++
++A .packignore is read only if the directory holding it is not excluded (the
++root's always is). Being excluded itself does not stop it from being read.
++A .packignore that would be read but is a directory, or is not valid UTF-8,
++is an error.
+ """
+ 
++import functools
+ import os
+-import subprocess
+-import sys
++import re
++import stat
++import unicodedata
++
++_PACKIGNORE = ".packignore"
++
++
++def _fold(name):
++    """Key under which the engine's filesystem considers names equal."""
++    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
++
++
++class _Dir:
++    def __init__(self, name):
++        self.name = name
++        self.children = {}  # folded name -> _Dir or _File
++
++
++class _File:
++    def __init__(self, name, source):
++        self.name = name
++        self.source = source  # path of the last file stored under this name
++
++
++def _walk(root):
++    """Yield (relative path, absolute path) for the files the engine sees."""
++    inodes = set()
++    for dirpath, dirnames, filenames in os.walk(root):
++        if os.path.samefile(dirpath, root) and ".git" in dirnames:
++            dirnames.remove(".git")
++        for name in filenames:
++            full = os.path.join(dirpath, name)
++            if os.path.islink(full) or not os.path.isfile(full):
++                continue
++            rel = os.path.relpath(full, root).replace(os.sep, "/").lstrip("/")
++            try:
++                rel.encode("utf-8")
++            except UnicodeEncodeError:
++                raise ValueError(f"packignore: {rel!r}: file name is not valid UTF-8") from None
++            st = os.stat(full)
++            if st.st_nlink > 1:
++                # The engine received trees as tar archives, where a second
++                # hard link to a file is a link entry, which it rejects.
++                if (st.st_ino, st.st_dev) in inodes:
++                    raise ValueError(f"packignore: {rel}: hard links are not supported")
++                inodes.add((st.st_ino, st.st_dev))
++            yield rel, full
++
++
++def _build_tree(root):
++    top = _Dir("")
++    for rel, full in _walk(root):
++        parts = rel.split("/")
++        node = top
++        for part in parts[:-1]:
++            child = node.children.get(_fold(part))
++            if child is None:
++                child = node.children[_fold(part)] = _Dir(part)
++            elif not isinstance(child, _Dir):
++                raise ValueError(f"packignore: {rel}: path collides with a file")
++            node = child
++        key = _fold(parts[-1])
++        child = node.children.get(key)
++        if child is None:
++            node.children[key] = _File(parts[-1], full)
++        elif isinstance(child, _File):
++            child.source = full
++        else:
++            raise ValueError(f"packignore: {rel}: path collides with a directory")
++    return top
++
++
++def _is_generated(path):
++    """True if the first line of the file contains b"@generated"."""
++    needle = b"@generated"
++    tail = b""
++    with open(path, "rb") as f:
++        while True:
++            chunk = f.read(65536)
++            if not chunk:
++                return False
++            nl = chunk.find(b"\n")
++            if nl >= 0:
++                chunk = chunk[:nl]
++            if needle in tail + chunk:
++                return True
++            if nl >= 0:
++                return False
++            tail = (tail + chunk)[-(len(needle) - 1):]
++
++
++def _is_executable(path):
++    return bool(os.stat(path).st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++
++def _segment_regex(seg):
++    out = []
++    for ch in seg:
++        if ch == "*":
++            out.append("[^/]*")
++        elif ch == "?":
++            out.append("[^/]")
++        else:
++            out.append(re.escape(ch))
++    return re.compile("".join(out), re.DOTALL)
++
++
++class _Rule:
++    def __init__(self, line, depth, index):
++        self.negated = line.startswith("!")
++        if self.negated:
++            line = line[1:]
++        self.dir_only = line.endswith("/")
++        line = line.rstrip("/")
++        self.anchored = "/" in line
++        line = line.lstrip("/")
++        # (deeper .packignore, more literal characters, later line) wins
++        self.rank = (depth, sum(1 for ch in line if ch not in "*?/{},"), index)
++        if self.anchored:
++            self.alternatives = [[None if seg == "**" else _segment_regex(seg) for seg in alt.split("/")]
++                                 for alt in _expand_braces(line)]
++        else:
++            self.alternatives = [_segment_regex(alt) for alt in _expand_braces(line)]
++
++    def matches(self, rel, is_dir):
++        """`rel` is the path's segments relative to the .packignore's directory."""
++        if self.dir_only and not is_dir:
++            return False
++        if not self.anchored:
++            return any(alt.fullmatch(rel[-1]) for alt in self.alternatives)
++        return any(_match_segments(alt, rel) for alt in self.alternatives)
++
++
++def _expand_braces(pattern):
++    """Expand `{a,b}` groups. A group runs from a `{` to the next `}`; groups
++    don't nest, and an unclosed `{` is literal."""
++    start = pattern.find("{")
++    end = pattern.find("}", start + 1) if start >= 0 else -1
++    if end < 0:
++        return [pattern]
++    rest = _expand_braces(pattern[end + 1:])
++    return [pattern[:start] + alt + tail for alt in pattern[start + 1:end].split(",") for tail in rest]
++
++
++_MAX_STARSTAR = 3  # a `**` segment matches at most this many path segments
++
++
++def _match_segments(pattern, path):
++    """Match compiled segments (None for `**`) against all of `path`."""
++    @functools.lru_cache(maxsize=None)
++    def match(i, j):
++        if i == len(pattern):
++            return j == len(path)
++        if pattern[i] is None:
++            return any(match(i + 1, k) for k in range(j, min(j + _MAX_STARSTAR, len(path)) + 1))
++        return j < len(path) and pattern[i].fullmatch(path[j]) is not None and match(i + 1, j + 1)
++
++    return match(0, 0)
++
++
++def _read_rules(path, depth):
++    with open(path, "rb") as f:
++        text = f.read().decode("utf-8")
++    rules = []
++    for line in text.splitlines():
++        line = line.strip()
++        if not line or line.startswith(";"):
++            continue
++        rules.append(_Rule(line, depth, len(rules)))
++    return rules
++
++
++def _decide(sources, path, is_dir):
++    """Return True/False if a pattern decides `path`, None if none matches.
++
++    `sources` is a list of (directory segments, rules) for every .packignore
++    that applies to `path`.
++    """
++    best = None
++    for base, rules in sources:
++        rel = path[len(base):]
++        for rule in rules:
++            if (best is None or rule.rank > best.rank) and rule.matches(rel, is_dir):
++                best = rule
++    return None if best is None else not best.negated
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +253,25 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    out = []
++
++    def visit(node, path, excluded, sources):
++        pi = node.children.get(_fold(_PACKIGNORE))
++        if not excluded and pi is not None and pi.name == _PACKIGNORE:
++            if isinstance(pi, _Dir):
++                raise ValueError(f"packignore: {'/'.join(path + [_PACKIGNORE])} is a directory")
++            sources = sources + [(path, _read_rules(pi.source, len(path)))]
++        for child in node.children.values():
++            child_path = path + [child.name]
++            if isinstance(child, _Dir):
++                decided = _decide(sources, child_path, True)
++                visit(child, child_path, excluded if decided is None else decided, sources)
++            else:
++                decided = _decide(sources, child_path, False)
++                if decided is None:
++                    decided = excluded or _is_executable(child.source) or _is_generated(child.source)
++                if decided:
++                    out.append("/".join(child_path))
++
++    visit(_build_tree(root), [], False, [])
++    return sorted(out)
+
+# untracked files:
+snapshot/__pycache__/__init__.cpython-311.pyc
+snapshot/__pycache__/__main__.cpython-311.pyc
+snapshot/__pycache__/_build_info.cpython-311.pyc
+snapshot/__pycache__/cli.cpython-311.pyc
+snapshot/__pycache__/ignore.cpython-311.pyc

@@ -1,0 +1,202 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index c64e439..1a5ee3b 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,14 +1,182 @@
+ """Decide which files in a project tree are excluded by its .packignore files.
+ 
+-This currently delegates to `packignore`, the legacy exclusion engine (see
+-docs/PACKIGNORE.md), via the client in tools/.
++This is a pure-Python reimplementation of `packignore`, the legacy exclusion
++engine. docs/PACKIGNORE.md describes the intent but is out of date; the rules
++below are what packignore actually does.
++
++Parsing (per line, after `str.splitlines()`):
++  - The line is stripped of surrounding whitespace (`str.strip()`); blank lines
++    are skipped. There are no comments and no escapes: `#` and `\\` are literal.
++  - A leading `!` negates the rule (only one is consumed).
++  - Trailing `/`s make the rule match directories only; leading `/`s anchor it.
++    A rule whose remaining text contains `/` is anchored too. Anchored rules
++    match the path relative to the directory holding the .packignore; others
++    match a single name at any depth below it.
++  - Braces are expanded: the leftmost `{...}` (up to the first `}`) is split on
++    `,`; each alternative is followed by the expansion of the rest. Text inside
++    an alternative is not expanded again.
++  - `*` matches any run of characters within a name and `?` exactly one. A whole
++    path segment `**` matches zero to three directory levels; any other `**` is
++    a plain `*`. `[` is literal.
++
++Precedence (for each file, consider it and each of its parent directories):
++  1. A match on a deeper path wins (the file itself beats its directories).
++  2. Then the rule from the deeper .packignore wins.
++  3. Then the more specific rule wins: the one with more characters other
++     than `*?{},/`.
++  4. Then the later rule in the file wins.
++The winning rule decides: excluded, or (if negated) included.
++
++A .packignore is only read if its directory is not itself excluded (the root
++one is always read). A rule never matches the directory holding its file.
+ """
+ 
+ import os
+-import subprocess
+-import sys
++import re
++
++_NAME = ".packignore"
++_GLOBSTAR_MAX = 3
++_BRACES = re.compile(r"\{([^}]*)\}")
++_UNSCORED = set("*?{},/")
++
++
++def _expand(pat):
++    m = _BRACES.search(pat)
++    if not m:
++        return [pat]
++    prefix = pat[:m.start()]
++    rests = _expand(pat[m.end():])
++    return [prefix + alt + rest for alt in m.group(1).split(",") for rest in rests]
++
++
++def _segment_re(seg):
++    out = []
++    for ch in seg:
++        if ch == "*":
++            if not out or out[-1] != "[^/]*":
++                out.append("[^/]*")
++        elif ch == "?":
++            out.append("[^/]")
++        else:
++            out.append(re.escape(ch))
++    return re.compile("".join(out), re.DOTALL)
++
++
++class _Rule:
++    __slots__ = ("negate", "dir_only", "anchored", "score", "alts")
++
++    def __init__(self, negate, dir_only, anchored, pat):
++        self.negate = negate
++        self.dir_only = dir_only
++        self.anchored = anchored
++        self.score = sum(1 for ch in pat if ch not in _UNSCORED)
++        self.alts = []
++        for alt in _expand(pat):
++            if anchored:
++                self.alts.append([None if s == "**" else _segment_re(s) for s in alt.split("/")])
++            else:
++                self.alts.append(_segment_re(alt))
++
++    def matches(self, parts, is_dir):
++        """`parts` is the path relative to the rule's directory, split on "/"."""
++        if self.dir_only and not is_dir:
++            return False
++        if self.anchored:
++            return any(_match_segments(alt, 0, parts, 0) for alt in self.alts)
++        name = parts[-1]
++        return any(r.fullmatch(name) for r in self.alts)
++
++
++def _match_segments(pat, i, parts, j):
++    if i == len(pat):
++        return j == len(parts)
++    if pat[i] is None:
++        for k in range(min(_GLOBSTAR_MAX, len(parts) - j) + 1):
++            if _match_segments(pat, i + 1, parts, j + k):
++                return True
++        return False
++    if j == len(parts) or not pat[i].fullmatch(parts[j]):
++        return False
++    return _match_segments(pat, i + 1, parts, j + 1)
++
++
++def _parse(text):
++    rules = []
++    for line in text.splitlines():
++        line = line.strip()
++        if not line:
++            continue
++        negate = line.startswith("!")
++        if negate:
++            line = line[1:]
++        dir_only = line.endswith("/")
++        line = line.rstrip("/")
++        anchored = line.startswith("/")
++        line = line.lstrip("/")
++        if not line:
++            continue
++        anchored = anchored or "/" in line
++        rules.append(_Rule(negate, dir_only, anchored, line))
++    return rules
++
++
++def _walk(root):
++    """Mirror the tree listing packignore was given: files and .packignore texts."""
++    files = []
++    texts = {}
++    for dirpath, dirnames, filenames in os.walk(root):
++        if os.path.samefile(dirpath, root) and ".git" in dirnames:
++            dirnames.remove(".git")
++        for name in filenames:
++            full = os.path.join(dirpath, name)
++            rel = os.path.relpath(full, root).replace(os.sep, "/")
++            files.append(rel)
++            if name == _NAME:
++                with open(full, newline="") as f:
++                    texts[rel] = f.read()
++    return files, texts
++
++
++class _Engine:
++    def __init__(self, texts):
++        # Directory ("" for root) -> rules of the .packignore in it.
++        self.rules = {}
++        for rel, text in texts.items():
++            self.rules[rel[:-len(_NAME)].rstrip("/")] = _parse(text)
++        self.dir_excluded = {}
++
++    def _read(self, d):
++        return d == "" or not self.excluded(d, True)
+ 
+-_CLIENT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "packignore")
++    def excluded(self, path, is_dir):
++        if is_dir and path in self.dir_excluded:
++            return self.dir_excluded[path]
++        parts = path.split("/")
++        # Directories holding a .packignore that applies to `path`.
++        sources = []
++        for depth in range(len(parts)):
++            d = "/".join(parts[:depth])
++            if d in self.rules and self._read(d):
++                sources.append((depth, self.rules[d]))
++        result = False
++        for level in range(len(parts), 0, -1):
++            best = None
++            level_is_dir = is_dir or level < len(parts)
++            for depth, rules in sources:
++                if depth >= level:
++                    continue
++                rel = parts[depth:level]
++                for idx, rule in enumerate(rules):
++                    if rule.matches(rel, level_is_dir):
++                        key = (depth, rule.score, idx)
++                        if best is None or key > best[0]:
++                            best = (key, rule)
++            if best is not None:
++                result = not best[1].negate
++                break
++        if is_dir:
++            self.dir_excluded[path] = result
++        return result
+ 
+ 
+ def ignored_files(root):
+@@ -18,6 +186,6 @@ def ignored_files(root):
+     Only files are listed, never directories. A `.git` directory directly
+     under `root` is skipped.
+     """
+-    out = subprocess.run([sys.executable, _CLIENT, root], check=True, capture_output=True,
+-                         text=True).stdout
+-    return sorted(line for line in out.splitlines() if line)
++    files, texts = _walk(root)
++    engine = _Engine(texts)
++    return sorted(f for f in files if engine.excluded(f, False))

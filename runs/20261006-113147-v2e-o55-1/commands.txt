@@ -1,0 +1,965 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && head -c 600 tools/packignore
+
+$ cat tools/packignore; cat .packignore README.md snapshot/cli.py
+
+$ cd /tmp && curl -s -XPOST localhost:8765/ignored -H 'Content-Type: application/json' -d '{"files":{".packignore":"*.tmp\n;x\n#y\n","a.tmp":null,"b/c.tmp":null,";x":null,"#y":null}}'; echo; curl -s localhost:8765/; echo; env | grep -i pack
+
+$ mkdir -p /tmp/probe && cat > /tmp/probe/q.py <<'EOF'
+import json, os, sys, urllib.request, urllib.error
+URL = os.environ["PACKIGNORE_URL"]
+def query(files):
+    req = urllib.request.Request(URL + "/ignored", data=json.dumps({"files": files}).encode(),
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.load(r)["ignored"]
+    except urllib.error.HTTPError as e:
+        body = e.read()
+        try: return ("ERROR", e.code, json.loads(body))
+        except Exception: return ("ERROR", e.code, body)
+def t(pi, paths, **extra):
+    files = {".packignore": pi}
+    files.update({p: None for p in paths})
+    files.update(extra)
+    return query(files)
+if __name__ == "__main__":
+    print(query(json.loads(sys.argv[1])))
+EOF
+cd /tmp/probe && python3 -c '
+from q import *
+print(t("*.tmp\n;x\n#y\n", ["a.tmp","b/c.tmp",";x","#y"]))
+'
+
+$ cd /tmp/probe && python3 -c '
+import urllib.request,os
+U=os.environ["PACKIGNORE_URL"]
+for p in ["/","/version","/help","/ignored","/docs"]:
+    try:
+        r=urllib.request.urlopen(U+p,timeout=10); print(p,r.status,r.headers, r.read()[:2000])
+    except Exception as e:
+        print(p,e, getattr(e,"read",lambda:b"")()[:500])
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+P=["a.tmp","b/c.tmp","b/d/e.tmp","A.TMP","x.tmpl","b/a.tmp","tmp","b/tmp/f","ab","b/ab", "c/b/x"]
+for pi in ["*.tmp","  *.tmp","*.tmp  ","\t;x\n*.tmp","  ;c","*.TMP","/a.tmp","/*.tmp","b/*.tmp","b/","b","tmp/","tmp","/b/","a?tmp","[ab].tmp","[!a].tmp","[^a].tmp","\\*.tmp","**/*.tmp","b/**","b/**/e.tmp","**/b/**","**","*","b/d","d/","*/c.tmp","b/*/e.tmp","b**", "*b", "a**","!x","",";"]:
+    print(repr(pi), t(pi,P))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+print(t("*",["A.TMP"]))
+print(t("*",["A.TMP","a.tmp"]))
+print(t("*.tmp",["A.TMP"]))
+print(t("*.TMP",["A.TMP"]))
+print(t("A.TMP",["A.TMP"]))
+print(t("a.tmp",["A.TMP"]))
+print(t("*",["Ab/c"]))
+print(t("ab",["Ab/c"]))
+print(t("*",["B/c","b/d"]))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+def T(pi, paths): 
+    f={p:None for p in paths}; f[".packignore"]=pi; return query(f)
+print(T("*",["b/d","B/c"]))
+print(T("*",["a.tmp","A.TMP"]))
+print(T("*",["A.TMP","a.tmp"]))
+print(T("*",["x/a","X/b","x/c"]))
+print(T("*",["x/Y/a","X/y/b"]))
+print(T("b",["B/c"]))
+print(T("B",["b/c"]))
+print(T("b/",["B/c"]))
+print(T("*",[".PACKIGNORE"]))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+def T(*items): return query(dict(items))
+print(T((".packignore","*"),(".PACKIGNORE",None)))
+print(T((".packignore","*"),(".PACKIGNORE","x")))
+print(T((".packignore","x"),(".PACKIGNORE","*")))
+print(T((".PACKIGNORE",None),(".packignore","*"),("a",None)))
+print(T(("a",None),(".packignore","*"),("A",None)))
+print(T(("a",None),(".packignore","A")))
+print(T(("A",None),(".packignore","A"),("a",None)))
+print(T(("a",None),(".packignore","A"),("A",None)))
+print(T(("sub/.packignore","*"),("SUB/x",None)))
+print(T(("SUB/x",None),("sub/.packignore","*")))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+P=["a.tmp","imp.tmp","b/imp.tmp","b/x","b/c/y","!a","#a"]
+for pi in ["*.tmp\n!imp.tmp","!imp.tmp\n*.tmp","b/\n!b/x","b/\n!x","b\n!b/x","b/**\n!b/x","*\n!b/","*\n!b","*\n!*.tmp","\\!a","!!a","! imp.tmp\n*.tmp","*.tmp\n! imp.tmp","\\#a","#a","*.tmp\n!/imp.tmp","b/*\n!b/c/","b/*\n!b/c","b/c/\n!b/c/y","*\n!b/c/y","*\n!*/","*\n!**/"]:
+    print(repr(pi), t(pi,P))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+P=["imp.tmp","a.tmp","[ab].tmp","\\\\a","\\\\*.tmp","!a","x/!a","{a,b}","a+b","a.b","aXb","a b","a\tb", "c/d/e"]
+for pi in ["!*.tmp\nimp.tmp","[ab].tmp","\\\\a","\\\\*.tmp","\\\\!a","!!a","{a,b}","a.b","a+b","a?b","a b","a*b","a\tb","a\\\\ b","!\\\\!a","c/d/e/","c/d/e","/c/d/e","c//e","c/*/e","c/**/d/e","**/e","**/d","c/**/e/**","c**e","c/*","**/"," !imp.tmp\n*.tmp"]:
+    print(repr(pi), t(pi,P))
+'
+
+$ cd /tmp/probe && cat > p1.py <<'EOF'
+from q import *
+P=["imp.tmp","a.tmp","b/imp.tmp","{a,b}","a","b","!a","ab"]
+tests = [
+ "!*.tmp\nimp.tmp", "imp.tmp\n!*.tmp", "!i*.tmp\n*.tmp", "*.tmp\n!i*.tmp", "!*.tmp\ni*.tmp", "i*.tmp\n!*.tmp",
+ "!imp.tmp\nimp.tmp", "imp.tmp\n!imp.tmp", "*\n!imp.tmp", "!imp.*\n*.tmp", "*.tmp\n!imp.*",
+ "!im?.tmp\nimp.tmp", "!*mp.tmp\n*.tmp", "!*p.tmp\n*mp.tmp", "*mp.tmp\n!*p.tmp",
+ "{a,b}", "*\n!!a", "!a\n*",
+]
+for pi in tests: print(repr(pi), t(pi,P))
+EOF
+python3 p1.py
+
+$ cd /tmp/probe && sed -i 's/"a","b","!a"/"a","!a"/' p1.py && python3 p1.py
+
+$ cd /tmp/probe && cat > p2.py <<'EOF'
+from q import *
+import sys
+P=["imp.tmp","a.tmp","b/imp.tmp","bbbbbbbb/x","bbbbbbbb/c/y"]
+tests = [l.replace("\\n","\n") for l in sys.argv[1:]]
+for pi in tests: print(repr(pi), t(pi,P))
+EOF
+python3 p2.py '!*****.tmp\ni*.tmp' 'i*.tmp\n!*****.tmp' '!*.tmp\n?mp.tmp' '?mp.tmp\n!*.tmp' '!???.tmp\nimp.*' 'imp.*\n!???.tmp' 'bbbbbbbb/\n!*' '!*\nbbbbbbbb/' 'b*/\n!x' '!x\nb*/' 'bbbbbbbb\n!x' 'bbbbbbbb/c/\n!y' '!y\nbbbbbbbb/c/' '!/imp.tmp\n*.tmp' '!**.tmp\n*.tmp' '*.tmp\n!**.tmp' '!**/imp.tmp\nimp.tmp' 'imp.tmp\n!**/imp.tmp'
+
+$ cd /tmp/probe && python3 p2.py '!b/*.tmp\n?mp.tmp' '?mp.tmp\n!b/*.tmp' '!b/*.tmp\n??p.tmp' '??p.tmp\n!b/*.tmp' '!/imp.tmp\nimp.tmp' 'imp.tmp\n!/imp.tmp' '!{i,j}mp.tmp\nimp.tmp' 'imp.tmp\n!{i,j}mp.tmp' '!{i}mp.tmp\n?mp.tmp' '?mp.tmp\n!{i}mp.tmp' '!imp.tmp/\nimp.tmp' '!b/\n*' '*\n!b/' '!b\n*' '!b/**\nb/*' 'b/*\n!b/**' '!b/**\n*' '!b/**/*\n*/*' '*/*\n!b/**/*'
+
+$ cd /tmp/probe && cat > p3.py <<'EOF'
+from q import *
+import sys
+P=["imp.tmp","a.tmp","s/imp.tmp","s/a.tmp","s/t/imp.tmp","s/t/a.tmp","x/s/a.tmp"]
+args=[a.replace("\\n","\n") for a in sys.argv[1:]]
+for i in range(0,len(args),2):
+    files={p:None for p in P}
+    files[".packignore"]=args[i]; files["s/.packignore"]=args[i+1]
+    print(repr(args[i]),"|",repr(args[i+1]), query(files))
+EOF
+python3 p3.py '*.tmp' '!imp.tmp' '!imp.tmp' '*.tmp' '*.tmp' '!*.tmp' '!*.tmp' '*.tmp' 'imp.tmp' '!*.tmp' '!*.tmp' 'imp.tmp' 's/*.tmp' '!*.tmp' '!s/*.tmp' '*.tmp' 's/a.tmp' '!a.tmp' '!s/a.tmp' 'a.tmp' '' 's/a.tmp' '' '/a.tmp' '' 't/a.tmp' '' 't/' 's/' '!a.tmp' 's/' '!t/' '' '*' '' '/*' 's/t/a.tmp' '!t/a.tmp' '!s/t/a.tmp' 't/a.tmp' 
+
+$ cd /tmp/probe && python3 p3.py 's/\n!s/.packignore' '!a.tmp' 's/.packignore' '*' '.packignore' '*.tmp' 's/*\n!s/t/' '!t/a.tmp' 's/*\n!s/t/' '!/t/a.tmp' 's/*' '!t/' 's/**' '!t/' 's/**' '!a.tmp' 's/*' '!a.tmp' 's/*' '!/*' 'x/\n!x/s/' '' '!s/t/' '*' '*' '!*' '*' '!*/'
+
+$ cd /tmp/probe && cat > p4.py <<'EOF'
+from q import *
+import sys, json
+# usage: p4.py 'path=content' ... ; paths w/o '=' are plain files
+base=["a.tmp","s/a.tmp","s/b.tmp","s/t/a.tmp","s/t/b.tmp","x/s/a.tmp","x/s/b.tmp"]
+files={p:None for p in base}
+for a in sys.argv[1:]:
+    k,v=a.split("=",1); files[k]=v.replace("\\n","\n")
+print(query(files))
+EOF
+python3 p4.py '.packignore=x/\n!x/s/' 'x/s/.packignore=a.tmp'
+python3 p4.py '.packignore=s/\n!s/t/' 's/t/.packignore=a.tmp'
+python3 p4.py '.packignore=s/\n!s/t/' 's/.packignore=!b.tmp' 's/t/.packignore=a.tmp'
+python3 p4.py '.packignore=s/t/' 's/.packignore=!t/' 
+python3 p4.py '.packignore=t/' 's/.packignore=!t/' 's/t/.packignore=!a.tmp'
+python3 p4.py '.packignore=s/t/' 's/.packignore=!t/' 's/t/.packignore=!a.tmp'
+
+
+$ cd /tmp/probe && cat > p5.py <<'EOF'
+from q import *
+import sys
+P=["a","b","ab","a.c","d/a","d/e/a","{a","a}","a,b","{}","{a,b}","[a]","**","***","x y","c\\d"]
+args=[a.replace("\\n","\n").replace("\\r","\r").replace("\\t","\t") for a in sys.argv[1:]]
+for pi in args: print(repr(pi), t(pi,P))
+EOF
+python3 p5.py '{a' 'a}' '{a,b' '{a,{b,c}}' '{,a}' '{}' '{a}' 'a,b' '{a,b}/a' 'd/{a,e/a}' '{d,x}/' '{a\,b}' '***' '**/**' '/**' '/' '//' '!' '!/' '.' './a' 'd/./a' 'd/../a' '..' '[' '[a]' '\\' 'a\\' 'x y' 'x  y' 'a\r' '  a  ' 'a\t' '\ta' '\x0ba' '*\\' '{{a}}' '}{' '{a,}' '{,}'
+
+$ cd /tmp/probe && cat > score.py <<'EOF'
+from q import *
+import sys
+F = "abcdefghijklmnopqrstuvwxyz"
+def cal(s): return F[:s] + "?"*(len(F)-s)
+def rel(X, Y, path):
+    """compare X (as neg) vs Y (pos). returns 'X' if X wins both orders, 'Y', or 'tie'"""
+    r1 = path in t("!"+X+"\n"+Y, [path])   # X first, Y last -> excluded if Y wins
+    r2 = path in t(Y+"\n!"+X, [path])
+    if not r1 and not r2: return "X"
+    if r1 and r2: return "Y"
+    if r1 and not r2: return "tie"
+    return "weird"
+def score(X, path=F, prefix=""):
+    # binary search s such that rel(X, cal(s)) == tie
+    lo, hi = 0, len(F)
+    res = {}
+    while lo <= hi:
+        m = (lo+hi)//2
+        r = rel(X, prefix+cal(m), path)
+        if r == "tie": return m
+        if r == "X": lo = m+1
+        elif r == "Y": hi = m-1
+        else: return ("weird", m)
+    return ("between", hi, lo)
+if __name__ == "__main__":
+    for x in sys.argv[1:]:
+        print(repr(x), score(x))
+EOF
+python3 score.py 'abcdefghijklmnopqrstuvwxyz' '*' '**' 'a*' '{a}bcdefghijklmnopqrstuvwxyz' '{a,b}bcdefghijklmnopqrstuvwxyz' '{a,}bcdefghijklmnopqrstuvwxyz' '/abcdefghijklmnopqrstuvwxyz' '**/abc*' 'abc*/' '*z' 'abc**' '{x,a}*'
+
+$ cd /tmp/probe && cat > score2.py <<'EOF'
+from q import *
+import sys
+def rel(X, Y, path, others=()):
+    r1 = path in t("!"+X+"\n"+Y, [path, *others])
+    r2 = path in t(Y+"\n!"+X, [path, *others])
+    if not r1 and not r2: return "X"
+    if r1 and r2: return "Y"
+    if r1 and not r2: return "tie"
+    return "weird"
+def score(X, path):
+    base = path.rsplit("/",1)[-1]
+    pre = path[:len(path)-len(base)]
+    n=len(base)
+    lo, hi = 0, n
+    while lo <= hi:
+        m = (lo+hi)//2
+        Y = "/"+pre + base[:m] + "?"*(n-m) if pre else base[:m] + "?"*(n-m)
+        r = rel(X, Y, path)
+        if r == "tie": return m + (len(pre.replace("/","")) if pre else 0)
+        if r == "X": lo = m+1
+        elif r == "Y": hi = m-1
+        else: return ("weird", m)
+    return ("between", hi, lo)
+if __name__ == "__main__":
+    import ast
+    for pair in sys.argv[1:]:
+        X, path = pair.split("\t")
+        print(repr(X), repr(path), score(X, path))
+EOF
+python3 score2.py "{abcdefghijklmnop	{abcdefghijklmnop" "a,bcdefghijklmnop	a,bcdefghijklmnop" "a}bcdefghijklmnop	a}bcdefghijklmnop" "a bcdefghijklmnop	a bcdefghijklmnop" "a\\bcdefghijklmnop	a\\bcdefghijklmnop" "a!bcdefghijklmnop	a!bcdefghijklmnop" "a[b]cdefghijklmnop	a[b]cdefghijklmnop" "{a,b,c}bcdefghijklmnop	abcdefghijklmnop" "{a,bc}defghijklmnop	abcdefghijklmnop"  "{ab,b}cdefghijklmnop	abcdefghijklmnop" "{a,b}{b,c}cdefghijklmnop	abbcdefghijklmnop"
+
+$ cd /tmp/probe && python3 score2.py "{a,bbbbbbbb}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{a,b,c}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{a,b,c,d,e}????????????????????	cxxxxxxxxxxxxxxxxxxxx" "{a,}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{,a}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{bbbbbb,a}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{a}{b}????????????????????	abxxxxxxxxxxxxxxxxxxxx" "{a,{b}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{a,{b}}????????????????????	a}xxxxxxxxxxxxxxxxxxxx" "{a**,b}????????????????????	axxxxxxxxxxxxxxxxxxxx" "{}a????????????????????	axxxxxxxxxxxxxxxxxxxx"
+
+$ cd /tmp/probe && P='????????????????????'; X='xxxxxxxxxxxxxxxxxxxx'; python3 score2.py "{a}{b$P	a{b$X" "{a}b}$P	ab}$X" "{a}b,c$P	ab,c$X" "a{b,c$P	a{b,c$X" "{a,{b}$P	{b$X" "{{a}$P	{a$X" "{a{,}$P	a{$X" "{a,b}}$P	a}$X" "}{a}$P	}a$X" "a}{b,c}$P	a}b$X" "{a,b}{$P	a{$X" "{a,b},{c}$P	a,c$X"
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+for pat, files in [("{a}b}",["ab}","a}b","ab","a}b}","{a}b}"]),("{a}{b",["a{b","ab","{a}{b"]),("{a,{b}",["a","{b","b","{a,{b}"]),("{{a}",["{a","a"]),("{a{,}",["a{","a","{a{,}","a{,"]),("{a,b}}",["a}","b}","a","{a,b}}"]),("}{a}",["}a","a"]),("{a,b},{c}",["a,c","b,c","a","c"]),("{a,b}{c,d}",["ac","ad","bc","bd","a{c,d}"]),("{a,b}x{c,d}y",["axcy","bxdy"])]:
+    print(pat, t(pat, files))
+'
+
+$ cd /tmp/probe && python3 -c '
+from score2 import *
+P="?"*20; X="x"*20
+for pat,f in [("{a}b}"+P,"ab}"+X),("{a,{b}"+P,"a"+X),("{a,{b}"+P,"{b"+X),("{a}b"+P,"ab"+X),("{a}bc}"+P,"abc}"+X),("{a,b}c}"+P,"ac}"+X)]:
+    print(pat[:8], f[:5], [rel(pat, f[:m]+"?"*(len(f)-m), f) for m in range(0,6)])
+'
+
+$ cd /tmp/probe && cat > score3.py <<'EOF'
+from score2 import rel
+import sys
+def calib(f, k):
+    out=[]; n=0
+    for c in f:
+        if c.isalnum() and n<k: out.append(c); n+=1
+        else: out.append('?')
+    return ''.join(out)
+def score(X, f):
+    n=sum(c.isalnum() for c in f)
+    res=[rel(X, calib(f,k), f) for k in range(n+1)]
+    ties=[k for k,r in enumerate(res) if r=="tie"]
+    return ties if ties else res
+if __name__=="__main__":
+    P="?"*20; Xs="x"*20
+    for pair in sys.argv[1:]:
+        X,f=pair.split("\t")
+        print(repr(X), repr(f), score(X+P, f+Xs) if True else None)
+EOF
+python3 -c '
+import score3
+P="?"*10; X="x"*10
+for pat,f in [("{a}b}","ab}"),("{a,{b}","a"),("{a,{b}","{b"),("{a,bbb}","a"),("a}b","a}b"),("a{b","a{b"),("a,b","a,b"),("{a}{b","a{b"),("{a,b},{c}","a,c"),("a\\b","a\\b"),("a b","a b"),("a.b","a.b"),("a!b","a!b"),("a[b","a[b"),("a-b_","a-b_"),("a**b","axb")]:
+    print(pat, f, score3.score(pat+P, f+X))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a/b","a/x/b","a/x/y/b","ab","b","x/a/b","a/bc","a/b/c","axb","s/a"]
+for pat in ["a?b","a*b","a/**/b","a/**b","a**/b","a/**/**/b","**/a/b","**/b","**b","a/*/b","a/*","a/*/","a/**/","*/b","{a/b,b}","{x/a,ab}","{a,s}/","{b/,c}","{!a,b}","!{a,b}","a/b/**","a/b/**/","a/**/*","a/b*","a/b/","/a/b/c/","**/","*/","*/*/","/b","a//b","a/./b","**/**/b","b/**"]:
+    print(repr(pat), t(pat, F))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a/b","a/x/b","a/x/y/b","ab","b","x/a/b","a/bc","a/bb/c","axb","s/a","a/b.d/q"]
+for pat in ["a?b","a*b","a/**/b","a/**b","a**/b","a/**/**/b","**/a/b","**/b","**b","a/*/b","a/*","a/*/","a/**/","*/b","{a/b,b}","{x/a,ab}","{a,s}/","{b/,c}","{!a,b}","!{a,b}","a/bb/**","a/bb/**/","a/**/*","a/b*","a/bb/","/a/bb/c/","**/","*/","*/*/","/b","a//b","a/./b","**/**/b","b/**","bb/**", "a/**/**","**/**"]:
+    print(repr(pat), t(pat, F))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+def T(*items, pi="*"): 
+    d={".packignore":pi}; d.update({k:None for k in items}); return query(d)
+print(T("a","A/x")); print(T("A/x","a")); print(T("a/b","A/B/c")); print(T("a/B/c","A/b"))
+print(T("ß","SS","ss")); print(T("straße","STRASSE")); print(T("k","K")); print(T("K","k"))
+print(T("İ","i")); print(T("i","İ")); print(T("ı","I")); print(T("ǅ","ǆ","Ǆ")); print(T("σ","ς","Σ"))
+print(T("ﬁ","FI","fi"));print(T("é","é")); print(T("Ω","ω","Ω"))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+import unicodedata
+def T(*items, pi="*"): 
+    d={".packignore":pi}; d.update({k:None for k in items}); return query(d)
+for items in [("é","é"),("f","ｆ"),("2","²"),("1","①"),("Å","Å"),("á̂","ấ"),("ǅ","DŽ"),("ᾈ","ἀι"),("ﬀ","ff"),("ΐ","ΐ"),("x/é/a","x/é/b"),("A",),("a\u0000",)]:
+    print([ascii(i) for i in items], [ascii(x) for x in T(*items)] if not isinstance(T(*items),tuple) else T(*items))
+'
+
+$ cd /tmp/probe && cat > norm.py <<'EOF'
+import unicodedata as u, sys, itertools
+from q import query
+N=u.normalize
+Ks = {
+ "cf_nfc": lambda s: N("NFC",s).casefold(),
+ "cf_nfd": lambda s: N("NFD",s).casefold(),
+ "nfc_cf": lambda s: N("NFC",s.casefold()),
+ "nfd_cf": lambda s: N("NFD",s.casefold()),
+ "nfc_cf_nfc": lambda s: N("NFC",N("NFC",s).casefold()),
+ "nfd_cf_nfd": lambda s: N("NFD",N("NFD",s).casefold()),
+ "nfc_cf_nfd": lambda s: N("NFC",N("NFD",s).casefold()),
+ "nfd_cf_nfc": lambda s: N("NFD",N("NFC",s).casefold()),
+}
+# candidate strings
+chars=[chr(c) for c in range(0x80,0x2200) if u.category(chr(c))[0] in "LM"]
+cands=set()
+for c in chars:
+    for f in [lambda x:x, lambda x:N("NFD",x), lambda x:N("NFC",x), lambda x:x.casefold(), lambda x:x.upper(), lambda x:x.lower(), lambda x:N("NFD",x.casefold()), lambda x:N("NFC",x.casefold())]:
+        cands.add(f(c))
+groups={}
+cands=sorted(cands)
+# find pairs where key functions disagree
+from collections import defaultdict
+pairs=[]
+idx=defaultdict(list)
+for s in cands:
+    for k,f in Ks.items():
+        idx[(k,f(s))].append(s)
+seen=set()
+for (k,key),lst in idx.items():
+    for a,b in itertools.combinations(lst,2):
+        if (a,b) in seen: continue
+        seen.add((a,b))
+        sig=tuple(Ks[kk](a)==Ks[kk](b) for kk in Ks)
+        if not all(sig): pairs.append((sig,a,b))
+bysig={}
+for sig,a,b in pairs: bysig.setdefault(sig,[]).append((a,b))
+for sig,lst in bysig.items():
+    for a,b in lst[:3]:
+        d={".packignore":"*", "x"+a:None, "x"+b:None}
+        r=query(d)
+        merged = len([p for p in r if p!=".packignore"])==1
+        print(sig, ascii(a), ascii(b), "merged" if merged else "separate", ascii(r) if isinstance(r,tuple) else "")
+print(list(Ks))
+EOF
+python3 norm.py
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+print(t("é",["é"]), t("é",["é"]), t("e?",["é"]), t("?",["é"]), t("?",["é"]), t("K",["k"]), t("ss",["ß"]), t("?",["\U0001F600"]))
+'; python3 --version
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+for p in ["a\nb","a\rb","a\\\\b"," a","a ","a\tb","\x01","\x7f","a\udcff","...", "a b","﻿","a/b/../c","./a","a//b","/a","a/","",".packignore/x"]:
+    r=t("*",[p]); print(ascii(p), ascii(r))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+print(t("zzz",["a\udcff"]), t("",["a\udcff"]), t("zzz",["d\udcff/x"]))
+print(query({"a":None})); print(query({}))
+print(query({".packignore":"\udcff"}))
+print(query({".packignore":"a\udcff\nb", "b":None}))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a","b","a\rb","a\x0bb","\xa0a","a\xa0","a b","a\x85b","a\x1cb", " a"]
+for pi in ["a\rb","a\x0bb","a\x0cb","a\x1cb","a\x85b","a b","\xa0a","a\xa0","　a","\x1fa","\x1ca", "a\r\nb", "﻿a", "﻿;x\nb"]:
+    print(ascii(pi), ascii(t(pi,F)))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a/x","b","c","d/a/y","d/b","e/f/g"]
+for pi in ["{a/,b}","{b,a/}","{/a,b}","{b,/a}","{/b,c}","/{b,c}","{a,b}/","{a,b/}","{e/f,c}/","{e,b}","{e/,b/}","e{/f,x}","e{/f/,x/}","{e/f/g,a}/","{,/}b","b{,/}","{a/x,b}/", "a/{x,}", "a{/x,}", "{a/,}x"]:
+    print(repr(pi), t(pi,F))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a/x","b","c\nd","e/f/g"]
+for pi in ["//a","a//","//b","b//","///b","/","//","/**/","a/x/","c?d","c*d","*d","/e//","e//f/g","e/f//","**//g","!/b","!//b"]:
+    print(repr(pi), t(pi,F))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a/x","b","e/f/g"]
+for pi in ["f//","f///","//f","g//","/{f,x}/","{/f,x}","!f//"]:
+    print(repr(pi), t(pi,F))
+'
+
+$ cd /tmp/probe && cat > fuzz.py <<'EOF'
+import random, sys, json
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import evaluate, PackignoreError
+from q import query
+
+NAMES = ["a","b","c","ab","a.tmp","b.tmp","x.py","build","src","tmp","A","B","Tmp","d.d",".hidden","{a","a}","a,b","[a]","!a","#a",";a"," a","a b","é","e\u0301","ß","ss"]
+DIRNAMES = ["a","b","src","build","tmp","d","A","Build","x","sub","ß","SS"]
+CH = list("ab*?/{},!;# .x") + ["**","tmp","/","\\","\n","\r\n","\t"]
+
+def rand_pattern(rng):
+    if rng.random()<0.3:
+        # structured
+        segs=[]
+        for _ in range(rng.randint(1,3)):
+            segs.append(rng.choice(["*","**","a","b","*.tmp","?","a*","{a,b}","{a,src}","build","tmp","s*","*b","{,a}","x"]+DIRNAMES))
+        p="/".join(segs)
+        if rng.random()<0.3: p="/"+p
+        if rng.random()<0.3: p=p+"/"
+    else:
+        p="".join(rng.choice(CH) for _ in range(rng.randint(0,6)))
+    if rng.random()<0.35: p="!"+p
+    if rng.random()<0.1: p=";"+p
+    if rng.random()<0.1: p=" "+p
+    return p
+
+def rand_tree(rng, case_ins):
+    files={}
+    def gen(prefix, depth):
+        for _ in range(rng.randint(1,4)):
+            if depth<3 and rng.random()<0.4:
+                d=rng.choice(DIRNAMES if case_ins else [n for n in DIRNAMES if n.islower() and n not in ("ß",)])
+                gen(prefix+d+"/", depth+1)
+            else:
+                n=rng.choice(NAMES if case_ins else ["a","b","c","ab","a.tmp","b.tmp","x.py","{a","a}","!a","#a"])
+                files[prefix+n]=None
+        if rng.random()<0.6:
+            files[prefix+".packignore"]="\n".join(rand_pattern(rng) for _ in range(rng.randint(0,5)))
+    gen("",0)
+    return files
+
+def run(seed, case_ins):
+    rng=random.Random(seed)
+    files=rand_tree(rng, case_ins)
+    exp=query(files)
+    try:
+        got=evaluate(files)
+    except PackignoreError as e:
+        got=("ERROR",str(e))
+    expe=isinstance(exp,tuple); gote=isinstance(got,tuple)
+    if expe or gote:
+        return expe==gote, files, exp, got
+    return exp==got, files, exp, got
+
+if __name__=="__main__":
+    start=int(sys.argv[1]); n=int(sys.argv[2]); ci=sys.argv[3]=="1"
+    bad=0; errs=0
+    for s in range(start,start+n):
+        ok,files,exp,got=run(s,ci)
+        if isinstance(exp,tuple): errs+=1
+        if not ok:
+            bad+=1
+            if bad<=3:
+                print("SEED",s); print(json.dumps(files,indent=1,ensure_ascii=False)); print("exp",exp); print("got",got)
+    print("bad",bad,"of",n,"errors",errs)
+EOF
+python3 fuzz.py 0 300 0
+
+$ cd /tmp/probe && python3 fuzz.py 1000 1500 1 2>&1 | tail -40; python3 fuzz.py 5000 1500 0 | tail -5
+
+$ cd /tmp/probe && python3 - <<'EOF'
+import re
+s=open("fuzz.py").read()
+s=s.replace("""    exp=query(files)
+""","""    for attempt in range(3):
+        try:
+            exp=query(files); break
+        except Exception as e:
+            print("timeout seed",seed,e, flush=True)
+    else:
+        return True, files, None, None
+""")
+open("fuzz.py","w").write(s)
+EOF
+python3 fuzz.py 1000 1500 1 2>&1 | tail -40
+
+$ cd /tmp/probe && cat > fuzz2.py <<'EOF'
+import random, sys, json
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import evaluate, PackignoreError
+from q import query
+SEGS=["a","b","ab","ba","aa","x.tmp","y.tmp","src","lib","{","}",",","*","?","!","é","A","Ab"]
+def mutate_seg(rng, s):
+    r=rng.random()
+    if r<0.15: return "*"
+    if r<0.25: return "**"
+    if r<0.35: return s[:1]+"*"
+    if r<0.42: return "?"*len(s)
+    if r<0.5: return "{"+s+","+rng.choice(SEGS)+"}"
+    if r<0.55: return "*"+s[-1:]
+    if r<0.6: return s+"**"
+    if r<0.63: return "{"+s
+    if r<0.66: return s+"}"
+    return s
+def gen_tree(rng):
+    files={}
+    dirs=[""]
+    for _ in range(rng.randint(3,25)):
+        parent=rng.choice(dirs)
+        name=rng.choice(SEGS[:8]+["c","d","e"])
+        if rng.random()<0.4 and parent.count("/")<4:
+            dirs.append(parent+name+"/")
+        else:
+            files[parent+name]=None
+    # dirs need a file to exist
+    for d in dirs[1:]:
+        if rng.random()<0.5: files[d+rng.choice(["f","g.tmp","a"])]=None
+    paths=list(files)
+    for d in dirs:
+        if rng.random()<0.55:
+            lines=[]
+            for _ in range(rng.randint(1,6)):
+                if rng.random()<0.7 and paths:
+                    p=rng.choice(paths)
+                    if not p.startswith(d): 
+                        segs=p.split("/")[-rng.randint(1,2):]
+                    else:
+                        segs=p[len(d):].split("/")
+                        if rng.random()<0.5: segs=segs[:rng.randint(1,len(segs))]
+                    segs=[mutate_seg(rng,s) for s in segs]
+                    line="/".join(segs)
+                    if rng.random()<0.25: line="/"+line
+                    if rng.random()<0.2: line+="/"
+                else:
+                    line="".join(rng.choice(["*","?","/","a","b","{","}",",","**","!"," ","x.tmp"]) for _ in range(rng.randint(1,5)))
+                if rng.random()<0.4: line="!"+line
+                lines.append(line)
+            files[d+".packignore"]="\n".join(lines)
+    # shuffle insertion order
+    items=list(files.items()); rng.shuffle(items)
+    return dict(items)
+def run(seed):
+    rng=random.Random(seed)
+    files=gen_tree(rng)
+    for _ in range(3):
+        try: exp=query(files); break
+        except Exception as e: print("timeout",seed,flush=True)
+    else: return True,files,None,None
+    try: got=evaluate(files)
+    except PackignoreError as e: got=("ERROR",str(e))
+    if isinstance(exp,tuple) or isinstance(got,tuple):
+        return isinstance(exp,tuple)==isinstance(got,tuple),files,exp,got
+    return exp==got,files,exp,got
+if __name__=="__main__":
+    start=int(sys.argv[1]); n=int(sys.argv[2]); bad=0; errs=0
+    for s in range(start,start+n):
+        ok,files,exp,got=run(s)
+        if isinstance(exp,tuple): errs+=1
+        if not ok:
+            bad+=1
+            if bad<=3: print("SEED",s); print(json.dumps(files,indent=1,ensure_ascii=False)); print("exp",exp); print("got",got)
+    print("bad",bad,"of",n,"errors",errs)
+EOF
+python3 fuzz2.py 0 2000
+
+$ cd /tmp/probe && python3 - <<'EOF'
+s=open("fuzz2.py").read()
+s=s.replace("""        if rng.random()<0.4 and parent.count("/")<4:
+            dirs.append(parent+name+"/")
+        else:
+            files[parent+name]=None""","""        fold=lambda x:x.casefold()
+        if rng.random()<0.4 and parent.count("/")<4:
+            if any(fold(f)==fold(parent+name) for f in files): continue
+            dirs.append(parent+name+"/")
+        else:
+            if any(fold(d)==fold(parent+name+"/") for d in dirs): continue
+            files[parent+name]=None""")
+s=s.replace("""        if rng.random()<0.5: files[d+rng.choice(["f","g.tmp","a"])]=None""","""        if rng.random()<0.5:
+            c=d+rng.choice(["f","g.tmp","a"])
+            if not any(x.casefold()==(c+"/").casefold() for x in dirs): files[c]=None""")
+open("fuzz2.py","w").write(s)
+EOF
+python3 fuzz2.py 0 3000
+
+$ cd /tmp/probe && cat > mini.py <<'EOF'
+import sys, json
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import evaluate, PackignoreError
+from q import query
+def differs(files):
+    exp=query(files)
+    try: got=evaluate(files)
+    except PackignoreError as e: got=("ERROR",)
+    if isinstance(exp,tuple) or isinstance(got,tuple): return isinstance(exp,tuple)!=isinstance(got,tuple)
+    return exp!=got
+def minimize(files):
+    changed=True
+    while changed:
+        changed=False
+        for k in list(files):
+            f=dict(files); del f[k]
+            if differs(f): files=f; changed=True
+        for k,v in list(files.items()):
+            if v is None: continue
+            lines=v.split("\n")
+            for i in range(len(lines)):
+                nl=lines[:i]+lines[i+1:]
+                f=dict(files); f[k]="\n".join(nl)
+                if differs(f): files=f; lines=nl; changed=True; break
+    return files
+if __name__=="__main__":
+    import fuzz2, random
+    for seed in map(int,sys.argv[1:]):
+        files=fuzz2.gen_tree(random.Random(seed))
+        m=minimize(files)
+        print(seed, json.dumps(m,ensure_ascii=False)); print(" exp",query(m)); print(" got",evaluate(m))
+EOF
+python3 mini.py 785 1757 1777
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["a/x","a/b/x","a/b/c/x","a/b/c/d/x","a/b/c/d/e/x","q/a/x"]
+for pi in ["*\n!a/**","*\n!/**","*\n!**","*\n!**/x","*\n!a/**/x","*\n!**/b/**","*\n!a/**/**","*\n!**/**", "*\n!a/*/**", "*\n!a/**/*"]:
+    print(repr(pi), t(pi,F))
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["/".join("abcdefghijk"[:n])+"/x" for n in range(0,11)]
+for pi in ["*\n!x","*\n!**","*\n!**/**","*\n!**/**/**","*\n!a/**","*\n!a/**/**","*\n!a/**/**/**","*\n!**/x","*\n!**/**/x", "*\n!a/**/*/**", "*\n!a**/**", "*\n!a/**x", "*\n!c/**"]:
+    r=t(pi,F); print(repr(pi), "included:", [f.count("/") for f in F if f not in r])
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+F=["x"]+["/".join("abcdefghijk"[:n])+"/x" for n in range(1,11)]
+for pi in ["*\n!x","*\n!**","*\n!**/**","*\n!**/**/**","*\n!a/**","*\n!a/**/**","*\n!a/**/**/**","*\n!**/x","*\n!**/**/x", "*\n!a/**/*/**", "*\n!a**/**", "*\n!a/**x", "*\n!c/**", "*\n!/**", "*\n!/**/x"]:
+    r=t(pi,F); print(repr(pi), "included depths:", [f.count("/")+1 for f in F if f not in r])
+'
+
+$ cd /tmp/probe && python3 -c '
+from q import *
+L="q"*40
+F=["a/"+L+"/x", "a/"+L+"/"+L+"/x", "a/"+L+"/"+L+"/"+L+"/x", "a/b/c/x", "a/b/c/d/x"]
+r=t("*\n!a/**",F); print([f.count("/") for f in F if f not in r])
+r=t("*\n!a/**/x",F); print([f.count("/") for f in F if f not in r])
+'
+
+$ python3 - <<'EOF'
+p="snapshot/ignore.py"
+s=open(p).read()
+s=s.replace('''        rx = "".join("(?:/[^/]*)*" if seg == "**" else "/" + _segment_regex(seg)''','''        rx = "".join("(?:/[^/]*){0,3}" if seg == "**" else "/" + _segment_regex(seg)''')
+s=s.replace('''- "*" and "?" never match "/". A "**" segment matches zero or more segments;
+  "**" inside a segment acts like "*".''','''- "*" and "?" never match "/". A "**" segment matches zero to three
+  segments (not any number); "**" inside a segment acts like "*". The
+  implicit any-depth prefix of an unanchored pattern has no such limit.''')
+open(p,"w").write(s)
+EOF
+grep -n '0,3\|zero to three' snapshot/ignore.py; cd /tmp/probe && python3 mini.py 785 1757 1777 2>&1 | tail -3; python3 fuzz2.py 0 3000
+
+$ cd /tmp/probe && cat > lim.py <<'EOF'
+import sys
+sys.path.insert(0, "/work/repo")
+from snapshot.ignore import evaluate, PackignoreError
+from q import query
+def cmp(name, files):
+    exp=query(files)
+    try: got=evaluate(files)
+    except PackignoreError as e: got=("ERROR",str(e))
+    same = (exp==got) if not (isinstance(exp,tuple) or isinstance(got,tuple)) else (isinstance(exp,tuple)==isinstance(got,tuple))
+    print(name, "OK" if same else "DIFF", str(exp)[:200] if not same else "", str(got)[:200] if not same else "")
+deep="/".join(["d"]*40)
+cmp("deep", {".packignore":"x", deep+"/x":None, deep+"/y":None})
+cmp("deep-anch", {".packignore":"d/d/d/d/d/d/d/d/d/d/d/d/*/x", deep+"/x":None})
+cmp("deep-star", {".packignore":"*\n!"+"/".join(["*"]*41), deep+"/x":None, deep+"/y":None})
+cmp("deep-pi", {".packignore":"*\n!d/\n!x", deep+"/.packignore":"x", deep+"/x":None, deep+"/y":None})
+for n in [100,255,256,257,1000,5000,20000]:
+    cmp(f"longline{n}", {".packignore":"a"*n, "a"*n:None, "b":None})
+    cmp(f"longline-star{n}", {".packignore":"*"*n+"b", "b":None})
+for n in [100,1000,10000]:
+    cmp(f"manylines{n}", {".packignore":"\n".join(f"f{i}" for i in range(n)), f"f{n-1}":None, "f0":None})
+cmp("bigbrace", {".packignore":"{a,b}"*12, "ab"*6+"ba"*6:None})
+cmp("bigbrace2", {".packignore":"{"+",".join(f"x{i}" for i in range(500))+"}", "x499":None})
+cmp("bigbrace3", {".packignore":"{a,b}"*20, "a"*20:None})
+cmp("manyfiles", {**{f"d{i%50}/f{i}":None for i in range(3000)}, ".packignore":"d1*/\n!f1*"})
+cmp("score-big", {".packignore":"!"+"a"*300+"\n"+"*"*300, "a"*300:None})
+cmp("longname", {".packignore":"?"*300, "a"*300:None})
+EOF
+python3 lim.py
+
+$ cd /tmp/probe && cat > lim2.py <<'EOF'
+from q import query
+def ok(files):
+    r=query(files); return "ERR"+str(r[1]) if isinstance(r,tuple) else "ok"
+print("lines")
+for n in [1999,2000,2001]:
+    print(n, ok({".packignore":"\n".join("a" for _ in range(n))}), ok({".packignore":"\n".join("a" for _ in range(n))+"\n"}), ok({".packignore":"\n".join(";" for _ in range(n))}), ok({".packignore":"\n"*n}), ok({".packignore":"\r\n"*n}), ok({".packignore":"\r"*n}), ok({".packignore":" "*n}))
+print("chars")
+for n in [999,1000,1001]:
+    print(n, ok({".packignore":"a"*n}), ok({".packignore":" "*n}), ok({".packignore":";"*n}), ok({".packignore":"  "+"a"*(n-2)+"  "}), ok({".packignore":"é"*n}), ok({".packignore":"a"*n+"\r\n"}), ok({".packignore":"\U0001F600"*n}), ok({".packignore":"!"+"a"*(n-1)}))
+print("names")
+for n in [254,255,256]:
+    print(n, ok({"a"*n:None}), ok({"é"*n:None}), ok({"d/"+"a"*n:None}), ok({"a"*n+"/x":None}))
+for n in [127,128]:
+    print(n, ok({"é"*n:None}), ok({"\U0001F600"*(n//2):None}))
+EOF
+python3 lim2.py
+
+$ cd /tmp/probe && cat > lim3.py <<'EOF'
+from q import query
+import time
+def ok(files):
+    t0=time.time(); r=query(files); return ("ERR"+str(r[1])+str(r[2]) if isinstance(r,tuple) else "ok "+str(len(r)))+f" {time.time()-t0:.1f}s"
+for k in [4,8,16,17,20,40]:
+    p="/".join(["a"*255]*k)
+    print("pathlen", len(p), ok({p:None}))
+for d in [100,500,1000,2000]:
+    print("depth", d, ok({"/".join(["d"]*d)+"/x":None}))
+for n in [10000,50000,100000]:
+    print("files", n, ok({**{f"d{i%100}/f{i}":None for i in range(n)}, ".packignore":"f1*"}))
+print("brace last", ok({".packignore":"{a,b}"*20, "b"*20:None}))
+print("brace many", ok({".packignore":"{a,b,c,d,e,f,g,h,i,j}"*8, "j"*8:None}))
+EOF
+python3 lim3.py
+
+$ cd /tmp/probe && cat > lim4.py <<'EOF'
+from q import query
+def ok(files):
+    r=query(files); return "ERR"+str(r[1])+str(r[2])[:60] if isinstance(r,tuple) else "ok"
+def bis(f, lo, hi):
+    # largest n with ok
+    while lo<hi:
+        m=(lo+hi+1)//2
+        if f(m)=="ok": lo=m
+        else: hi=m-1
+    return lo, f(lo+1)
+def mk(n):  # path of total length n using components of <=200
+    parts=[]; rem=n
+    while rem>0:
+        c=min(200, rem if rem<=200 else 200)
+        if rem-c==1: c-=1
+        parts.append("a"*c); rem-=c+1
+    p="/".join(parts); return p
+print("pathlen", bis(lambda n: ok({"x"*min(n,255) if n<=255 else mk(n): None}), 1, 2000), len(mk(400)))
+print("pathlen-chars-é", bis(lambda n: ok({"é"*100+"/"+"é"*(n-101):None}), 102, 1000))
+print("depth", bis(lambda n: ok({"/".join(["d"]*n):None}), 1, 200))
+print("files", bis(lambda n: ok({f"f{i}":None for i in range(n)}), 1, 10000))
+print("files+pi", bis(lambda n: ok({**{f"f{i}":None for i in range(n)}, **{f"d{i}/.packignore":"" for i in range(10)}}), 1, 10000))
+print("files-case", bis(lambda n: ok({**{f"f{i}":None for i in range(n)}, **{f"F{i}":None for i in range(n)}}), 1, 10000))
+EOF
+python3 lim4.py
+
+$ cd /tmp/probe && for i in $(seq 1 30); do if timeout 20 python3 -c 'from q import *; print(t("a",["a"]))' 2>/dev/null; then break; fi; sleep 20; done
+
+$ cd /tmp/probe && cat > lim5.py <<'EOF'
+from q import query
+def ok(files):
+    r=query(files); return "ERR"+str(r[1])+str(r[2])[:70] if isinstance(r,tuple) else "ok"
+def bis(f, lo, hi):
+    while lo<hi:
+        m=(lo+hi+1)//2
+        if f(m)=="ok": lo=m
+        else: hi=m-1
+    return lo, f(lo+1)
+def path(n, k, ch="a"):
+    # total length n chars, components of size k (last shorter)
+    parts=[]; rem=n
+    while rem>0:
+        c=min(k, rem)
+        if 0 < rem-c < 2: c-=2
+        parts.append(ch*c); rem-=c+1
+    return "/".join(parts)
+for k in [100,200,250]:
+    print("k",k, bis(lambda n: ok({path(n,k):None}), 300, 3000))
+print("é k100", bis(lambda n: ok({path(n,100,"é"):None}), 300, 3000))
+print("files", bis(lambda n: ok({f"f{i}":None for i in range(n)}), 4990, 5010))
+print("files+pi", bis(lambda n: ok({**{f"f{i}":None for i in range(n)}, **{f"d{i}/.packignore":"" for i in range(10)}}), 4980, 5010))
+print("files-case", bis(lambda n: ok({**{f"f{i}":None for i in range(n)}, **{f"F{i}":None for i in range(n)}}), 2490, 5010))
+EOF
+python3 lim5.py
+
+$ cd /tmp/probe && for i in $(seq 1 30); do if timeout 20 python3 -c 'from q import *; print(t("a",["a"]))' 2>/dev/null; then break; fi; sleep 20; done
+
+$ cd /tmp/probe && cat > lim6.py <<'EOF'
+from q import query
+import time
+def ok(files):
+    t0=time.time(); r=query(files); dt=time.time()-t0
+    if dt>5: print("  slow",dt)
+    return "ERR"+str(r[1])+str(r[2])[:70] if isinstance(r,tuple) else "ok"
+def p(n, unit):  # path whose components each have 50 units, total ~n units
+    comps=[]; tot=0
+    while tot < n:
+        c=min(50, n-tot)
+        comps.append(unit*c); tot+=c
+    return "/".join(comps)
+# 'a' baseline: 955 chars ok
+print(ok({p(940,"a"):None}), len(p(940,"a")))
+for n in [300,320,340,400,470,480]:
+    s=p(n,"é"); print("é", n, len(s), len(s.encode()), ok({s:None}))
+EOF
+timeout 300 python3 lim6.py
+
+$ cd /tmp/probe && cat > fs.py <<'EOF'
+from q import query
+def T(*names):
+    d={".packignore":"*"}; d.update({n:None for n in names}); r=query(d)
+    return r if isinstance(r,tuple) else [x for x in r if x!=".packignore"]
+tests=[("a͸",),("",),("a￾",),("a￿",),("\U0010ffff",),("\U000e0001",),
+("a‌b","ab"),("a‍b","ab"),("a﻿b","ab"),("a­b","ab"),("a͏b","ab"),
+("Ᲊ","ᲊ"),("Ꟁ","ꟁ"),("Ⱟ","ⱟ"),("\U00010570","\U00010597"),("\U0001e900","\U0001e922"),
+("a:b",),("a\x7fb",),("İ","i̇"),("ẞ","ss"),("ẞ","ß"),("ǈ","ǉ"),("ǈ","Ǉ"),
+("Σ","ς"),("ι","ι"),("ͅ","ι"),("Ω","ω"),("Å","å"),
+("가","가"),("क़","क़"),("⫝̸","⫝̸"),("\U0001d15e","\U0001d157\U0001d165"),
+("豈","豈"),("̈́","̈́"),("ཱི","ཱི"),
+]
+for names in tests:
+    print([ascii(n) for n in names], ascii(T(*names)))
+EOF
+timeout 500 python3 fs.py
+
+$ cd /tmp/probe && python3 -c '
+import unicodedata; print("local", unicodedata.unidata_version)
+from q import query
+def T(*names):
+    d={".packignore":"*"}; d.update({n:None for n in names}); r=query(d)
+    return r if isinstance(r,tuple) else [x for x in r if x!=".packignore"]
+# chars new in versions
+for ver, ch in [("15.0","\U0001F6DC"),("15.0","\U00011F00"),("15.1","⿼"),("15.1","\U0002EBF0"),("16.0","Ᲊ"),("16.0","\U000105C0"),("16.0","\U0001CC00"),("17.0","\U00016EA0"),("17.0","\U0001E6C0"),("17.0","\U00010940"),("17.0","\U0001F6D8"),("17.0","꟎"),("17.0","\U00011DB0")]:
+    print(ver, ascii(ch), unicodedata.category(ch), ascii(T("x"+ch)))
+'
+
+$ ls /usr/bin/python3* /usr/local/bin/python3* 2>/dev/null; which -a python3 pypy3 uv 2>/dev/null; ls /usr/share/unicode* /usr/share/unicode-data 2>/dev/null | head; find / -name "UnicodeData.txt" -o -name "CaseFolding.txt" 2>/dev/null | head; python3 -c "import sys;print(sys.version)"
+
+$ cd /tmp/probe && cat > lim7.py <<'EOF'
+from q import query
+def ok(files):
+    r=query(files); return "ERR"+str(r[1])+str(r[2])[:60] if isinstance(r,tuple) else "ok"
+def bis(f, lo, hi):
+    while lo<hi:
+        m=(lo+hi+1)//2
+        if f(m)=="ok": lo=m
+        else: hi=m-1
+    return lo, f(lo+1)
+print("files", bis(lambda n: ok({f"f{i}":None for i in range(n)}), 4990, 5010))
+print("files w/ pi", bis(lambda n: ok({**{f"f{i}":None for i in range(n)}, ".packignore":"x"}), 4990, 5010))
+print("files case", bis(lambda n: ok({**{f"f{i}":None for i in range(n)}, **{f"F{i}":None for i in range(n)}}), 2490, 5010))
+print("files deep", bis(lambda n: ok({f"d{i%7}/e{i%3}/f{i}":None for i in range(n)}), 4990, 5010))
+big="\n".join(["a"]*2001)
+print("inactive big", ok({".packignore":"d/","d/.packignore":big}))
+print("PACKIGNORE big", ok({".PACKIGNORE":big}))
+print("overwritten big", ok({".packignore":big, ".PACKIGNORE":None}))
+print("overwritten2 big", ok({".PACKIGNORE":None, ".packignore":big}))
+print("unassigned in content", ok({".packignore":"a͸"}))
+print("surrogate in inactive", ok({".packignore":"d/","d/.packignore":"\udcff"}))
+print("depth64 file", ok({"/".join(["d"]*64):None}), ok({"/".join(["d"]*65):None}))
+EOF
+timeout 500 python3 lim7.py
+
+$ mkdir -p /tmp/udata && cd /tmp/udata && cat > dump.py <<'EOF'
+import unicodedata as u, sys, json
+out={"ver":u.unidata_version,"assigned":[],"cf":{},"nfd":{},"ccc":{}, "nfc":{}}
+for c in range(0x110000):
+    ch=chr(c)
+    if 0xD800<=c<=0xDFFF: continue
+    if u.category(ch)!="Cn": out["assigned"].append(c)
+    cf=ch.casefold()
+    if cf!=ch: out["cf"][c]=cf
+    d=u.normalize("NFD",ch)
+    if d!=ch: out["nfd"][c]=d
+    if u.combining(ch): out["ccc"][c]=u.combining(ch)
+json.dump(out,open(sys.argv[1],"w"))
+EOF
+/usr/local/bin/python3.11 -I dump.py u14.json && /usr/bin/python3.13 -I dump.py u151.json && /usr/bin/python3.13 -I -c '
+import json
+a=json.load(open("u14.json")); b=json.load(open("u151.json"))
+print(a["ver"], b["ver"])
+A=set(a["assigned"]); B=set(b["assigned"])
+print("newly assigned", len(B-A), "removed", len(A-B))
+for k in ["cf","nfd","ccc"]:
+    diff={x:(a[k].get(x),b[k].get(x)) for x in set(a[k])|set(b[k]) if a[k].get(x)!=b[k].get(x)}
+    print(k, len(diff), list(diff.items())[:20])
+'
+
+$ cd /tmp/udata && cat > probe16.py <<'EOF'
+import json, sys
+sys.path.insert(0,"/tmp/probe")
+from q import query
+b=json.load(open("u151.json"))
+B=set(b["assigned"])
+C=[c for c in range(0x110000) if not (0xD800<=c<=0xDFFF) and c not in B]
+print("candidates", len(C), flush=True)
+nreq=0
+def ok(lo, hi):
+    global nreq; nreq+=1
+    chars=[chr(c) for c in C[lo:hi]]
+    files={}
+    for i in range(0,len(chars),200):
+        files["n%d"%i+"".join(chars[i:i+200])]=None
+    r=query(files)
+    if isinstance(r,tuple):
+        if r[1]!=500: print("unexpected", r, lo, hi, flush=True)
+        return False
+    return True
+found=[]
+def rec(lo, hi):
+    if lo>=hi: return
+    if ok(lo,hi):
+        found.append((C[lo],C[hi-1])); return
+    if hi-lo==1: return
+    m=(lo+hi)//2
+    rec(lo,m); rec(m,hi)
+step=len(C)
+# chunk to stay within 5000 files*200
+CH=900000
+for s in range(0,len(C),CH):
+    rec(s, min(len(C),s+CH))
+cps=[c for a,b2 in found for c in C[C.index(a):C.index(b2)+1]]
+print("requests", nreq, "assigned16", len(cps))
+json.dump(cps, open("new16.json","w"))
+EOF
+timeout 3000 /usr/bin/python3.13 -I probe16.py
+
+$ cd /tmp/udata && sed -i 's/^CH=900000/CH=20000/' probe16.py && timeout 3000 /usr/bin/python3.13 -I probe16.py && /usr/bin/python3.13 -c '
+import json; c=json.load(open("/tmp/udata/new16.json"))
+# ranges
+r=[]; 
+for x in c:
+    if r and r[-1][1]==x-1: r[-1][1]=x
+    else: r.append([x,x])
+print(len(r)); print(" ".join("%X-%X"%(a,b) for a,b in r))'
+
+$ cd /tmp/udata && python3 - <<'EOF'
+s=open("probe16.py").read()
+s=s.replace("    r=query(files)\n","""    import time
+    for att in range(20):
+        try:
+            r=query(files); break
+        except Exception as e:
+            print("retry",att,e,flush=True); time.sleep(5*(att+1))
+    else: raise SystemExit("gave up")
+""")
+open("probe16.py","w").write(s)
+EOF
+timeout 3500 /usr/bin/python3.13 -I probe16.py 2>&1 | tail -15 && /usr/bin/python3.13 -c '
+import json; c=json.load(open("/tmp/udata/new16.json"))
+r=[]
+for x in c:
+    if r and r[-1][1]==x-1: r[-1][1]=x
+    else: r.append([x,x])
+print(len(r)); print(" ".join("%X-%X"%(a,b) for a,b in r))'
+
+$ tail -5 /tmp/claude-501/-work-repo/0703b7f7-0595-49db-9e7a-990800aa2901/tasks/bml0wq3fq.output
+
+$ for i in $(seq 1 55); do [ -s /tmp/claude-501/-work-repo/0703b7f7-0595-49db-9e7a-990800aa2901/tasks/bml0wq3fq.output ] && break; sleep 10; done; cat /tmp/claude-501/-work-repo/0703b7f7-0595-49db-9e7a-990800aa2901/tasks/bml0wq3fq.output | cut -c1-3000
+
+$ for i in $(seq 1 58); do [ -s /tmp/claude-501/-work-repo/0703b7f7-0595-49db-9e7a-990800aa2901/tasks/bml0wq3fq.output ] && break; sleep 10; done; cut -c1-3000 /tmp/claude-501/-work-repo/0703b7f7-0595-49db-9e7a-990800aa2901/tasks/bml0wq3fq.output; ls -la /tmp/udata

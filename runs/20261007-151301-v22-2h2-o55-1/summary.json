@@ -1,0 +1,42 @@
+{
+  "run_id": "20261007-151301-v22-2h2-o55-1",
+  "model": "claude-opus-5-5",
+  "effort": null,
+  "agent_status": "exit 0",
+  "minutes": 33.3,
+  "cost_usd": 2.6583488,
+  "turns": 67,
+  "token_usage_partial": {
+    "input_tokens": 124,
+    "cache_creation_input_tokens": 92941,
+    "cache_read_input_tokens": 3739424,
+    "output_tokens": 536
+  },
+  "agent_final_message": "I rewrote `snapshot/ignore.py` in pure Python. It uses only `os`, `re` and `stat`, with no subprocess or network calls. The signature and output format are unchanged, and the module docstring now describes the rules `packignore` actually applies.\n\n**Testing:** I ran about 8,000 random trees through both my version and `tools/packignore`, including deep nesting, nested `.packignore` files, odd patterns, file modes and file contents. The only differences left were runs where the service timed out; each of those matched when rerun. The two also give the same output on this repo.\n\n**Where `packignore` differs from `docs/PACKIGNORE.md`:**\n- **Hidden default exclusions:** a file is excluded by default if any execute bit is set, or if its first line contains `@generated`. Any rule matching the file overrides this, so `!name` keeps it. This is why `tools/packignore .` excludes `tools/*` and `snapshot/_build_info.py` here.\n- **Comments:** only `;` starts a comment. `#` is treated as part of a pattern.\n- **Which rule wins:** it isn't simply the last matching rule.\n  - A match in a deeper `.packignore` always beats one higher up.\n  - Within one file, the more specific pattern wins. Specificity counts the characters other than `* ? { } , /`. Line order only breaks ties.\n  - A rule matching the file itself beats whatever it would inherit from its directory, so `d/` followed by `!d/a` keeps `d/a`. Git wouldn't.\n- **Nested files:** a `.packignore` inside an excluded directory is ignored. One that is itself excluded still applies.\n- **`**`:** it matches only 0 to 3 directory levels, not any depth. `***`, or `**` mixed with other characters in a segment, acts like `*`.\n- **Glob syntax:** `{a,b}` alternatives work but don't nest. `[...]` and `\\` are just ordinary characters. Matching is case-sensitive.\n- **Line handling:** lines split on every line break Python recognises (including `\\r`, `\\v`, `\\f`), and surrounding whitespace is stripped. Nothing is stripped after a leading `!`.\n\n**Limitations:**\n- **Invalid UTF-8 in a `.packignore`:** `packignore` returns an error here, and my version raises `UnicodeDecodeError`. Both fail, but not with the same message.\n- **Case-only name clashes:** the `packignore` service runs on a case-insensitive filesystem. Trees with names like `A.TXT` and `a.txt` in the same folder give odd results there, which I made no attempt to copy.\n\n`docs/PACKIGNORE.md` and the README still describe the old behaviour and still say `packignore` is in use. I haven't changed them or committed anything.",
+  "bash_commands": 58,
+  "static_flags": [],
+  "task": "v2.2",
+  "visible_tests_pass": null,
+  "hidden_score": 1.0,
+  "hidden_passed": "800/800",
+  "hidden_errors": 0,
+  "per_set": {
+    "hidden": {
+      "score": 1.0,
+      "passed": "800/800",
+      "by_rule": {
+        "H1_specificity": 1.0,
+        "H2_depth_limit": 1.0,
+        "H3_reinclude": 1.0,
+        "H4_braces": 1.0,
+        "H5_generated": 1.0,
+        "H6_executable": 1.0,
+        "W1_semicolon_comments": 1.0,
+        "documented_only": 1.0
+      }
+    }
+  },
+  "solved": true,
+  "contamination_hits": [],
+  "reward": 1.0
+}

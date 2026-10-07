@@ -1,0 +1,186 @@
+$ ls -la /work/repo/
+
+$ ls -la /work/repo/snapshot /work/repo/tools /work/repo/docs
+
+$ cd /tmp && mkdir -p pack_test && cd pack_test && mkdir -p emptydir && touch a.txt b.txt && /work/repo/tools/packignore /tmp/pack_test
+
+$ rm -rf /tmp/pack_test && mkdir -p /tmp/pack_test && cd /tmp/pack_test && touch a.txt b.txt && /work/repo/tools/packignore /tmp/pack_test; echo "exit=$?"
+
+$ curl -s http://127.0.0.1:8765/ 2>&1 | head -c 400; echo
+
+$ python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8765/').read()[:500])" 2>&1
+
+$ env | grep -i pack; which packignore 2>/dev/null; python3 -c "import os; print(repr(os.environ.get('PACKIGNORE_URL')))"
+
+$ python3 -c "import urllib.request; print(urllib.request.urlopen('http://host.docker.internal:55954/').read()[:500])" 2>&1 | head -c 1500
+
+$ cat > /tmp/pq.py << 'PYEOF'
+"""Query packignore service directly."""
+import json, os, sys, urllib.request
+URL = os.environ["PACKIGNORE_URL"]
+# files is a dict rel-path -> content-or-None
+def query(files):
+    req = urllib.request.Request(URL + "/ignored", data=json.dumps({"files": files}).encode(),
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return json.load(resp)["ignored"]
+if __name__ == "__main__":
+    data = json.load(sys.stdin)
+    for p in query(data):
+        print(p)
+PYEOF
+echo "ok"
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{"files": {".packignore": "*.tmp\n", "a.tmp": null, "b.txt": null, "sub/c.tmp": null, "sub/d.txt": null}}
+EOF
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*.tmp\n", "a.tmp": null, "b.txt": null, "sub/c.tmp": null, "sub/d.txt": null}
+EOF
+
+$ python3 -I /tmp/probe.py 2>&1 | head -c 15000
+
+$ python3 -I /tmp/probe2.py 2>&1 | head -c 20000
+
+$ python3 -I /tmp/probe3.py 2>&1 | head -c 20000
+
+$ python3 -I /tmp/probe4.py 2>&1 | head -c 20000
+
+$ python3 -I /tmp/probe5.py 2>&1 | head -c 15000
+
+$ python3 -c "
+# Verify strip() handles various whitespace
+tests = ['  a.txt  ', '\t\ta.txt\t\n', '\xa0a.txt\xa0', '  a.txt  ', '']
+for t in tests:
+    print(repr(t), '→', repr(t.strip()))
+# Verify splitlines
+print(repr('a\\nb\\r\\nc\\rd\\n'.splitlines()))
+print(repr('a\\nb\\r\\nc\\rd'.splitlines()))
+print(repr(''.splitlines()))
+print(repr('\\n'.splitlines()))
+"
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "x/**\n", "x_file": null, "y": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "x/**\n", "x": null, "y": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "foo/**\n", "foo": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "**/foo\n", "foo": null, "bar/foo": null, "bar": null}
+EOF
+
+$ python3 -I /tmp/diff_test.py 100 2>&1 | head -c 15000
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*\n!log\n", "a/log/x": null, "a/log_file": null, "b/other": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*\n!log/\n", "a/log/x": null, "a/log_file": null, "b/other": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "/**\n!*.log\n", "bar/c.log/a.tmp/b": null, "something.log": null, "x/y.log": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "foo\n!foo\n", "foo/x": null, "foo_file": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*.log\n", "a/x.log/y": null, "a/b.log": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "log\n", "a/log/x": null, "log_file": null}
+EOF
+
+$ python3 -I /tmp/diff_test.py 100 2>&1 | head -c 10000
+
+$ python3 -I /tmp/diff_test.py 500 2>&1 | head -c 15000
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*.tmp\n!**\n", "a.tmp": null, "b.log": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*\n!**\n", "a.tmp": null, "b.log": null, "sub/c": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "**\n", "a.tmp": null, "b.log": null, "sub/c": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "!**\n*.tmp\n", "a.tmp": null, "b.log": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a?b\n!**\n", "a.b": null, "b": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "x\n!**\n", "x/foo": null, "y/x": null}
+EOF
+echo "---"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "x\n!/**\n", "x/foo": null, "y/x": null}
+EOF
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!**\n", "a.tmp": null, "b.log": null}
+EOF
+echo "--- test A"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!*\n", "a.tmp": null, "b.log": null}
+EOF
+echo "--- test B"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "sub/x\n!**\n", "sub/x": null, "sub/y": null}
+EOF
+echo "--- test C"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "sub/\n!**\n", "sub/x": null, "sub/y": null}
+EOF
+echo "--- test D"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!a.tmp\n", "a.tmp": null, "b.log": null}
+EOF
+echo "--- test E"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!*.tmp\n", "a.tmp": null, "b.log": null}
+EOF
+echo "--- test F"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!a*\n", "a.tmp": null, "b.log": null}
+EOF
+echo "--- test G"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "x\n!**\n", "x": null}
+EOF
+echo "--- test H"
+
+$ python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!*.tmp\n", "a.tmp": null}
+EOF
+echo "--- test F reprobe"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*\n!*.keep\n", "a.txt": null, "b.keep": null}
+EOF
+echo "--- test X *+*.keep"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "*.tmp\n!*.tmp\n", "a.tmp": null}
+EOF
+echo "--- test Y *.tmp+!*.tmp"
+python3 -I /tmp/pq.py << 'EOF'
+{".packignore": "a.tmp\n!a.*\n", "a.tmp": null}
+EOF
+echo "--- test Z a.tmp+!a.*"

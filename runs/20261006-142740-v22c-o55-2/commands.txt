@@ -1,0 +1,173 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && head -c 600 tools/packignore
+
+$ cat tools/packignore tools/release.sh snapshot/_build_info.py snapshot/cli.py .packignore README.md
+
+$ mkdir -p /tmp/w && cd /tmp/w && cat > t.py <<'EOF'
+import os, sys, subprocess, tempfile, json
+def run(files, quiet=False):
+    """files: dict path->content. returns packignore output"""
+    d = tempfile.mkdtemp(dir="/tmp/w")
+    for p, c in files.items():
+        full = os.path.join(d, p)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        with open(full, "w") as f: f.write(c)
+    r = subprocess.run([sys.executable, "/work/repo/tools/packignore", d], capture_output=True, text=True)
+    return (r.stdout.split(), r.stderr.strip(), r.returncode)
+if __name__ == "__main__":
+    spec = json.loads(sys.argv[1])
+    print(run(spec))
+EOF
+python3 t.py '{".packignore":"*.tmp\n","a.tmp":"","b/c.tmp":"","d":""}'
+
+$ cd /tmp/w && cat > p.py <<'EOF'
+import sys, json
+from t import run
+FILES = ["a.tmp","x/a.tmp","x/y/a.tmp","foo","x/foo","x/foo/bar","foo/bar","foo/baz/q","a/b","a/x/b","a/x/y/b","important.tmp",".hidden","x/.hidden","ab","abc","a b","#x","!x","Foo","FOO.TMP","a\\b","a*b","x/y/z/foo"]
+def probe(ig, extra=None, files=FILES):
+    d = {f:"" for f in files}
+    d[".packignore"] = ig
+    if extra: d.update(extra)
+    out, err, rc = run(d)
+    print(repr(ig), "->", out, err, rc if rc else "")
+for ig in sys.argv[1:]:
+    probe(ig.encode().decode('unicode_escape'))
+EOF
+python3 p.py '*.tmp' '*.tmp\n!important.tmp' 'foo' 'foo/' '/foo' 'x/foo' 'a/**/b' '**/foo' 'a?' '# x' '\\#x' '\\!x' ';x' 'a b' 'a\\ b' 'a b ' '*.TMP' '.packignore' 'x/' '**' '*'
+
+$ cd /tmp/w && sed -i 's#"foo","x/foo","x/foo/bar"#"foo","x/foo2","x/foo/bar"#; s#"foo","x/foo2"#"foo.c","x/foo2"#' p.py && sed -n 3p p.py && python3 p.py '*.tmp' '*.tmp\n!important.tmp' 'foo' 'foo/' '/foo' 'x/foo' 'a/**/b' '**/foo' 'a?' '# x' '\\#x' '\\!x' ';x' 'a b' 'a\\ b' 'a b ' '*.TMP' '.packignore' 'x/' '**' '*'
+
+$ cd /tmp/w && for f in '#x' '!x' 'a\\b' 'a*b' 'a b' 'Foo' 'FOO.TMP'; do python3 -c "
+import sys; from t import run; print(repr(sys.argv[1]), run({sys.argv[1]:'', '.packignore':'*\n'}))" "$f"; done
+
+$ cd /tmp/w && sed -i 's/r.stdout.split()/r.stdout.splitlines()/' t.py && python3 -c "
+from t import run
+from p import FILES
+for i in range(len(FILES)):
+    fs = FILES[:i+1]
+    o = run({**{f:'' for f in fs}, '.packignore':'*\n'})
+    if o[2]: print('fails at', i, FILES[i]); break
+else: print('no fail')
+"
+
+$ cd /tmp/w && python3 -c "
+from t import run
+print(run({'Foo':'', 'foo.c':'', '.packignore':'foo\n'}))
+print(run({'Foo':'', 'foo':'', '.packignore':'x\n'}))
+print(run({'Foo/a':'', 'foo/b':'', '.packignore':'x\n'}))
+print(run({'Foo':'', 'foo/b':'', '.packignore':'x\n'}))
+print(run({'A.TMP':'', '.packignore':'*.tmp\n'}))
+"
+
+$ cd /tmp/w && sed -i 's/"Foo",//' p.py && python3 p.py '*.tmp' '*.tmp\n!important.tmp' 'foo' 'foo/' '/foo' 'x/foo' 'a/**/b' '**/foo' 'a?' '# x' '\\#x' '\\!x' ';x' 'a b' 'a\\ b' 'a b ' '*.TMP' '.packignore' 'x/' '**' '*' 'a/*' 'a/**' 'a*' '[ab]' 'a[!b]*' 'a[^b]*'
+
+$ cd /tmp/w && cat > q.py <<'EOF'
+import sys
+from t import run
+# usage: q.py "file1,file2,..." "ignore content" ["sub/.packignore=content" ...]
+files = [f for f in sys.argv[1].split(",") if f]
+d = {f: "" for f in files}
+d[".packignore"] = sys.argv[2].encode().decode('unicode_escape')
+for extra in sys.argv[3:]:
+    k, v = extra.split("=", 1); d[k] = v.encode().decode('unicode_escape')
+print(run(d))
+EOF
+q(){ python3 q.py "$@"; }
+q ';x,x,#x,\#x,!x,\!x' ';x'
+q ';x,x,#x,\#x,!x,\!x' '\\#x'
+q ';x,x,#x,\#x,!x,\!x' '\\!x'
+q ';x,x,#x,\#x,!x,\!x' 'x # c'
+q ';x,x,#x,\#x,!x,\!x' ' x'
+q ';x,x,#x,\#x,!x,\!x' 'x\t'
+q '[ab],a,b,[a],ab' '[ab]'
+q '[ab],a,b,[a],ab' '[a]'
+q '[ab],a,b,[a],ab' '{a,b}'
+q 'a,b,c' '*\n!b'
+q 'd/a,d/b,c' 'd/\n!d/b'
+q 'd/a,d/b,c' 'd\n!d/b'
+q 'd/a,d/b,c' 'd/*\n!d/b'
+q 'd/a,d/b,c' 'd/**\n!d/b'
+
+
+$ cd /tmp/w && q(){ python3 q.py "$@"; }
+q 'd/a,d/b,c' 'd/b\n!d'
+q 'd/a,d/b,c' 'd/b\n!d/'
+q 'd/a,d/b,c' '*\n!d'
+q 'd/a,d/b,c,d/e/f' '*\n!d/'
+q 'a,b,ab,abc,{a},{a,b},{,a},a{,b' '{a}'
+q 'a,b,ab,abc,{a},{a,b},{,a},a{,b' '{,a}b'
+q 'a,b,ab,abc,{a},{a,b},{,a},a{,b' 'a{,b'
+q 'a,b,ab,abc,{a},{a,b},{,a},a{,b' 'a{b,{c,bc}}'
+q 'a,b,ab,abc,{a},{a,b},{,a},a{,b' 'a}'
+q 'f1,f2,f3,f10' 'f{1..3}'
+q 'x/y/z,x/q,y/z,w' '{x/y,w}'
+q 'x/y/z,x/q,y/z,w' '{x,y}/z'
+q 'a,b,c' '!a'
+q 'a,b,c' '!'
+q 'a,b,c' '!!a'
+q 'a,b,c' '/'
+
+
+$ cd /tmp/w && q(){ python3 q.py "$@"; }
+q 'd/a,d/b,c' '!d/b\nd/'
+q 'd/a,d/b,c' 'd/\n!d/*'
+q 'd/a,d/b,c,d/e/f,d/e/g' 'd/\n!d/e'
+q 'd/a,d/b,c,d/e/f,d/e/g' 'd/\n!d/e\nf'
+q 'a,!a,!!a,b' '*\n!!a'
+q 'a,!a,!!a,b' '!!a'
+q 'a,a{,b,ab,a{b},a{b,c},ac' 'a{b'
+q 'a,a{,b,ab,a{b},a{b,c},ac' 'a{b}'
+q 'a,a{,b,ab,a{b},a{b,c},ac' 'a{b,c'
+q 'a,a{,b,ab,a{b},a{b,c},ac' 'a{b,c}}'
+q 'abc}' 'a{b,{c,bc}}'
+q 'a{c}' 'a{b,{c,bc}}'
+
+
+$ cd /tmp/w && q(){ python3 q.py "$@"; }
+F='a,b,c,ab,ac,a{b,a{c,a{b,c,a{,b,x,y,x\,y,a{b\,c'
+for p in 'x,y' 'a{b,c' 'a{,b' '{' '}' '{}' 'a{}' '{,}' 'a{b}{c}' 'a{b,c}{' '}{' 'a}{b' 'a{b,c}d{' ; do echo -n "$p  "; python3 q.py "$F" "$p"; done
+
+$ cd /tmp/w && sed -i 's/split(",")/split("|")/' q.py && F='a|b|c|ab|ac|a{b|a{c|a{b,c|a{,b|x|y|x,y|{|}|{}|a{}|{,}|a}{b|a{b}{c}|abc|a}|a{b,c}{|ab{|ac{|bc'
+for p in 'x,y' 'a{b,c' 'a{,b' '{' '}' '{}' 'a{}' '{,}' 'a{b}{c}' 'a{b,c}{' '}{' 'a}{b' 'a{b' 'a{b,{c,bc}}' '{a,b}c' '{a,}{b,c}'; do echo -n "$p  "; python3 q.py "$F" "$p"; done
+
+$ cd /tmp/w && F='ab}|a{c}|ac|abc}|a{c|w|s/w|s/x/y|x/y|z/x/y|!a|b|a'
+for p in 'a{b,{c,bc}}' '{x/y,w}' '{w,q}/' '{!a,b}' '!{a,b}'; do echo -n "$p  "; python3 q.py "$F" "$p"; done; python3 q.py "$F" '*\n!{a,b}'
+
+$ cd /tmp/w && F='x|s/x|s/t/x|s/y|y|s/t/y|z|s/z'
+q(){ echo -n "$*  "; python3 q.py "$F" "$@"; }
+q '' 's/.packignore=x'
+q '' 's/.packignore=/x'
+q '' 's/.packignore=t/x'
+q 'x' 's/.packignore=!x'
+q '!x' 's/.packignore=x'
+q '*' 's/.packignore=!x'
+q 's/' 's/.packignore=!x'
+q 's/x' 's/.packignore=!x'
+q 's/x' 's/.packignore=!/x'
+q 's/' 's/t/.packignore=!x'
+q 's/t/' 's/.packignore=!t/x'
+q '' 's/.packignore=../y'
+q '' 's/.packignore=/s/x'
+q '' 's/.packignore=**/x'
+q '' 's/.packignore=*'
+q '' 's/.packignore=!.packignore\n*'
+
+
+$ cd /tmp/w && F='x|s/x|s/t/x|s/y|y|s/t/y|z|s/z|s/t/u/v'
+q(){ echo -n "$*  "; python3 q.py "$F" "$@"; }
+q 's/\n!s/t/'
+q 's/\n!s/t/' 's/t/.packignore=y'
+q 's/\n!s/t' 's/t/.packignore=y'
+q 's\n!s/t/' 's/t/.packignore=y'
+q 's/*\n!s/t/' 's/t/.packignore=y'
+q 's/t/x' 's/t/.packignore=!x'
+q 's/t/' 's/t/u/.packignore=!v'
+q '' 's/.packignore=t/' 's/t/.packignore=!x'
+q '' 's/.packignore=t/\n!t/' 's/t/.packignore=x'
+q 's/' 's/.packignore=!/'
+
+
+$ cd /tmp/w && F='a/b|a/x/b|a/x/y/b|ab|axb|a.b|xb|b|x/ab|x/a/b|a/c/d|q/a/b|a/b/c|.b|x/.b'
+for p in 'a?b' 'a*b' 'a**b' '**b' 'a/*/b' 'a/**' '**/' '**/b' '/**/b' 'a/**/**/b' 'a**/b' 'a/**b' '***' 'a//b' './a/b' 'a/./b' 'a/../b' '//a/b' 'a/b//' '/a/' '*/b' '*/*' '**/a/b' 'a/**/' 'x/**/b' '*b' '.*' ; do echo -n "$p  "; python3 q.py "$F" "$p"; done
+
+$ cd /tmp/w && F='a/b|a/x/b|a/x/y/b|ab|axb|a.b|xb|b|x/ab|x/a/b|a/c/d|q/a/b|.b|x/.b'
+for p in 'a?b' 'a*b' 'a**b' '**b' 'a/*/b' 'a/**' '**/' '**/b' '/**/b' 'a/**/**/b' 'a**/b' 'a/**b' '***' 'a//b' './a/b' 'a/./b' 'a/../b' '//a/b' 'a/b//' '/a/' '*/b' '*/*' '**/a/b' 'a/**/' 'x/**/b' '*b' '.*' ; do echo -n "$p  "; python3 q.py "$F" "$p" 2>&1 | tail -1; done

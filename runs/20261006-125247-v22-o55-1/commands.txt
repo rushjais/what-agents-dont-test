@@ -1,0 +1,648 @@
+$ git ls-files && cat snapshot/ignore.py docs/PACKIGNORE.md && file tools/packignore && head -c 600 tools/packignore
+
+$ cat tools/packignore; cat .packignore README.md snapshot/cli.py snapshot/_build_info.py tools/release.sh
+
+$ python3 tools/packignore . ; echo "PACKIGNORE_URL=$PACKIGNORE_URL"; python3 --version
+
+$ mkdir -p /tmp/probe && cat > /tmp/probe/p.py <<'EOF'
+import io, json, os, sys, tarfile, urllib.request, time
+URL = os.environ["PACKIGNORE_URL"]
+def q(files):
+    """files: dict path -> content(str/bytes) or (content, mode)"""
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        for p, v in files.items():
+            mode = 0o644
+            if isinstance(v, tuple): v, mode = v
+            if isinstance(v, str): v = v.encode()
+            ti = tarfile.TarInfo(p); ti.size = len(v); ti.mode = mode; ti.mtime = time.time()
+            tar.addfile(ti, io.BytesIO(v))
+    req = urllib.request.Request(URL + "/ignored", data=buf.getvalue(), headers={"Content-Type": "application/x-tar"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r: return json.load(r)["ignored"]
+    except urllib.error.HTTPError as e:
+        return "ERR %s %s" % (e.code, e.read()[:300])
+EOF
+cd /tmp/probe && python3 -c "
+from p import q
+print(q({'a.py':'x'}))
+print(q({'a.py':'# @generated'}))
+print(q({'a.sh':('x',0o755)}))
+print(q({'a.sh':'#!/bin/sh\n'}))
+print(q({'.packignore':'*.txt\n','a.txt':'','b/c.txt':'','b/d':''}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+tests = {
+ 'gen_mid': 'a\nb\n@generated\n',
+ 'gen_bare': '@generated',
+ 'gen_upper': '@GENERATED',
+ 'gen_nospace': 'x@generatedy',
+ 'generated_noat': 'generated',
+ 'gen_line10': 'a\n'*10+'@generated',
+ 'gen_line100': 'a\n'*100+'@generated',
+ 'gen_line1000': 'a\n'*1000+'@generated',
+ 'gen_far': 'a'*5000+'@generated',
+ 'gen_far2': 'a'*1000+'@generated',
+ 'gen_far3': 'a'*2000+'@generated',
+ 'gen_far4': 'a'*500+'@generated',
+ 'gen_bin': b'\x00\xff@generated',
+ 'dnd': 'do not edit',
+ 'autogen': 'auto-generated',
+}
+r = q(tests); print(sorted(r)); print(sorted(set(tests)-set(r)))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+tests = {
+ 'l2': 'a\n@generated',
+ 'l1far': 'a'*100000+'@generated',
+ 'cr': 'a\r@generated',
+ 'crlf': 'a\r\n@generated',
+ 'empty1': '\n@generated',
+ 'gen_sp': '@ generated',
+ 'gen_x': '@generatedX',
+ 'gen_utf': 'é@generated',
+ 'gen_latin': b'\xe9@generated',
+ 'gen_tab':'\t@generated',
+}
+r = q(tests); print(sorted(r)); print(sorted(set(tests)-set(r)))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+tests = {'m%o'%m:('x',m) for m in [0o100,0o010,0o001,0o700,0o600,0o4644,0o444,0o000,0o200,0o2644,0o1644]}
+tests['big'] = 'a'*3000000+'@generated'
+tests['big2'] = 'a'*(1<<20)+'@generated'
+tests['big3'] = 'a'*(65536-10)+'@generated'
+tests['big4'] = 'a'*(65536)+'@generated'
+r = q(tests); print(sorted(r)); print(sorted(set(tests)-set(r)))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+names = ['.DS_Store','a.pyc','a~','.env','core','Thumbs.db','.packignore','.hidden','x/.hidden','a.swp','.#a','#a#','a.bak','a.orig','a.tmp','a.log','node_modules/x','.git/x','x/.git/y','__pycache__/a','a.o','a.so','.gitignore','dist/a','build/a','tmp/a','a.lock','A.PYC','x.py','.svn/x','CVS/x','a.class','desktop.ini','.idea/x','.vscode/x','a b','ünï','.packignore.bak','x/.packignore']
+tests={n:'x' for n in names}
+tests['empty']=''
+tests['big']='a'*(5<<20)
+r = q(tests); print(sorted(r))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+names = ['.foo/x','x/.foo/y','x/node_modules/y','x/CVS/y','a/b/.hidden','x/.DS_Store','x/a.pyc','.foo/.bar','x/.','a/b/c/.h','cvs/x','Node_Modules/x','x/node_modules','node_modules','CVS','x/CVS','.git','x/.git','.gitx/y','.hg/x','_darcs/x','.bzr/x','bower_components/x','vendor/x','.cache/x','.tox/x','venv/x','.venv/x','.idea','x/.idea/y']
+tests={n:'x' for n in names}
+r = q(tests); print(sorted(r)); print(sorted(set(tests)-set(r)))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'x':'1','x/y':'2'}))
+names = ['.foo/x','x/.foo/y','x/node_modules/y','x/CVS/y','a/b/.hidden','x/.DS_Store','x/a.pyc','.foo/.bar','a/b/c/.h','cvs/x','Node_Modules/x','.gitx/y','.hg/x','_darcs/x','.bzr/x','bower_components/x','vendor/x','.cache/x','.tox/x','venv/x','.venv/x','x/.idea/y']
+tests={n:'x' for n in names}
+r = q(tests); print(sorted(r)); print(sorted(set(tests)-set(r)))
+"
+
+$ cd /tmp/probe && cat >> p.py <<'EOF'
+PATHS = ['a','b.txt','c.tmp','d/a','d/b.txt','d/e/a','d/e/f.tmp','a.d/x','x/d/a','.h','d/.h','important.tmp','d/important.tmp','build/x','d/build/y','ab','ba','a.b.c','D/A','foo/bar/baz','foo/baz','x/foo/bar/baz','[x]','a*b','a?b','#c','!n',' sp','sp ','t\\b']
+def t(ign, paths=PATHS, extra=None):
+    files={p:'x' for p in paths}
+    if isinstance(ign,dict): files.update(ign)
+    else: files['.packignore']=ign
+    r=q(files)
+    if isinstance(r,str): return r
+    return sorted(set(r)-{k for k in files if k.endswith('.packignore')}) , [k for k in r if k.endswith('.packignore')]
+EOF
+python3 -c "
+from p import t
+for pat in ['a','a/','/a','d/a','*.tmp','*.tmp\n!important.tmp','d','d/','e','e/a','**/a','d/**','d/**/a','a*','*a','?','??','d/*','*/a','build/','*','**','a.?','[ab]','[!a]*','\\\\[x\\\\]','\\\\#c','\\\\!n','D','a/**','foo/**/baz','**/foo/bar']:
+    print(repr(pat), t(pat))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['D/A','B','c','[x]','x','ab','a','b','\\\\x','a\\\\b','é','E']
+for pat in ['*','D','d','b','A','[x]','[ab]','\\\\[x]','\\\\x','a\\\\b','\\\\a','é','e','[a-c]','[[]x]']:
+    print(repr(pat), t(pat,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'B':'x','b':('x',0o755)}))
+print(q({'B':('x',0o755),'b':'x'}))
+print(q({'b':'x','B':'@generated'}))
+print(q({'D/A':'x','d/b':'x','.packignore':'*'}))
+print(q({'d/b':'x','D/A':'x','.packignore':'*'}))
+print(q({'D/.packignore':'*','d/b':'x','D/A':'x'}))
+print(q({'.packignore':'*','.PACKIGNORE':'x'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['a','b','#a',';a',' a','a ','c','!a','x/a','x/b','\\\\#a']
+for pat in ['#a','; a',';a','a #c','a ;c',' a','a ','  a  ','\ta','a\t','\\\\#a','\\\\ a','a\\\\ ','!a','\\\\!a','*\n!a','*\n! a','*\n!/a','*\n!x/a','*\n!x','*\n!*','!!a','a\r','a\r\nb','*\n!#a','*\n#!a','x/\n!x/a','x\n!x/a','x/*\n!x/a','x/**\n!x/a']:
+    print(repr(pat), t(pat,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['x/a','x/b','x/y/a','x/y/b','a','b']
+for pat in ['a\n!x','x\n!a','!a\nx','!x\na','x\n!y','y\n!x','x/y\n!x','!x/y\nx','x/y\n!x/y/a','x\n!x/y\nx/y/b','!x/y\nx\n','# a','#','!','/','*/','**/','x/**/','!/x\nx','x/\n!x/','x\n!x/']:
+    print(repr(pat), t(pat,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['x/a','x/b','x/y/a','x/y/b','a','b','xa','x/yz/a','q/x/y/a','# a','ya']
+for pat in ['# a','#a','x*a','x/*a','x/*/a','x**a','x/**a','x**/a','**a','***','x/***','x/y*','*/y','**/y','**/y/','**/y/**','y/**','x/**/**/a','/**/a','x//a','x/./a','./x','x/../x/a','../x','x/*/','x/y/a/','?/a','x/?','*/*/a','x/**/b','**/x/**/a','a/**/','x/y/**/a']:
+    print(repr(pat), t(pat,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['x/a','x/b','x/y/a','x/y/b','a','b']
+cases=[
+ {'.packignore':'a','x/.packignore':'!a'},
+ {'.packignore':'!a','x/.packignore':'a'},
+ {'.packignore':'!x/a','x/.packignore':'a'},
+ {'.packignore':'x/a','x/.packignore':'!a'},
+ {'.packignore':'x/a','x/.packignore':'!/a'},
+ {'.packignore':'x/','x/.packignore':'!a'},
+ {'.packignore':'x/','x/.packignore':'!y'},
+ {'.packignore':'x/a','x/.packignore':'!y'},
+ {'x/.packignore':'x'},
+ {'x/.packignore':'/a'},
+ {'x/.packignore':'y/a'},
+ {'x/.packignore':'**/a'},
+ {'x/.packignore':'*'},
+ {'x/y/.packignore':'a','x/.packignore':'!y/a'},
+ {'x/y/.packignore':'!a','x/.packignore':'y/a'},
+ {'x/y/.packignore':'!a','.packignore':'x/y/a'},
+ {'x/y/.packignore':'!a','.packignore':'y'},
+ {'.packignore':'.packignore'},
+ {'.packignore':'x/.packignore','x/.packignore':'a'},
+ {'.packignore':'x','x/.packignore':'!.packignore'},
+ {'.packignore':('a',0o755)},
+ {'.packignore':'@generated\na'},
+ {'.packignore':'a\n@generated'},
+]
+for c in cases: print(c, t(c,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t,q
+P=['x/a','x/b','x/y/a','x/y/b','a','b']
+cases=[
+ {'.packignore':'x/\n!x/y/','x/y/.packignore':'b'},
+ {'.packignore':'x/\n!x/y','x/y/.packignore':'b'},
+ {'.packignore':'x/\n!y','x/y/.packignore':'b'},
+ {'.packignore':'x/**\n!x/y/','x/y/.packignore':'b'},
+ {'.packignore':'x/y/\n!x/y/a','x/y/.packignore':'!b'},
+ {'.packignore':'y','x/.packignore':'!y','x/y/.packignore':'!b'},
+ {'.packignore':'!y','x/.packignore':'y','x/y/.packignore':'!b'},
+]
+for c in cases: print(c, t(c,P))
+print(q({'a':('x',0o755),'.packignore':'!a'}))
+print(q({'a':'@generated','.packignore':'!a'}))
+print(q({'a':'@generated','.packignore':'!*'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'x/a':('x',0o755),'.packignore':'!x'}))
+print(q({'x/a':('x',0o755),'.packignore':'!x/'}))
+print(q({'x/a':('x',0o755),'x/.packignore':'!a'}))
+print(q({'x/a':('x',0o755),'.packignore':'a\n!a'}))
+print(q({'x/a':('x',0o755),'.packignore':'!a\na'}))
+print(q({'x/a':('x',0o755),'.packignore':'x/\n!x/a'}))
+print(q({'x/a':('x',0o755),'.packignore':'!x/**'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['a','b','a\rb','a\x0bb','a\x0cb','a b','a\xa0','﻿a','a\x85b','a\x1cb','ab']
+for pat in ['a\rb','a\x0bb','a\x0cb','a b','a\x85b','a\x1cb','a\xa0','\xa0a','\x0ba','a\x0c','\x1ca','﻿a','﻿b','a　','a\x00']:
+    print(repr(pat), t(pat,P))
+" 2>&1 | tail -20
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'.packignore':b'\xff\na','a':'x','b':'x'}))
+print(q({'.packignore':b'a\xff','a':'x','b':'x'}))
+print(q({'.packignore':b'\xe9','\xe9':'x','�':'x','b':'x'}))
+print(q({'.packignore':'�','\xe9':'x','�':'x','b':'x'}))
+print(q({'.packignore':'*','\udcff':'x'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+import unicodedata as u
+pairs=[('\xe9',u.normalize('NFD','\xe9')),('ß','SS'),('ß','ss'),('k','K'),('i','İ'),('ı','I'),('σ','ς'),('Σ','ς'),('ǆ','ǅ'),('ﬀ','ff'),('µ','μ'),('A','a'),('Å','Å'),('ẞ','ß'),('Ⅰ','ⅰ'),('Ａ','ａ'),('𐐀','𐐨')]
+for a,b in pairs:
+    print(repr(a),repr(b), q({'.packignore':'*', 'd1/'+a:'1','d1/'+b:('2',0o755)}), q({'.packignore':'*', a+'/x':'1',b+'/x':'2'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+import unicodedata as u
+pairs=[('Ａ','A'),('²','2'),('ﬁ','fi'),('ͅ','ι'),('ẛ̣','ṩ'),('Å','å'),('á','á'),('ǰ','J̌'), ('İ','i̇'), ('ſ','s'), ('ſ','S')]
+for a,b in pairs:
+    print(repr(a),repr(b), q({'.packignore':'*', 'd1/'+a:'1','d1/'+b:('2',0o755)}))
+"
+
+$ cd /tmp/probe && python3 -c "
+import unicodedata as u, sys
+N=u.normalize
+K={'K1':lambda s:N('NFC',s).casefold(),'K2':lambda s:N('NFC',s.casefold()),'K3':lambda s:N('NFD',N('NFD',s).casefold()),'K4':lambda s:N('NFD',s).casefold(),'K5':lambda s:N('NFD',s.casefold()), 'K6':lambda s:N('NFC',N('NFC',s).casefold())}
+chars=[chr(c) for c in range(0x80,0x30000) if u.category(chr(c))[0] in 'LMN' or chr(c).casefold()!=chr(c)]
+combs=['́','̇','̈','͂','ͅ','̌','̣']
+cands=chars+[c+m for c in chars[:3000] for m in combs]
+from collections import defaultdict
+res={}
+for name,f in K.items():
+    res[name]={s:f(s) for s in cands}
+# find pairs that are equal under some K but not others
+import itertools
+groups=defaultdict(list)
+for s in cands: groups[res['K3'][s]].append(s)
+found=0
+for k,g in groups.items():
+    if len(g)<2: continue
+    for a,b in itertools.combinations(g,2):
+        sig=tuple(res[n][a]==res[n][b] for n in K)
+        if not all(sig):
+            print(repr(a),repr(b),sig); found+=1
+    if found>15: break
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'.packignore':'*','d/ś':'1','d/ſ́':'2'}))
+" ; python3 -c "
+import unicodedata as u, itertools
+from collections import defaultdict
+N=u.normalize
+K={'K2':lambda s:N('NFC',s.casefold()),'K3':lambda s:N('NFD',N('NFD',s).casefold()),'K4':lambda s:N('NFD',s).casefold(),'K5':lambda s:N('NFD',s.casefold()),'K6':lambda s:N('NFC',N('NFC',s).casefold())}
+chars=[chr(c) for c in range(0x80,0x30000) if u.category(chr(c))[0] in 'LMN' or chr(c).casefold()!=chr(c)]
+combs=['́','̇','̈','͂','ͅ','̌','̣','̓','̀']
+cands=chars+[c+m for c in chars for m in combs]+[c+m+n for c in 'aeiouαηωιυΑΗΩιſ' for m in combs for n in combs]
+res={n:{s:f(s) for s in cands} for n,f in K.items()}
+groups=defaultdict(list)
+for s in cands: groups[res['K3'][s]].append(s)
+seen=set()
+for k,g in groups.items():
+    for a,b in itertools.combinations(g,2):
+        sig=tuple(res[n][a]==res[n][b] for n in K)
+        if not all(sig) and sig not in seen:
+            seen.add(sig); print(repr(a),repr(b),sig)
+"
+
+$ cd /tmp/probe && python3 -c "
+import unicodedata as u, itertools
+from collections import defaultdict
+from p import q
+N=u.normalize
+K={'K2':lambda s:N('NFC',s.casefold()),'K3':lambda s:N('NFD',N('NFD',s).casefold()),'K4':lambda s:N('NFD',s).casefold(),'K5':lambda s:N('NFD',s.casefold()),'K6':lambda s:N('NFC',N('NFC',s).casefold())}
+chars=[chr(c) for c in range(0x80,0x30000) if u.category(chr(c))[0] in 'LMN' or chr(c).casefold()!=chr(c)]
+combs=['́','̇','̈','͂','ͅ','̌','̣','̓','̀']
+cands=chars+[c+m for c in chars for m in combs]+[c+m+n for c in 'aeiouαηωιυΑΗΩιſ' for m in combs for n in combs]
+res={n:{s:f(s) for s in cands} for n,f in K.items()}
+groups=defaultdict(list)
+for s in cands: groups[res['K3'][s]].append(s)
+seen=set()
+for k,g in groups.items():
+    for a,b in itertools.combinations(g,2):
+        sig=tuple(res[n][a]==res[n][b] for n in K)
+        if not all(sig) and sig not in seen:
+            seen.add(sig); print([hex(ord(c)) for c in a],[hex(ord(c)) for c in b],sig, q({'.packignore':'*','d/'+a:'1','d/'+b:'2'}).__len__())
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'.PACKIGNORE':'a','a':'1','b':'1'}))
+print(q({'.PACKIGNORE':'a','.packignore':'b','a':'1','b':'1'}))
+print(q({'.packignore':'a','.PACKIGNORE':'b','a':'1','b':'1'}))
+print(q({'.packignore':'A','a':'1','b':'1'}))
+print(q({'a':'1','A':'1'}))
+print(q({'a':('1',0o755),'A':'1'}))
+print(q({'a':'@generated','A':'1'}))
+print(q({'a':'1','A':'@generated'}))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+print(q({'.git/x':'1','.packignore':'*'}))
+print(q({'.git/x':('1',0o755)}))
+print(q({'.GIT/x':('1',0o755)}))
+print(q({'.git/.packignore':'*','.git/x':'1','y':'1'}))
+print(q({'.GIT/.packignore':'*','.GIT/x':'1','y':'1'}))
+print(q({'x/.git/x':'1','x/.git/.packignore':'*'}))
+print(q({'a':'1','A/x':'1'}))
+print(q({'A/x':'1','a':'1'}))
+print(q({'.packignore':'.git'}))
+"
+
+$ rm -rf /tmp/h && mkdir -p /tmp/h/d && cd /tmp/h && echo x > a && ln a b && ln a d/c && echo '*' > .packignore && echo y > e && ln -s e f && chmod 755 e; python3 /work/repo/tools/packignore /tmp/h; echo; echo '!a' > .packignore; python3 /work/repo/tools/packignore /tmp/h
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['x/a','x/b','x/y/a','a','b',';a','!a','y/x/c']
+for pat in ['x//','//x','x//a','*\n!;a',' ;a','*\n!  a','*\n!/','*\n!x//','/x/','//','x/**/**','**/**/a','*\n!**','x/**/','**/','!']:
+    print(repr(pat), t(pat,P))
+"
+
+$ mkdir -p /tmp/fz && cat > /tmp/probe/fuzz.py <<'EOF'
+import os, random, shutil, subprocess, sys, json
+sys.path.insert(0, '/work/repo')
+from snapshot.ignore import ignored_files
+NAMES = ['a','b','c','ab','a.txt','b.tmp','x','y','build','.h','A','B','important.tmp','d e','[a]','a*','#c',';c','!n','é','é','ß']
+SEG = ['a','b','*','?','**','x','y','build','*.tmp','a*','*a','.h','[a]','A','#c',';c','!n','***','a**','**b','?.txt','é','d e','ß']
+def rpat(r):
+    n = r.choice([1,1,1,2,2,3])
+    segs = [r.choice(SEG) for _ in range(n)]
+    p = '/'.join(segs)
+    if r.random()<0.2: p = '/' + p
+    if r.random()<0.2: p = p + '/'
+    if r.random()<0.25: p = '!' + p
+    if r.random()<0.05: p = ' ' + p + '\t'
+    if r.random()<0.03: p = ';' + p
+    return p
+def build(r, root):
+    files = []
+    for _ in range(r.randint(1, 25)):
+        depth = r.choice([1,1,2,2,3,4])
+        files.append('/'.join(r.choice(NAMES) for _ in range(depth)))
+    dirs = set()
+    for f in files:
+        parts = f.split('/')
+        for k in range(1,len(parts)): dirs.add('/'.join(parts[:k]))
+    for d in sorted(dirs):
+        if r.random()<0.4: files.append(d + '/.packignore')
+    files.append('.packignore')
+    for f in files:
+        parts = f.split('/')
+        if any('/'.join(parts[:k]) in files for k in range(1,len(parts))): continue
+        if f in dirs: continue
+        full = os.path.join(root, f)
+        os.makedirs(os.path.dirname(full), exist_ok=True)
+        if f.endswith('.packignore'):
+            content = '\n'.join(rpat(r) for _ in range(r.randint(0,5)))
+        else:
+            content = r.choice(['x','x','x','// @generated\n','a\n@generated','x\r@generated'])
+        with open(full,'w') as fh: fh.write(content)
+        if r.random()<0.08: os.chmod(full, r.choice([0o755,0o744,0o654,0o645]))
+def main(start, n):
+    bad = 0
+    for seed in range(start, start+n):
+        r = random.Random(seed)
+        root = f'/tmp/fz/{seed}'
+        shutil.rmtree(root, ignore_errors=True); os.makedirs(root)
+        build(r, root)
+        p = subprocess.run([sys.executable, '/work/repo/tools/packignore', root], capture_output=True, text=True)
+        try: mine = ignored_files(root); merr = None
+        except Exception as e: mine = None; merr = repr(e)
+        if p.returncode != 0:
+            ok = mine is None
+            exp = 'ERR ' + p.stderr.strip()
+        else:
+            exp = sorted(l for l in p.stdout.splitlines() if l); ok = mine == exp
+        if not ok:
+            bad += 1
+            print('MISMATCH seed', seed, 'expected', exp, 'got', mine, merr)
+        else:
+            shutil.rmtree(root)
+    print('done', n, 'bad', bad)
+main(int(sys.argv[1]), int(sys.argv[2]))
+EOF
+python3 /tmp/probe/fuzz.py 0 200 2>&1 | tail -15
+
+$ cd /tmp/fz/49 && find . -type f | sort | while read f; do printf '%s [%s] mode=%s\n' "$f" "$(head -c 200 "$f" | tr '\n' '|')" "$(stat -c %a "$f")"; done
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['d e/ab','de/ab','x/ab']
+for pat in ['/*','!d e\n/*','!de\n/*','!x\n/*','/*\n!x','x\n!x/ab']:
+    print(repr(pat), t(pat,P))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import t
+P=['ab','zz']
+pats=['ab','/ab','*','a*','*b','?b','a?','??','**','/*','**/ab','ab/','*/','[ab]']
+import itertools
+for a,b in itertools.permutations(['ab','/ab','*','a*','*b','?b','a?','??','**','/*','**/ab'],2):
+    r1=t(a+'\n!'+b,P)[0]; r2=t('!'+a+'\n'+b,P)[0]
+    w1 = 'neg' if 'ab' not in r1 else 'pos'
+    w2 = 'neg' if 'ab' not in r2 else 'pos'
+    print(f'{a!r:8} {b!r:8}  {a}/!{b} -> {\"later\" if w1==\"neg\" else \"earlier\"};  !{a}/{b} -> {\"later\" if w2==\"pos\" else \"earlier\"}')
+"
+
+$ cd /tmp/probe && cat >> p.py <<'EOF'
+def winner(a, b, target, P):
+    r1 = target in t(a+'\n!'+b, P)[0]   # True: a won
+    r2 = target in t('!'+a+'\n'+b, P)[0]  # True: b won
+    if r1 and not r2: return 'A'
+    if not r1 and r2: return 'B'
+    if not r1 and not r2: return 'later'
+    return 'earlier'
+EOF
+python3 -c "
+from p import winner
+P=['x/ab','zz']
+for a,b in [('x/ab','ab'),('x/*','ab'),('x/*','a?'),('*/ab','ab'),('x/a*','ab'),('x/a*','a?'),('**/x/ab','x/ab'),('x/**/ab','x/ab'),('x/**','ab'),('x/**','a*'),('x/**','*'),('*/*','*'),('*/*','??'),('/x/ab','x/ab'),('x/ab','**/ab'),('xx/../x/ab','ab')]:
+    print(a,b,winner(a,b,'x/ab',P))
+"
+
+$ cd /tmp/probe && cat > rank.py <<'EOF'
+import itertools, sys, json
+from p import q
+from concurrent.futures import ThreadPoolExecutor
+def run(target, pats, P):
+    def one(ab):
+        a,b = ab
+        files = {p:'x' for p in P}
+        files['.packignore'] = a+'\n!'+b
+        r1 = target in q(files)
+        files['.packignore'] = '!'+a+'\n'+b
+        r2 = target in q(files)
+        return (a,b,'A' if r1 and not r2 else 'B' if r2 and not r1 else 'later' if not r1 else 'earlier')
+    with ThreadPoolExecutor(16) as ex:
+        res = list(ex.map(one, itertools.combinations(pats,2)))
+    # build rank: count wins
+    beats = {p:set() for p in pats}; ties = []
+    for a,b,w in res:
+        if w=='A': beats[a].add(b)
+        elif w=='B': beats[b].add(a)
+        elif w=='later': ties.append((a,b))
+        else: print('EARLIER??',a,b)
+    # rank by number beaten
+    order = sorted(pats, key=lambda p: len(beats[p]))
+    for p in order: print(f'{len(beats[p]):3} {p!r}')
+    # consistency check: if a ties b, beats sets equal
+    for a,b in ties:
+        if beats[a]!=beats[b]: print('INCONSISTENT tie',a,b)
+    return res
+if __name__=='__main__':
+    target = sys.argv[1]; pats = json.loads(sys.argv[2]); P=[target,'zz']
+    run(target, pats, P)
+EOF
+python3 rank.py 'x/ab' '["x/ab","ab","/x/ab","x/*","a?","*/ab","x/a*","**/x/ab","x/**/ab","x/**","a*","*","*/*","??","**/ab","**","/x/a?","x/?b","*/a*","?/ab","x/ab/**","**/*","x/**/*","/**/ab","x*/ab","?/??","x/**/**/ab","**/**/ab","/*/ab","/x/*"]'
+
+$ cd /tmp/probe && python3 -c "
+from p import winner
+P=['x/ab','zz']
+for i in range(6): print(winner('ab','*/ab','x/ab',P), winner('x/ab','/x/ab','x/ab',P), winner('?','*','ab',['ab']))
+"
+
+$ cd /tmp/probe && cat > rank.py <<'EOF'
+import itertools, sys, json
+from p import q
+from concurrent.futures import ThreadPoolExecutor
+def run(target, pats, P, show=True):
+    def one(ab):
+        a,b = ab
+        files = {p:'x' for p in P}
+        files['.packignore'] = a+'\n!'+b
+        return (a,b, target in q(files))  # True: a (earlier) won
+    pairs = list(itertools.permutations(pats,2))
+    with ThreadPoolExecutor(16) as ex:
+        res = {(a,b):r for a,b,r in ex.map(one, pairs)}
+    # a beats b iff a wins when earlier (positive) ... also check with negation swapped
+    beats = {p:set() for p in pats}
+    for a,b in itertools.combinations(pats,2):
+        r_ab = res[(a,b)]; r_ba = res[(b,a)]
+        if r_ab and not r_ba: beats[a].add(b)
+        elif r_ba and not r_ab: beats[b].add(a)
+        elif r_ab and r_ba: print('BOTH EARLIER WIN??', a, b)
+    order = sorted(pats, key=lambda p: len(beats[p]))
+    if show:
+        for p in order: print(f'{len(beats[p]):3} {p!r}')
+    # consistency: tie classes
+    for a,b in itertools.combinations(pats,2):
+        if b not in beats[a] and a not in beats[b] and beats[a]!=beats[b]: print('INCONSISTENT tie',a,b)
+    return beats
+if __name__=='__main__':
+    target = sys.argv[1]; pats = json.loads(sys.argv[2]); P=[target,'zz']
+    run(target, pats, P)
+EOF
+python3 rank.py 'x/ab' '["x/ab","ab","/x/ab","x/*","a?","*/ab","x/a*","**/x/ab","x/**/ab","x/**","a*","*","*/*","??","**/ab","**","/x/a?","x/?b","*/a*","?/ab","x/ab/**","**/*","x/**/*","/**/ab","x*/ab","?/??","x/**/**/ab","**/**/ab","/*/ab","/x/*"]'
+
+$ python3 - <<'EOF'
+import re
+s = open('snapshot/ignore.py').read()
+s = s.replace('''    def __init__(self, base, negate, regex, dir_only):
+        self.base = base  # directory holding the .packignore, "" or "a/b/"
+        self.negate = negate
+        self.regex = regex
+        self.dir_only = dir_only
+''', '''    def __init__(self, base, negate, regex, dir_only, specificity):
+        self.base = base  # directory holding the .packignore, "" or "a/b/"
+        self.negate = negate
+        self.regex = regex
+        self.dir_only = dir_only
+        self.specificity = specificity
+''')
+s = s.replace('''    negate = line.startswith("!")
+    if negate:
+        line = line[1:]
+''', '''    negate = line.startswith("!")
+    if negate:
+        line = line[1:]
+    specificity = sum(c not in "*?/" for c in line)
+''')
+s = s.replace('''    return _Pattern(base, negate, re.compile(regex, re.DOTALL), dir_only)''', '''    return _Pattern(base, negate, re.compile(regex, re.DOTALL), dir_only, specificity)''')
+s = s.replace('''    """True/False if some pattern matches `path` (last one wins), else None."""
+    for pat in reversed(patterns):
+        if pat.matches(path, is_dir):
+            return not pat.negate
+    return None''', '''    """True/False if some pattern matches `path`, else None.
+
+    The most specific matching pattern decides; among equally specific ones,
+    the last one does.
+    """
+    best = None
+    for pat in patterns:
+        if pat.matches(path, is_dir) and (best is None or pat.specificity >= best.specificity):
+            best = pat
+    return None if best is None else not best.negate''')
+open('snapshot/ignore.py','w').write(s)
+EOF
+python3 /tmp/probe/fuzz.py 0 300 2>&1 | tail -8
+
+$ for s in 33 136; do echo "== $s"; cd /tmp/fz/$s && find . -type f | sort | while read f; do printf '%s [%s] %s\n' "$f" "$(head -c 200 "$f" | tr '\n' '|')" "$(stat -c %a "$f")"; done; done
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+for c in [
+ {'.packignore':'**/b/**','x/.packignore':'!/*','x/b':'1'},
+ {'.packignore':'**/b/**\n!x/*','x/b':'1'},
+ {'.packignore':'**/b\n!x/*','x/b':'1'},
+ {'.packignore':'**/b/**','x/b':'1'},
+ {'.packignore':'b/**','b':'1'},
+ {'.packignore':'**/b/**\n!*','b':'1'},
+ {'.packignore':'b/**\n!*','b':'1'},
+ {'.packignore':'b/**\n!b','b':'1'},
+ {'.packignore':'!b/**\nb','b':'1'},
+ {'.packignore':'x\n!x/**','x/b':'1'},
+ {'.packignore':'!x/**\nx','x/b':'1'},
+]: print(c, q(c))
+"
+
+$ cd /tmp/probe && python3 -c "
+from p import q
+for c in [
+ {'.packignore':'ab','x/.packignore':'!*','x/ab':'1'},
+ {'.packignore':'ab','x/.packignore':'!/*','x/ab':'1'},
+ {'.packignore':'ab','x/.packignore':'!/a?','x/ab':'1'},
+ {'.packignore':'ab','xyz/.packignore':'!/*','xyz/ab':'1'},
+ {'.packignore':'abcd','x/.packignore':'!*','x/abcd':'1'},
+ {'.packignore':'abcd','xyz/.packignore':'!*','xyz/abcd':'1'},
+ {'.packignore':'abcd','xyz/.packignore':'!/*','xyz/abcd':'1'},
+ {'.packignore':'abcd','xyz/.packignore':'!/a*','xyz/abcd':'1'},
+ {'.packignore':'abcd','xyz/.packignore':'!/ab*','xyz/abcd':'1'},
+ {'.packignore':'abcd','xyz/.packignore':'!/abc*','xyz/abcd':'1'},
+ {'.packignore':'xyz/abcd','xyz/.packignore':'!/abc*','xyz/abcd':'1'},
+ {'.packignore':'xyz/abcd','xyz/.packignore':'!/abcd','xyz/abcd':'1'},
+]: print(c, q(c))
+"
+
+$ python3 - <<'EOF'
+s = open('snapshot/ignore.py').read()
+old = '''    The most specific matching pattern decides; among equally specific ones,
+    the last one does.
+    """
+    best = None
+    for pat in patterns:
+        if pat.matches(path, is_dir) and (best is None or pat.specificity >= best.specificity):
+            best = pat
+    return None if best is None else not best.negate'''
+new = '''    The deepest .packignore with a matching pattern decides. Within it, the
+    most specific matching pattern wins, and among equally specific ones the
+    last one does.
+    """
+    best = None
+    for pat in patterns:  # ordered shallowest file first, then by line
+        if pat.matches(path, is_dir) and (
+                best is None or (len(pat.base), pat.specificity) >= (len(best.base), best.specificity)):
+            best = pat
+    return None if best is None else not best.negate'''
+assert old in s
+s = s.replace(old, new)
+open('snapshot/ignore.py','w').write(s)
+EOF
+python3 /tmp/probe/fuzz.py 0 400 2>&1 | tail -8
+
+$ python3 /tmp/probe/fuzz.py 400 600 2>&1 | tail -8
+
+$ cd /tmp/probe && python3 -c "
+from rank import run
+import unicodedata
+nfd='é'
+run('xé', ['xé','x?','x*','*é','?é','*','x'+nfd], ['xé','zz'])
+print('---')
+run('a b', ['a b','a?b','a*','*','[a]','a\\\\b'], ['a b','zz'])
+print('---')
+run('ab', ['ab','a?','a*','*','!b','[ab]','\\\\b'], ['ab','zz'])
+"

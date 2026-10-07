@@ -1,0 +1,97 @@
+$ find /private/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-83svy4vx/repo -type f -not -path '*/\.*' | head -50
+
+$ python3 -m unittest 2>&1 | tail -20
+
+$ python3 -m unittest 2>&1 | tail -20
+
+$ cd /tmp && python3 fuzz_ignore.py 0 100 2>&1 | tail -80
+
+$ cd /tmp && python3 fuzz_ignore.py 100 400 2>&1 | tail -80
+
+$ cd /tmp && python3 fuzz_ignore.py 0 500 2>&1 | tail -80
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'bc**/a\n' > .gitignore && touch bca && git check-ignore -v bca; echo "---"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'bc**/a\n' > .gitignore && touch bca bcxa bcxy xa && mkdir -p bcx && touch bcx/a; git ls-files --others --ignored --exclude-standard; echo "---"; for f in bca bcxa bcxy bcx/a xa; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'a**b\n' > .gitignore && mkdir -p ab axb a/b axyb a/x/b a/xb; touch ab axb a/b a/xb a/x/b; echo "pattern a**b:"; for f in ab axb a/b a/xb a/x/b; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf '/**ab\n' > .gitignore && mkdir -p xab x/ab; touch ab xab x/ab; echo "pattern /**ab:"; for f in ab xab x/ab; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'x**/a\n' > .gitignore && mkdir -p xa xya x/a x/y/a xyz; touch xa xya x/a x/y/a xyz/a; echo "pattern x**/a:"; for f in xa xya x/a x/y/a xyz/a; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'x/**\n' > .gitignore && mkdir -p x; touch x/a; mkdir -p x/y; touch x/y/b; touch x; printf '%s\n' "x/**:" && for f in x x/a x/y/b; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done; echo "---"; cd .. && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'ab**\n' > .gitignore && touch ab abc ab.x; mkdir -p ab/y; touch ab/y/z; echo "pattern ab**:"; for f in ab abc ab.x ab/y/z; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'x**/foo\n' > .gitignore && mkdir -p xy x/y xyz; touch xfoo xyfoo x/foo x/y/foo xy/foo; echo "pattern x**/foo:"; for f in xfoo xyfoo x/foo x/y/foo xy/foo; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ python3 -m unittest 2>&1 | tail -5 && cd /tmp && python3 fuzz_ignore.py 0 1000 2>&1 | tail -30
+
+$ wait %1 2>/dev/null; cat /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bk9a8va7w.output | tail -40
+
+$ cd /tmp && python3 fuzz_ignore.py 0 1000 2>&1 | tail -40
+
+$ wait %1 2>/dev/null; cat /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bf5uyimpa.output | tail -40
+
+$ cat /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bf5uyimpa.output | tail -60
+
+$ ls -la /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/ && echo "---" && tail -60 /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bf5uyimpa.output 2>&1
+
+$ cd /tmp && python3 fuzz_ignore.py 0 300 2>&1 | tail -50
+
+$ cd /tmp && python3 fuzz_ignore.py 300 500 2>&1 | tail -80 && python3 fuzz_ignore.py 800 500 2>&1 | tail -40
+
+$ tail -60 /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/b1tkuduhf.output 2>&1
+
+$ cd /tmp && python3 fuzz_ignore.py 800 400 2>&1 | tail -40
+
+$ cd /tmp && python3 fuzz_edge.py 2>&1
+
+$ cd /tmp && python3 fuzz_edge.py 2>&1
+
+$ cd /tmp && python3 fuzz_edge.py 2>&1
+
+$ cd /tmp && python3 fuzz_edge.py 2>&1
+
+$ cd /tmp && python3 fuzz_edge.py 2>&1
+
+$ cd /tmp && python3 fuzz_ignore.py 0 500 2>&1 | tail -60
+
+$ wait; tail -80 /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bzqtf2fa3.output 2>&1
+
+$ tail -200 /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bzqtf2fa3.output 2>&1
+
+$ ls -la /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/
+
+$ cd /tmp && python3 fuzz_ignore.py 0 100 > /tmp/fuzz_out.txt 2>&1; tail -80 /tmp/fuzz_out.txt
+
+$ cat /private/tmp/claude-501/-private-var-folders-45-f-g6h0r16tn0-2mj66ywgv500000gn-T-snapshot-attempt-83svy4vx-repo/2b021a0d-92b4-4de2-afdf-86e35456462b/tasks/bzqtf2fa3.output | tail -200
+
+$ cd /tmp && python3 fuzz_ignore.py 2000 800 > /tmp/fuzz2.txt 2>&1; tail -80 /tmp/fuzz2.txt
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p bac/bc/cba; touch bac/bc/cba/baa bac/bc/cba/.gitignore; echo "pattern cb**:"; for f in bac/bc/cba/.gitignore bac/bc/cba/baa bac/bc/cba; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done; echo; echo "Just cb**:"; touch cb cb1 cbx/y 2>/dev/null; mkdir -p cbx; touch cbx/y; for f in cb cb1 cbx/y; do echo "$f -> $(git check-ignore $f && echo IGNORED || echo not-ignored)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'bbba?py\ncb**\n*.py\n**ccac\n!*ba\n' > .gitignore && mkdir -p bac/bc/cba/bc; echo "a" > bac/bc/cba/baa; echo "b" > bac/bc/cba/.gitignore; echo "c" > bac/bc/cba/bc/.gitignore; echo "d" > bac/bc/cba/bc/abc.py; echo "e" > bac/bc/cba/bc/b; echo "---ls-files -i-o--exclude-standard"; git ls-files --others --ignored --exclude-standard; echo "---check-ignore"; for f in bac/bc/cba bac/bc/cba/.gitignore bac/bc/cba/baa bac/bc/cba/bc/.gitignore bac/bc/cba/bc/abc.py bac/bc/cba/bc/b; do echo "$f -> $(git check-ignore -v $f 2>&1 || echo NOT-IGNORED)"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p a/cba a/cba/bc; touch a/cba/.gitignore a/cba/bc/x; echo "cb** only:"; for f in a/cba a/cba/.gitignore a/cba/bc/x; do echo "$f -> $(git check-ignore -v $f 2>&1 || echo NOT-IGNORED)"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n!*ba\n' > .gitignore && mkdir -p a/cba/bc; touch a/cba/.gitignore a/cba/baa a/cba/bc/x; echo "cb** + !*ba:"; for f in a/cba a/cba/.gitignore a/cba/baa a/cba/bc/x; do echo "$f -> $(git check-ignore -v $f 2>&1 || echo NOT-IGNORED)"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p a/cba; touch a/cba/x cba/y 2>/dev/null; mkdir -p cba; touch cba/y; echo "cb** only, deeper tree:"; for f in a/cba a/cba/x cba cba/y; do echo "$f -> $(git check-ignore -v $f 2>&1 || echo NOT-IGNORED)"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p a/cba/sub; touch a/cba/.gitignore a/cba/sub/x; echo "cb** alone, test various paths:"; for f in a/cba a/cba/.gitignore a/cba/sub a/cba/sub/x; do echo "$f -> $(git check-ignore -v $f 2>&1 || echo NOT-IGNORED)"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p cbx; touch cbx/y cb cb1; echo "simple cb** test:"; for f in cb cb1 cbx cbx/y; do echo "$f -> $(git check-ignore -v $f 2>&1 || echo NOT-IGNORED)"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n!*ba\n' > .gitignore && mkdir -p a/cba; touch a/cba/.gitignore a/cba/baa; echo "cb**+!*ba (verbose):"; for f in a/cba a/cba/.gitignore a/cba/baa a/cba/other; do git check-ignore -v --no-index "$f" 2>&1; done; echo "---"; echo "ls-files (ignored):"; git ls-files --others --ignored --exclude-standard; echo "---"; echo "ls-files (all others):"; git ls-files --others --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n!*ba\n' > .gitignore && mkdir -p a/cba; touch a/cba/cbxxxx a/cba/other; echo "cb**+!*ba with cb-prefixed file inside:"; for f in a/cba a/cba/cbxxxx a/cba/other; do git check-ignore -v --no-index "$f" 2>&1 || echo "$f -> NOT IGNORED"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p cb; touch cb/x cb/.gitignore; echo "cb** matches dir 'cb':"; for f in cb cb/x cb/.gitignore; do git check-ignore -v "$f" 2>&1 || echo "$f -> NOT IGNORED"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p sub/cb; touch sub/cb/file; echo "cb** test with sub/cb/file:"; git check-ignore -v sub/cb sub/cb/file 2>&1; echo "---"; rm .gitignore; printf '/**/cb**\n' > .gitignore; echo "/**/cb**:"; git check-ignore -v sub/cb sub/cb/file 2>&1
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n!*ba\n' > .gitignore && mkdir -p sub/cba sub/cb; touch sub/cb/file sub/cba/file sub/cba/.gitignore; echo "cb**+!*ba:"; for f in sub/cb sub/cb/file sub/cba sub/cba/file sub/cba/.gitignore; do git check-ignore -v --no-index "$f" 2>&1 || echo "$f -> NOT IGNORED"; done; echo "---ls-files:"; git ls-files --others --ignored --exclude-standard
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p sub/cba; touch sub/cba/file sub/cba/.gitignore; echo "cb** only:"; for f in sub/cba sub/cba/file sub/cba/.gitignore; do git check-ignore -v --no-index "$f" 2>&1 || echo "$f -> NOT IGNORED"; done
+
+$ cd /tmp && rm -rf gi_test && mkdir gi_test && cd gi_test && git init -q && printf 'cb**\n' > .gitignore && mkdir -p cbx; touch cbx/y; echo "cb** matching cbx/y:"; git check-ignore -v --no-index cbx cbx/y 2>&1

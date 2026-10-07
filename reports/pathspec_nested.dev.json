@@ -1,0 +1,4155 @@
+{
+  "summary": {
+    "cases": 500,
+    "passed": 473,
+    "score": 0.946,
+    "file_accuracy": 0.9923813624858215,
+    "errors": 0,
+    "by_feature": {
+      "case": {
+        "passed": 189,
+        "cases": 201,
+        "rate": 0.9402985074626866
+      },
+      "char_class": {
+        "passed": 240,
+        "cases": 252,
+        "rate": 0.9523809523809523
+      },
+      "comment": {
+        "passed": 218,
+        "cases": 232,
+        "rate": 0.9396551724137931
+      },
+      "double_star": {
+        "passed": 285,
+        "cases": 309,
+        "rate": 0.9223300970873787
+      },
+      "escape": {
+        "passed": 131,
+        "cases": 138,
+        "rate": 0.9492753623188406
+      },
+      "leading_slash": {
+        "passed": 312,
+        "cases": 330,
+        "rate": 0.9454545454545454
+      },
+      "middle_slash": {
+        "passed": 371,
+        "cases": 395,
+        "rate": 0.9392405063291139
+      },
+      "negation": {
+        "passed": 358,
+        "cases": 385,
+        "rate": 0.9298701298701298
+      },
+      "nested_gitignore": {
+        "passed": 335,
+        "cases": 356,
+        "rate": 0.9410112359550562
+      },
+      "question": {
+        "passed": 210,
+        "cases": 227,
+        "rate": 0.9251101321585903
+      },
+      "star": {
+        "passed": 346,
+        "cases": 365,
+        "rate": 0.947945205479452
+      },
+      "trailing_slash": {
+        "passed": 296,
+        "cases": 318,
+        "rate": 0.9308176100628931
+      },
+      "trailing_space": {
+        "passed": 212,
+        "cases": 225,
+        "rate": 0.9422222222222222
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "dev-0000",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0001",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0002",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0003",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0004",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0005",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0006",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0007",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0008",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0009",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0010",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0011",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0012",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0013",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0014",
+      "pass": false,
+      "missing": [
+        "docs/build.sh"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0015",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0016",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0017",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0018",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0019",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0020",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0021",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0022",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0023",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0024",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0025",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0026",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0027",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0028",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0029",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0030",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0031",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0032",
+      "pass": false,
+      "missing": [
+        "build/docs/test/a.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9696969696969697,
+      "error": null
+    },
+    {
+      "id": "dev-0033",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0034",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0035",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0036",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0037",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0038",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0039",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0040",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0041",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0042",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0043",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0044",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0045",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0046",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0047",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0048",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0049",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "node_modules/!important.txt"
+      ],
+      "file_acc": 0.9333333333333333,
+      "error": null
+    },
+    {
+      "id": "dev-0050",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0051",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0052",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0053",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0054",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0055",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0056",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0057",
+      "pass": false,
+      "missing": [
+        "out/.gitignore",
+        "out/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0058",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0059",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0060",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0061",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0062",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0063",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0064",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0065",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0066",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0067",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0068",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0069",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0070",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0071",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0072",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0073",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0074",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0075",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0076",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0077",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0078",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0079",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0080",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0081",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0082",
+      "pass": false,
+      "missing": [
+        "tmp/lib/docs/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.962962962962963,
+      "error": null
+    },
+    {
+      "id": "dev-0083",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0084",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0085",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0086",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0087",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0088",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0089",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0090",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0091",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0092",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0093",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0094",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0095",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0096",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0097",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0098",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0099",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0100",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0101",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0102",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0103",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0104",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0105",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0106",
+      "pass": false,
+      "missing": [
+        "lib/src/.env",
+        "lib/src/a/README",
+        "lib/src/a/a.txt",
+        "lib/src/err.log",
+        "lib/src/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "dev-0107",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0108",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0109",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0110",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0111",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0112",
+      "pass": false,
+      "missing": [
+        "out/b/.hidden",
+        "out/b/a"
+      ],
+      "extra": [],
+      "file_acc": 0.8947368421052632,
+      "error": null
+    },
+    {
+      "id": "dev-0113",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0114",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0115",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0116",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0117",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0118",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0119",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0120",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0121",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0122",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0123",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0124",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0125",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0126",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0127",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0128",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0129",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0130",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0131",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0132",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0133",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0134",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0135",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0136",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0137",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0138",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0139",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0140",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0141",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0142",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0143",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0144",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0145",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0146",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0147",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0148",
+      "pass": false,
+      "missing": [
+        "out/README",
+        "out/foo",
+        "out/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.7272727272727273,
+      "error": null
+    },
+    {
+      "id": "dev-0149",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0150",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0151",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0152",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0153",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0154",
+      "pass": false,
+      "missing": [
+        "build/README",
+        "build/build.sh",
+        "build/build/#notes.txt",
+        "build/build/.gitignore",
+        "build/build/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.4444444444444444,
+      "error": null
+    },
+    {
+      "id": "dev-0155",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0156",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0157",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0158",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0159",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0160",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0161",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0162",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0163",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0164",
+      "pass": false,
+      "missing": [
+        "tmp/logs/a"
+      ],
+      "extra": [],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "dev-0165",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0166",
+      "pass": false,
+      "missing": [
+        "tmp/foo/docs/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.9473684210526316,
+      "error": null
+    },
+    {
+      "id": "dev-0167",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0168",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0169",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0170",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0171",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0172",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0173",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0174",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0175",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0176",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0177",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0178",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0179",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0180",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0181",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0182",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0183",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0184",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0185",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0186",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0187",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0188",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0189",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0190",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0191",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0192",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0193",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0194",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0195",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0196",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0197",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0198",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0199",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0200",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0201",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0202",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0203",
+      "pass": false,
+      "missing": [
+        "build/node_modules/a.txt"
+      ],
+      "extra": [],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0204",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0205",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0206",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0207",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0208",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0209",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0210",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0211",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0212",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0213",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0214",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0215",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0216",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0217",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0218",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0219",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0220",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0221",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0222",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0223",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0224",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0225",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0226",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0227",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0228",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0229",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0230",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0231",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0232",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0233",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0234",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0235",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0236",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0237",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0238",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0239",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0240",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0241",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0242",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0243",
+      "pass": false,
+      "missing": [
+        "node_modules/tmp/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.9375,
+      "error": null
+    },
+    {
+      "id": "dev-0244",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0245",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0246",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0247",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0248",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0249",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0250",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0251",
+      "pass": false,
+      "missing": [
+        "foo/out/build/err.log"
+      ],
+      "extra": [],
+      "file_acc": 0.9411764705882353,
+      "error": null
+    },
+    {
+      "id": "dev-0252",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0253",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0254",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0255",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0256",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0257",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0258",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0259",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0260",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0261",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0262",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0263",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0264",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0265",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0266",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0267",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0268",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0269",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0270",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0271",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0272",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0273",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0274",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0275",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0276",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0277",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0278",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0279",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0280",
+      "pass": false,
+      "missing": [
+        "logs/#notes.txt",
+        "logs/foo"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "dev-0281",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0282",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0283",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0284",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0285",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0286",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0287",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0288",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0289",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0290",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0291",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0292",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0293",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0294",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0295",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0296",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0297",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0298",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0299",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0300",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0301",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0302",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0303",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0304",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0305",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0306",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0307",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0308",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0309",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0310",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0311",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0312",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0313",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0314",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0315",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0316",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0317",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0318",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0319",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0320",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0321",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0322",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0323",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0324",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0325",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0326",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0327",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0328",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0329",
+      "pass": false,
+      "missing": [
+        "foo/.gitignore",
+        "foo/README",
+        "foo/debug.log",
+        "foo/f[1].txt"
+      ],
+      "extra": [],
+      "file_acc": 0.6363636363636364,
+      "error": null
+    },
+    {
+      "id": "dev-0330",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/README"
+      ],
+      "file_acc": 0.9444444444444444,
+      "error": null
+    },
+    {
+      "id": "dev-0331",
+      "pass": false,
+      "missing": [
+        "node_modules/src/notes.md"
+      ],
+      "extra": [],
+      "file_acc": 0.9565217391304348,
+      "error": null
+    },
+    {
+      "id": "dev-0332",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0333",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0334",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0335",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0336",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0337",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0338",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0339",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0340",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0341",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0342",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0343",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0344",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0345",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0346",
+      "pass": false,
+      "missing": [
+        "foo/!important.txt",
+        "foo/Makefile",
+        "foo/test/a.txt",
+        "foo/test/lib/#notes.txt",
+        "foo/test/lib/x.c"
+      ],
+      "extra": [],
+      "file_acc": 0.736842105263158,
+      "error": null
+    },
+    {
+      "id": "dev-0347",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0348",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0349",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0350",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0351",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0352",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0353",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0354",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0355",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0356",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "a/.hidden"
+      ],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "dev-0357",
+      "pass": false,
+      "missing": [
+        "build/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.8888888888888888,
+      "error": null
+    },
+    {
+      "id": "dev-0358",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0359",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0360",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0361",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0362",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "lib/b/build.sh"
+      ],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "dev-0363",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0364",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0365",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0366",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0367",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0368",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0369",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0370",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0371",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0372",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0373",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0374",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0375",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "logs/build/main.py"
+      ],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0376",
+      "pass": false,
+      "missing": [
+        "out/test/util.py"
+      ],
+      "extra": [],
+      "file_acc": 0.875,
+      "error": null
+    },
+    {
+      "id": "dev-0377",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0378",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0379",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0380",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0381",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0382",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0383",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0384",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0385",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0386",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0387",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0388",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0389",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0390",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0391",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0392",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0393",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0394",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0395",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0396",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0397",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0398",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0399",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0400",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0401",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0402",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0403",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0404",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0405",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0406",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0407",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0408",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0409",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0410",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0411",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0412",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0413",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0414",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0415",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0416",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0417",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0418",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0419",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0420",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0421",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0422",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0423",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0424",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0425",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0426",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0427",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0428",
+      "pass": false,
+      "missing": [
+        "a/build/README",
+        "a/build/debug.log",
+        "a/build/x.o"
+      ],
+      "extra": [],
+      "file_acc": 0.8235294117647058,
+      "error": null
+    },
+    {
+      "id": "dev-0429",
+      "pass": false,
+      "missing": [
+        "out/docs/main.py"
+      ],
+      "extra": [],
+      "file_acc": 0.9166666666666666,
+      "error": null
+    },
+    {
+      "id": "dev-0430",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0431",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0432",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0433",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0434",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0435",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0436",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0437",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0438",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0439",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0440",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0441",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0442",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0443",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0444",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0445",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0446",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0447",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0448",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0449",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0450",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0451",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0452",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0453",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0454",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0455",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0456",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0457",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0458",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0459",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0460",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0461",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0462",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0463",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0464",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0465",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0466",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0467",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0468",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0469",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0470",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0471",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0472",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0473",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0474",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0475",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0476",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0477",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0478",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0479",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0480",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0481",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0482",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0483",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0484",
+      "pass": false,
+      "missing": [
+        "logs/out/src/util.py",
+        "node_modules/a/lib/.hidden"
+      ],
+      "extra": [],
+      "file_acc": 0.9090909090909091,
+      "error": null
+    },
+    {
+      "id": "dev-0485",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0486",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0487",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0488",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0489",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0490",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0491",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0492",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0493",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0494",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0495",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0496",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0497",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0498",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "dev-0499",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    }
+  ]
+}

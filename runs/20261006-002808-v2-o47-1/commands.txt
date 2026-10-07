@@ -1,0 +1,187 @@
+$ ls -la /work/repo/
+
+$ ls -laR /work/repo/snapshot /work/repo/tools /work/repo/docs
+
+$ curl -sS http://127.0.0.1:8765/ 2>&1 | head -c 500; echo; echo "---"; env | grep -i packignore
+
+$ python3 -c "import urllib.request, os; print(urllib.request.urlopen(os.environ['PACKIGNORE_URL'] + '/', timeout=5).read()[:500])" 2>&1
+
+$ mkdir -p /tmp/probe && ls /tmp/probe
+
+$ cd /tmp/probe && python3 probe.py -c '{".packignore": "*.log\n", "a.log": None, "b.txt": None, "sub/c.log": None, "sub/d.txt": None}'
+
+$ cd /tmp/probe && python3 -c "
+import probe, json
+
+tests = [
+    ('basic star at depth', {'.packignore': '*.log\n', 'a.log': None, 'b.txt': None, 'sub/c.log': None}),
+    ('leading slash anchors', {'.packignore': '/a.log\n', 'a.log': None, 'sub/a.log': None}),
+    ('trailing slash directories only', {'.packignore': 'foo/\n', 'foo/a': None, 'bar/foo': None}),
+    ('no trailing slash matches files', {'.packignore': 'foo\n', 'foo/a': None, 'bar/foo': None, 'top_foo': None}),
+    ('negation', {'.packignore': '*.log\n!keep.log\n', 'a.log': None, 'keep.log': None}),
+    ('nested packignore', {'.packignore': '*.log\n', 'sub/.packignore': '!c.log\n', 'sub/c.log': None, 'sub/d.log': None, 'a.log': None}),
+    ('comment and blank', {'.packignore': '# comment\n\n*.log\n', 'a.log': None, 'b.txt': None}),
+    ('escaped hash', {'.packignore': '\\\\#file\n', '#file': None, 'other': None}),
+    ('question mark', {'.packignore': '?.log\n', 'a.log': None, 'ab.log': None, 'x.log': None}),
+    ('double star', {'.packignore': 'a/**/b\n', 'a/b': None, 'a/x/b': None, 'a/x/y/b': None, 'c/b': None}),
+    ('is packignore itself ignored?', {'.packignore': '*.log\n', 'a.log': None}),
+    ('is packignore nested in output?', {'.packignore': '', 'sub/.packignore': '*.log\n', 'sub/a.log': None}),
+    ('empty packignore', {'.packignore': '', 'a.log': None, 'b.txt': None}),
+    ('no packignore at all', {'a.log': None, 'b.txt': None}),
+    ('subdir packignore scope', {'sub/.packignore': '*.log\n', 'a.log': None, 'sub/b.log': None}),
+    ('path with slash is relative', {'.packignore': 'sub/a.log\n', 'sub/a.log': None, 'a.log': None, 'other/sub/a.log': None}),
+    ('leading slash with subdir', {'sub/.packignore': '/a.log\n', 'sub/a.log': None, 'sub/deeper/a.log': None}),
+    ('character class', {'.packignore': '[ab].txt\n', 'a.txt': None, 'b.txt': None, 'c.txt': None}),
+    ('negated char class', {'.packignore': '[!ab].txt\n', 'a.txt': None, 'b.txt': None, 'c.txt': None}),
+    ('char class range', {'.packignore': '[a-c].txt\n', 'a.txt': None, 'b.txt': None, 'c.txt': None, 'd.txt': None}),
+    ('star does not cross slash', {'.packignore': 'a*b\n', 'ab': None, 'a/b': None, 'axb': None}),
+    ('double star alone', {'.packignore': '**\n', 'a': None, 'b/c': None}),
+    ('leading **/', {'.packignore': '**/foo\n', 'foo': None, 'a/foo': None, 'a/b/foo': None}),
+    ('trailing /**', {'.packignore': 'foo/**\n', 'foo/a': None, 'foo/b/c': None, 'foo': None, 'bar/foo/x': None}),
+]
+for name, files in tests:
+    out = probe.ignored(files)
+    print(name, '=>', out)
+"
+
+$ cd /tmp/probe && python3 -c "
+import probe, json
+
+tests = [
+    ('escape hash literal', {'.packignore': '\#file\n', '#file': None, 'other': None}),
+    ('escape star literal', {'.packignore': '\*.log\n', '*.log': None, 'a.log': None}),
+    ('escape bang', {'.packignore': '*.log\n\!keep.log\n', 'a.log': None, '!keep.log': None, 'keep.log': None}),
+    ('star alone', {'.packignore': '*\n', 'a': None, 'b/c': None, '.hidden': None}),
+    ('dot files', {'.packignore': '*.log\n', '.a.log': None, 'a.log': None}),
+    ('bang alone', {'.packignore': '!a.log\n', 'a.log': None}),
+    ('multiple patterns', {'.packignore': '*.log\n*.tmp\n', 'a.log': None, 'b.tmp': None, 'c.txt': None}),
+    ('trailing slash in deeper', {'.packignore': 'foo/\n', 'foo/a/b': None, 'foo/a': None}),
+    ('negate dir', {'.packignore': 'foo/\n!foo/keep\n', 'foo/a': None, 'foo/keep': None}),
+    ('negate dir star', {'.packignore': 'foo\n!foo/keep\n', 'foo/a': None, 'foo/keep': None}),
+    ('negate file after dir pattern', {'.packignore': '*.log\n!*.log\n', 'a.log': None}),
+    ('order matters', {'.packignore': '!a.log\n*.log\n', 'a.log': None, 'b.log': None}),
+    ('crlf line endings', {'.packignore': '*.log\r\n', 'a.log': None, 'b.txt': None}),
+    ('trailing whitespace', {'.packignore': '*.log  \n', 'a.log': None, 'a.log  ': None}),
+    ('leading whitespace', {'.packignore': '  *.log\n', 'a.log': None}),
+    ('empty line in middle', {'.packignore': '*.log\n\n*.tmp\n', 'a.log': None, 'b.tmp': None}),
+    ('path separator in middle', {'.packignore': 'a/b/c.log\n', 'a/b/c.log': None, 'x/a/b/c.log': None}),
+    ('nested packignore reinclude parent exclude', {'.packignore': '*.log\n', 'sub/.packignore': '!*.log\n', 'sub/a.log': None, 'a.log': None}),
+    ('exclude in subdir but reinclude', {'.packignore': '*.log\n!sub/a.log\n', 'sub/a.log': None, 'a.log': None}),
+    ('bracket in filename', {'.packignore': '[a].txt\n', '[a].txt': None, 'a.txt': None}),
+    ('question mark multi', {'.packignore': 'a??c\n', 'abbc': None, 'abc': None, 'ac': None}),
+    ('nested double star middle', {'.packignore': 'a/**/b\n', 'a/b': None, 'a/x/b': None, 'ab': None, 'a/b/c': None}),
+    ('star match empty', {'.packignore': 'a*.log\n', 'a.log': None, 'ab.log': None}),
+    ('star in middle', {'.packignore': 'a*c\n', 'ac': None, 'abc': None, 'abbbbc': None, 'a/c': None}),
+    ('star only, no extension', {'.packignore': 'build/*\n', 'build/a': None, 'build/sub/b': None, 'other/a': None}),
+    ('star only matches files', {'.packignore': '*\n', 'a': None, 'sub/b': None}),
+    ('negation of a file', {'.packignore': '*\n!keep\n', 'a': None, 'keep': None, 'sub/keep': None}),
+    ('reinclude but parent excluded', {'.packignore': 'foo/\n!foo/keep\n', 'foo/keep': None, 'foo/a': None}),
+    ('subdir patterns with slash', {'.packignore': 'sub/*.log\n', 'sub/a.log': None, 'sub/deeper/b.log': None, 'a.log': None}),
+    ('star to match dir name', {'.packignore': 'build/**\n', 'build/a': None, 'build/x/y': None}),
+    ('relative path pattern no leading slash', {'.packignore': 'a/b\n', 'a/b': None, 'x/a/b': None}),
+    ('relative path with glob', {'.packignore': 'a/*.log\n', 'a/x.log': None, 'a/sub/x.log': None, 'x/a/x.log': None}),
+    ('matching across levels', {'.packignore': 'logs\n', 'logs': None, 'a/logs': None, 'a/logs/x': None, 'a/b/logs/x': None}),
+    ('char range order mix', {'.packignore': '[c-a].txt\n', 'a.txt': None, 'b.txt': None, 'c.txt': None}),
+]
+for name, files in tests:
+    out = probe.ignored(files)
+    print(name, '=>', out)
+"
+
+$ cd /tmp/probe && python3 -c "
+import probe
+
+tests = [
+    ('escape backslash literal', {'.packignore': '\\\\\\\\\n', '\\\\': None, 'other': None}),
+    ('one backslash in pattern alone', {'.packignore': '\\\\\n', '\\\\': None}),
+    ('hash mid pattern', {'.packignore': 'a#b\n', 'a#b': None, 'ab': None}),
+    ('whitespace in pattern', {'.packignore': 'foo bar\n', 'foo bar': None, 'foobar': None}),
+    ('tabs', {'.packignore': '\tfoo\n', 'foo': None}),
+    ('escape trailing space', {'.packignore': 'foo \\\\ \n', 'foo ': None, 'foo': None, 'foo  ': None}),
+    ('star does not match .packignore itself?', {'.packignore': '*\n', '.packignore': None, 'a': None}),
+    ('negate pattern only in subdir', {'.packignore': '*.log\n', 'keep/.packignore': '!*.log\n', 'keep/a.log': None, 'a.log': None}),
+    ('deeper reinclude', {'.packignore': 'logs/\n', 'logs/.packignore': '!important.log\n', 'logs/important.log': None, 'logs/a.log': None}),
+    ('pattern ends with wildcard', {'.packignore': 'build/*\n', 'build/a': None, 'build/sub/b': None, 'build/sub/c/d': None}),
+    ('double star between', {'.packignore': 'a/**/*.log\n', 'a/x.log': None, 'a/b/x.log': None, 'a/b/c/x.log': None}),
+    ('double star alone in path', {'.packignore': 'a/**\n', 'a/x': None, 'a/b/y': None, 'other/a': None}),
+    ('star alone no slash', {'.packignore': 'a\n', 'a': None, 'sub/a': None, 'a/x': None, 'aa': None}),
+    ('star alone with slash leading', {'.packignore': '/a\n', 'a': None, 'sub/a': None}),
+    ('star alone with slash trailing', {'.packignore': 'a/\n', 'a/x': None, 'sub/a/y': None, 'a': None, 'sub/a': None}),
+    ('pattern with leading double star without slash', {'.packignore': '**foo\n', 'foo': None, 'a/foo': None, 'a/bfoo': None, 'bfoo': None}),
+    ('both leading and trailing /**', {'.packignore': '/**/*.log\n', 'a.log': None, 'sub/a.log': None}),
+    ('star inside match slash?', {'.packignore': '*/log\n', 'a/log': None, 'a/b/log': None}),
+    ('specific vs star', {'.packignore': '*.log\n!important.log\n*.log\n', 'important.log': None}),
+    ('subdir double neg', {'.packignore': '*.log\n', 'sub/.packignore': '*.log\n', 'sub/a.log': None, 'a.log': None}),
+    ('nested overrides parent', {'.packignore': '!*.log\n', 'sub/.packignore': '*.log\n', 'sub/a.log': None, 'a.log': None}),
+    ('reinclude in different nested', {'.packignore': '*.log\n', 'sub/.packignore': '!a.log\n', 'sub/a.log': None, 'sub/deeper/a.log': None}),
+    ('subdir pattern not matching parent', {'sub/.packignore': 'a.log\n', 'a.log': None, 'sub/a.log': None, 'sub/deeper/a.log': None}),
+    ('one segment deep', {'.packignore': 'a/b/\n', 'a/b/x': None, 'a/b': None}),
+    ('pattern with mid slash is anchored to pkg dir not any depth', {'.packignore': 'a/b\n', 'a/b': None, 'x/a/b': None, 'a/x/b': None}),
+    ('star match multiple segs', {'.packignore': '**/foo/**\n', 'foo/x': None, 'a/foo/y': None, 'a/foo/b/c': None, 'foo': None}),
+    ('subdir packignore with slash pattern', {'sub/.packignore': 'a/b\n', 'sub/a/b': None, 'sub/x/a/b': None, 'a/b': None}),
+    ('starts with slash and star', {'.packignore': '/*.log\n', 'a.log': None, 'sub/a.log': None}),
+    ('escape slash', {'.packignore': '\\\\/a\n', 'a': None, 'sub/a': None}),
+    ('reinclude a dir', {'.packignore': 'sub\n!sub/keep\n', 'sub/keep': None, 'sub/a': None}),
+    ('a file named packignore not literally .packignore', {'.packignore': '', 'packignore': None, 'sub/packignore': None}),
+    ('dir with underscore', {'.packignore': 'build_dir/\n', 'build_dir/a': None, 'other': None}),
+    ('exact extension', {'.packignore': '.log\n', '.log': None, 'a.log': None, 'sub/.log': None}),
+    ('pure wildcard start', {'.packignore': '*b.log\n', 'ab.log': None, 'b.log': None, 'sub/ab.log': None}),
+]
+for name, files in tests:
+    out = probe.ignored(files)
+    print(name, '=>', out)
+"
+
+$ cd /tmp/probe && python3 -I t.py
+
+$ cd /tmp/probe && python3 -I t2.py
+
+$ cd /tmp/probe && python3 -I t3.py
+
+$ cd /tmp/probe && python3 -I -c "
+import probe
+print('W1a: *.log + !a.*, files a.log b.log =>', probe.ignored({'.packignore': '*.log\n!a.*\n', 'a.log': None, 'b.log': None}))
+print('W1b: *.log + !a.* alone, file a.log =>', probe.ignored({'.packignore': '*.log\n!a.*\n', 'a.log': None}))
+print('W1c: !*.log + ?.log, file a.log =>', probe.ignored({'.packignore': '!*.log\n?.log\n', 'a.log': None}))
+print('W1d: ?.log + !*.log, file a.log =>', probe.ignored({'.packignore': '?.log\n!*.log\n', 'a.log': None}))
+print('W1e: *.log + !*.log + *.log, file a.log =>', probe.ignored({'.packignore': '*.log\n!*.log\n*.log\n', 'a.log': None}))
+print('W1f: !*.log + *.log + !*.log, file a.log =>', probe.ignored({'.packignore': '!*.log\n*.log\n!*.log\n', 'a.log': None}))
+"
+
+$ cd /tmp/probe && PYTHONPATH=/tmp/probe python3 -I -c "
+import probe
+print('W1a: *.log + !a.*, files a.log b.log =>', probe.ignored({'.packignore': '*.log\n!a.*\n', 'a.log': None, 'b.log': None}))
+print('W1b: *.log + !a.* alone, file a.log =>', probe.ignored({'.packignore': '*.log\n!a.*\n', 'a.log': None}))
+print('W1c: !*.log + ?.log, file a.log =>', probe.ignored({'.packignore': '!*.log\n?.log\n', 'a.log': None}))
+print('W1d: ?.log + !*.log, file a.log =>', probe.ignored({'.packignore': '?.log\n!*.log\n', 'a.log': None}))
+print('W1e: *.log + !*.log + *.log, file a.log =>', probe.ignored({'.packignore': '*.log\n!*.log\n*.log\n', 'a.log': None}))
+print('W1f: !*.log + *.log + !*.log, file a.log =>', probe.ignored({'.packignore': '!*.log\n*.log\n!*.log\n', 'a.log': None}))
+print('W1g: *.log + !?.log, file a.log =>', probe.ignored({'.packignore': '*.log\n!?.log\n', 'a.log': None, 'bc.log': None}))
+print('W1h: ?.log + !*.log, file a.log =>', probe.ignored({'.packignore': '?.log\n!*.log\n', 'a.log': None, 'bc.log': None}))
+"
+
+$ cd /tmp/probe && python3 -I t4.py
+
+$ cd /tmp/probe && python3 -I t5.py
+
+$ cd /tmp/probe && python3 -I t6.py
+
+$ cd /tmp/probe && python3 -I t7.py
+
+$ cd /tmp/probe && python3 -I t8.py
+
+$ cd /tmp/probe && python3 -I t9.py
+
+$ cd /tmp/probe && python3 -I t10.py
+
+$ cd /tmp/probe && python3 -I t11.py
+
+$ cd /tmp/probe && python3 -I t12.py
+
+$ cd /tmp/probe && python3 -I t13.py
+
+$ cd /tmp/probe && python3 -I t14.py
+
+$ cd /tmp/probe && python3 -I t15.py
+
+$ cd /tmp/probe && python3 -I t16.py

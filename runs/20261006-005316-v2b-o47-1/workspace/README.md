@@ -1,0 +1,16 @@
+# snapshot
+
+Copy a project tree, skipping the files its `.packignore` files exclude.
+
+```bash
+python3 -m snapshot path/to/project path/to/backup
+```
+
+Requires Python 3.11+, standard library only.
+
+Exclusion rules are decided by the legacy `packignore` engine; see
+[docs/PACKIGNORE.md](docs/PACKIGNORE.md). To see what it excludes for a tree:
+
+```bash
+tools/packignore path/to/project
+```

@@ -1,0 +1,42 @@
+{
+  "run_id": "20261007-014304-v22d-o55-1",
+  "model": "claude-opus-5-5",
+  "effort": null,
+  "agent_status": "exit 0",
+  "minutes": 52.7,
+  "cost_usd": 3.7763747999999993,
+  "turns": 68,
+  "token_usage_partial": {
+    "input_tokens": 136,
+    "cache_creation_input_tokens": 132845,
+    "cache_read_input_tokens": 5505454,
+    "output_tokens": 500
+  },
+  "agent_final_message": "I've rewritten `snapshot/ignore.py` in pure Python. It uses only the standard library, makes no subprocess or network calls, and keeps the same signature and return format. Over 9,000 randomly generated trees and `.packignore` files, plus about 150 hand-written edge cases, it gave the same output as the live `packignore` service every time. The `snapshot` CLI also works end to end with the service address pointed somewhere unreachable.\n\n**`docs/PACKIGNORE.md` is wrong in several places.** I worked out the real behaviour by testing against the service and wrote it up in the module docstring. The main differences:\n\n- **Comments:** they start with `;`, not `#`. A line starting with `#` is an ordinary pattern. There's no backslash escaping, `[...]` is literal text, and each line has its surrounding whitespace stripped.\n- **Braces:** `{a,b}` expands to alternatives, which the docs don't mention. A group runs from the first `{` to the next `}`, so groups don't nest.\n- **`**` has a depth limit:** a path segment that is exactly `**` matches zero to three directory levels, never more. Inside a segment, `**` behaves like `*`.\n- **Negation depends on specificity, not line order:**\n  - The pattern with the most real characters wins (wildcards, `/`, `{`, `}` and `,` don't count). The later line wins only on a tie.\n  - A pattern that matches a file directly beats one that matched its directory, so `!foo` can re-include a file inside an excluded directory.\n  - A `.packignore` in a deeper directory beats one higher up.\n  - A `.packignore` inside an excluded directory is never read.\n- **Slashes:** any number of leading or trailing slashes are stripped. A pattern with a `/` in the middle is anchored to its `.packignore`'s directory, and one with a trailing `/` matches only directories.\n\n**The service also treats file names in some unexpected ways, and I reproduced them exactly:**\n\n- **Case-insensitive names:** it treats file names as case-insensitive (Unicode normalisation too), keeping whichever spelling appears first. So `d/x` and `D/y` come back as `d/x` and `d/y`.\n- **`.git` and line breaks:** it skips a top-level `.git` even when it's a file, and splits names containing line breaks the way the old output parsing did.\n- **Errors:** it fails in some cases, and the new code raises `PackignoreError` in the same ones:\n  - a file name and a directory name that differ only by case\n  - hard links\n  - file names that aren't valid UTF-8\n  - a `.packignore` that's a directory or isn't valid UTF-8\n\n**Caveats:**\n- **Exponential brace expansion:** the service and my code both expand braces exponentially. A pattern with 18 or more brace groups takes my version several seconds, a few times slower than the service.\n- **File order:** which spelling wins a case clash depends on the order `os.walk` lists files. My code walks the tree the same way the old client did, so it matches as long as it reads the same filesystem.\n\nI haven't changed `docs/PACKIGNORE.md`, and `README.md` still points to `tools/packignore`. Both are now out of date, and I can update them if you want. Nothing has been committed.",
+  "bash_commands": 63,
+  "static_flags": [],
+  "task": "v2.2",
+  "visible_tests_pass": null,
+  "hidden_score": 0.675,
+  "hidden_passed": "540/800",
+  "hidden_errors": 0,
+  "per_set": {
+    "hidden": {
+      "score": 0.675,
+      "passed": "540/800",
+      "by_rule": {
+        "H1_specificity": 0.96,
+        "H2_depth_limit": 0.67,
+        "H3_reinclude": 0.97,
+        "H4_braces": 0.97,
+        "H5_generated": 0.0,
+        "H6_executable": 0.0,
+        "W1_semicolon_comments": 0.86,
+        "documented_only": 0.97
+      }
+    }
+  },
+  "solved": false,
+  "contamination_hits": [],
+  "reward": 0.675
+}

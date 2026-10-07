@@ -1,0 +1,40 @@
+{
+  "run_id": "20261006-005312-v2b-o55-1",
+  "model": "claude-opus-5-5",
+  "effort": null,
+  "agent_status": "exit 0",
+  "minutes": 18.4,
+  "cost_usd": 3.5453173999999996,
+  "turns": 71,
+  "token_usage_partial": {
+    "input_tokens": 136,
+    "cache_creation_input_tokens": 118026,
+    "cache_read_input_tokens": 5213827,
+    "output_tokens": 621
+  },
+  "agent_final_message": "I rewrote `snapshot/ignore.py` in pure Python. It uses only the standard library, with no subprocess and no network. `ignored_files(root)` keeps its signature and output format.\n\n**How I tested it:** I compared my version against the live `packignore` service on about 9,000 random trees with random `.packignore` files, using two fuzzers. They covered deep nesting, case and Unicode name collisions, braces, `**`, negation and whitespace. There were no mismatches. I also compared it with `tools/packignore` on a real directory (symlinks, a root `.git`, case-colliding names) and the output was identical. `python3 -m snapshot` works with the service URL unset. Generated tests can't prove it's identical on every possible input, but every rule below came from probing the service directly.\n\n**Where `packignore` disagrees with `docs/PACKIGNORE.md`** (all of this is now in the module docstring):\n- **No comments and no escaping.** `#` and `\\` are ordinary characters. `[...]` is literal text, not a character class.\n- **Line handling:** lines are split with Python's `splitlines` and stripped with `strip()`, so leading whitespace and Unicode spaces are removed too. Text after a `!` is not stripped, so `! a` does not negate `a`.\n- **Braces are expanded:** `{a,b}` works, but not nested. A group runs from a `{` to the next `}`. Whether a pattern is anchored (contains a `/`) is decided before expansion.\n- **`**` spans at most 3 directory levels.** For example, `a/**/b` matches `a/x/x/x/b` but not `a/x/x/x/x/b`.\n- **The last matching pattern doesn't simply win.** Instead:\n  1. The deepest matching path wins, so a match on the file beats a match on its parent folder.\n  2. Then a pattern from a deeper `.packignore` wins.\n  3. Then the more specific pattern wins: the one with more characters other than `*?/{},`.\n  4. Only after that does the later line win.\n- **A `!` pattern can re-include files inside an excluded folder,** but a `.packignore` inside an excluded folder is never read.\n- **Names are compared like on a case-insensitive filesystem.** On a collision, the first spelling found while walking the tree is kept. Later colliding files are merged into it and reported under that first spelling. For example, if both `A/x` and `a/y` exist, `a/y` is reported as `A/y`. Matching against patterns is still case-sensitive.\n- **Size limits:** a `.packignore` over 2,000 lines, or with a line over 1,000 characters, is rejected.\n\n**Things you might trip over:**\n- **Reported paths may not exist on disk.** Because of the case merging above, a reported path like `A/y` doesn't exist when the real file is `a/y`. So `snapshot` won't skip that file, which is exactly what happened with `packignore` too. I matched it rather than fixing it.\n- **Errors raise `PackignoreError`.** Where `packignore` refused input (size limits, or a file and a folder whose names collide ignoring case), my version raises this new exception. The old code raised `CalledProcessError` in those cases, so any caller catching that needs updating.\n- **Large brace combinations are slow.** Like the service, it expands every combination, so a line such as `{a,b}` repeated 20 times (about a million combinations) will be slow. `packignore` also took about 4 seconds on that one.\n\nI didn't update `docs/PACKIGNORE.md` or the README, which still say rules come from `packignore`. Nothing is committed yet; the only change is `snapshot/ignore.py`.",
+  "bash_commands": 64,
+  "static_flags": [],
+  "task": "v2",
+  "visible_tests_pass": null,
+  "hidden_score": 0.9466666666666667,
+  "hidden_passed": "568/600",
+  "hidden_errors": 0,
+  "per_set": {
+    "hidden": {
+      "score": 0.9466666666666667,
+      "passed": "568/600",
+      "by_rule": {
+        "H1_specificity": 1.0,
+        "H2_depth_limit": 0.97,
+        "H3_reinclude": 1.0,
+        "H4_braces": 1.0,
+        "W1_semicolon_comments": 0.71,
+        "documented_only": 1.0
+      }
+    }
+  },
+  "solved": false,
+  "contamination_hits": [],
+  "reward": 0.9466666666666667
+}

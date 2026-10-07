@@ -1,0 +1,232 @@
+"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine. docs/PACKIGNORE.md describes the original, but parts of it are out of
+date; the rules below are the ones packignore actually applies.
+
+Pattern files
+    Each directory may hold a `.packignore`. It is decoded as UTF-8 and split
+    with str.splitlines(), so \\r, \\v, \\f, \\x1c-\\x1e, \\x85, \\u2028 and
+    \\u2029 all end a line. Each line is stripped of surrounding whitespace
+    (str.strip()). Empty lines and lines starting with `;` are skipped. `#`
+    does NOT start a comment. There are no backslash escapes.
+
+Patterns
+    - A leading `!` negates the pattern. Nothing after it is stripped.
+    - Trailing `/`s are removed and make the pattern match directories only.
+    - If what remains contains a `/`, the pattern is anchored: it matches
+      the path relative to the directory holding the `.packignore` (leading
+      `/`s are removed). Otherwise it matches a file or directory name at
+      any depth below that directory.
+    - `{a,b}` expands to alternatives. Each group runs from a `{` to the next
+      `}`, split on `,`. Groups are not nested and the expanded results are
+      not expanded again. An unclosed `{` and a lone `}` are literal.
+    - `*` matches any run of characters except `/`, and `?` matches one
+      character except `/`. A path segment that is exactly `**` matches zero
+      to three segments, no more. Anywhere else `**` (or `***`) behaves like
+      `*`. Every other character, including `[`, `]` and `\\`, is literal.
+      Matching is case-sensitive.
+
+Evaluation
+    A path's own state comes from the rules that match it. A match in a
+    deeper `.packignore` always beats one in a shallower file. Within one
+    file the most specific rule wins: its score is the number of characters
+    in the pattern (after any `!`) other than `* ? { } , /`. Among rules
+    with equal scores the last one wins. If no rule matches, the path takes
+    its parent directory's state. Files that are executable (any execute bit
+    set) or whose first line contains `@generated` are excluded by default.
+    Any rule that matches the file itself overrides that default.
+    A `.packignore` inside an excluded directory is not read. One that is
+    itself excluded still applies.
+
+Only regular files are considered. Symlinks are skipped and so are symlinked
+directories. A `.git` directory directly under the root is skipped too.
+"""
+
+import os
+import re
+import stat
+
+_MARKER = b"@generated"
+# Characters that don't count towards a pattern's specificity score.
+_NOT_SCORED = frozenset("*?{},/")
+
+
+def _expand_braces(pattern):
+    start = pattern.find("{")
+    if start < 0:
+        return [pattern]
+    end = pattern.find("}", start)
+    if end < 0:
+        return [pattern]
+    head = pattern[:start]
+    alternatives = pattern[start + 1:end].split(",")
+    tails = _expand_braces(pattern[end + 1:])
+    return [head + alt + tail for alt in alternatives for tail in tails]
+
+
+def _segment_regex(segment):
+    out = []
+    for ch in segment:
+        if ch == "*":
+            if not out or out[-1] != "[^/]*":
+                out.append("[^/]*")
+        elif ch == "?":
+            out.append("[^/]")
+        else:
+            out.append(re.escape(ch))
+    return "".join(out)
+
+
+def _anchored_regex(pattern):
+    # Matched against "/" + relative path, so every segment starts with "/".
+    out = ""
+    for seg in pattern.split("/"):
+        if seg == "**":
+            out += "(?:/[^/]*){0,3}"
+        else:
+            out += "/" + _segment_regex(seg)
+    return out
+
+
+class _Rule:
+    __slots__ = ("negate", "dir_only", "anchored", "regex", "score")
+
+    def __init__(self, negate, dir_only, anchored, regex, score):
+        self.negate = negate
+        self.dir_only = dir_only
+        self.anchored = anchored
+        self.regex = regex
+        self.score = score
+
+
+def _parse_rule(line):
+    negate = line.startswith("!")
+    if negate:
+        line = line[1:]
+    score = sum(1 for ch in line if ch not in _NOT_SCORED)
+    dir_only = line.endswith("/")
+    line = line.rstrip("/")
+    anchored = "/" in line
+    if anchored:
+        line = line.lstrip("/")
+    alternatives = _expand_braces(line)
+    if anchored:
+        parts = [_anchored_regex(alt) for alt in alternatives]
+    else:
+        parts = [_segment_regex(alt) for alt in alternatives]
+    # An empty alternative (or an empty pattern) never matches anything.
+    parts = [p for p in parts if p]
+    if not parts:
+        return None
+    regex = re.compile("(?s:" + "|".join("(?:%s)" % p for p in parts) + r")\Z")
+    return _Rule(negate, dir_only, anchored, regex, score)
+
+
+def _read_rules(path):
+    """Parse the .packignore at `path` into a list of rules, in file order."""
+    with open(path, "rb") as f:
+        text = f.read().decode("utf-8")
+    rules = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith(";"):
+            continue
+        rule = _parse_rule(line)
+        if rule is not None:
+            rules.append(rule)
+    return rules
+
+
+def _match(layers, rel, name, is_dir):
+    """Return whether the rules matching `rel` exclude it, or None if none match.
+
+    `layers` holds (base, rules) for each .packignore that applies, outermost
+    first. The deepest file with a matching rule decides. Within that file the
+    rule with the highest score wins, and among equal scores the last one wins.
+    """
+    for base, rules in reversed(layers):
+        if base:
+            if not rel.startswith(base + "/"):
+                continue
+            sub = "/" + rel[len(base) + 1:]
+        else:
+            sub = "/" + rel
+        best = None
+        for rule in rules:
+            if rule.dir_only and not is_dir:
+                continue
+            if best is not None and rule.score < best.score:
+                continue
+            if rule.regex.match(sub if rule.anchored else name):
+                best = rule
+        if best is not None:
+            return not best.negate
+    return None
+
+
+def _is_generated(path):
+    """Whether the file's first line (up to the first b"\\n") contains the marker."""
+    with open(path, "rb") as f:
+        # Carry the end of the previous chunk so a marker split across reads is found.
+        carry = b""
+        while True:
+            chunk = f.read(65536)
+            if not chunk:
+                return False
+            nl = chunk.find(b"\n")
+            if nl >= 0:
+                return _MARKER in carry + chunk[:nl]
+            if _MARKER in carry + chunk:
+                return True
+            carry = chunk[-(len(_MARKER) - 1):]
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .packignore files exclude.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. A `.git` directory directly
+    under `root` is skipped.
+    """
+    ignored = []
+    # (rules, excluded) for each directory, keyed by its path relative to root.
+    state = {}
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root):
+            rel_dir = ""
+            if ".git" in dirnames:
+                dirnames.remove(".git")
+            rules, excluded = [], False
+        else:
+            rel_dir = os.path.relpath(dirpath, root).replace(os.sep, "/")
+            parent, _, name = rel_dir.rpartition("/")
+            rules, parent_excluded = state[parent]
+            own = _match(rules, rel_dir, name, True)
+            excluded = parent_excluded if own is None else own
+
+        files = []
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            if os.path.islink(full) or not os.path.isfile(full):
+                continue
+            files.append((name, full))
+
+        if not excluded and ".packignore" in filenames:
+            pi = os.path.join(dirpath, ".packignore")
+            if any(full == pi for _, full in files):
+                rules = rules + [(rel_dir, _read_rules(pi))]
+        state[rel_dir] = (rules, excluded)
+
+        for name, full in files:
+            rel = rel_dir + "/" + name if rel_dir else name
+            own = _match(rules, rel, name, False)
+            if own is None:
+                mode = os.stat(full).st_mode
+                if mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH) or _is_generated(full):
+                    own = True
+                else:
+                    own = excluded
+            if own:
+                ignored.append(rel)
+    return sorted(ignored)

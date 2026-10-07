@@ -1,0 +1,273 @@
+diff --git a/snapshot/ignore.py b/snapshot/ignore.py
+index ced8452..fc2662a 100644
+--- a/snapshot/ignore.py
++++ b/snapshot/ignore.py
+@@ -1,27 +1,11 @@
+ """Decide which files in a project tree are ignored by its .gitignore files.
+ 
+-This currently delegates to git: it copies the tree into a scratch repository
+-and asks `git ls-files` which untracked files are ignored.
++Pure-Python implementation mirroring `git ls-files --others --ignored
++--exclude-standard` with no global excludes file and case-sensitive matching.
+ """
+ 
+ import os
+-import shutil
+-import subprocess
+-import tempfile
+-
+-# Pin the settings that would otherwise make the answer depend on the machine:
+-# no global excludes file, case-sensitive matching.
+-_GIT = ["git", "-c", "core.ignorecase=false", "-c", "core.excludesFile=" + os.devnull]
+-
+-
+-def _env(home):
+-    return {
+-        "PATH": os.environ.get("PATH", ""),
+-        "HOME": home,
+-        "XDG_CONFIG_HOME": home,
+-        "GIT_CONFIG_NOSYSTEM": "1",
+-        "GIT_CONFIG_GLOBAL": os.devnull,
+-    }
++import re
+ 
+ 
+ def ignored_files(root):
+@@ -31,13 +15,227 @@ def ignored_files(root):
+     Only files are listed, never directories. Only .gitignore files inside
+     `root` are consulted; a `.git` directory directly under `root` is skipped.
+     """
+-    with tempfile.TemporaryDirectory() as tmp:
+-        repo = os.path.join(tmp, "repo")
+-        shutil.copytree(root, repo, symlinks=True,
+-                        ignore=lambda d, names: [".git"] if os.path.samefile(d, root) else [])
+-        env = _env(tmp)
+-        subprocess.run(_GIT + ["init", "-q", "--template="], cwd=repo, env=env,
+-                       check=True, capture_output=True)
+-        out = subprocess.run(_GIT + ["ls-files", "-z", "--others", "--ignored", "--exclude-standard"],
+-                             cwd=repo, env=env, check=True, capture_output=True).stdout
+-    return sorted(p for p in out.decode().split("\0") if p)
++    root = os.path.abspath(root)
++    result = []
++    _walk(root, root, [], result)
++    return sorted(result)
++
++
++def _walk(current_dir, root, parent_patterns, result):
++    patterns = parent_patterns
++    gi = os.path.join(current_dir, ".gitignore")
++    if os.path.isfile(gi) and not os.path.islink(gi):
++        new_patterns = _parse_gitignore(gi)
++        if new_patterns:
++            base = _relpath(current_dir, root)
++            patterns = patterns + [(base, new_patterns)]
++
++    try:
++        entries = os.listdir(current_dir)
++    except OSError:
++        return
++
++    is_root = current_dir == root
++    for entry in entries:
++        if is_root and entry == ".git":
++            continue
++        path = os.path.join(current_dir, entry)
++        rel = _relpath(path, root)
++        if os.path.islink(path):
++            is_dir = False
++        else:
++            try:
++                is_dir = os.path.isdir(path)
++            except OSError:
++                continue
++        if is_dir:
++            if _is_ignored(rel, True, patterns):
++                _collect_all_files(path, root, result)
++            else:
++                _walk(path, root, patterns, result)
++        else:
++            if _is_ignored(rel, False, patterns):
++                result.append(rel)
++
++
++def _collect_all_files(dir_path, root, result):
++    try:
++        entries = os.listdir(dir_path)
++    except OSError:
++        return
++    for entry in entries:
++        path = os.path.join(dir_path, entry)
++        if os.path.islink(path):
++            is_dir = False
++        else:
++            try:
++                is_dir = os.path.isdir(path)
++            except OSError:
++                continue
++        if is_dir:
++            _collect_all_files(path, root, result)
++        else:
++            result.append(_relpath(path, root))
++
++
++def _relpath(path, root):
++    rel = os.path.relpath(path, root)
++    return "" if rel == "." else rel.replace(os.sep, "/")
++
++
++def _is_ignored(rel_path, is_dir, patterns):
++    """Walk accumulated .gitignore patterns; last matching pattern decides."""
++    ignored = False
++    for base, pat_list in patterns:
++        if base:
++            if not rel_path.startswith(base + "/"):
++                continue
++            local = rel_path[len(base) + 1:]
++        else:
++            local = rel_path
++        for compiled, dir_only, negate in pat_list:
++            if dir_only and not is_dir:
++                continue
++            if compiled.match(local):
++                ignored = not negate
++    return ignored
++
++
++def _parse_gitignore(path):
++    patterns = []
++    try:
++        with open(path, "r", encoding="utf-8", errors="replace") as f:
++            data = f.read()
++    except OSError:
++        return patterns
++    for raw in data.split("\n"):
++        line = raw[:-1] if raw.endswith("\r") else raw
++        if not line or line[0] == "#":
++            continue
++        line = _strip_trailing_spaces(line)
++        if not line:
++            continue
++        negate = False
++        if line[0] == "!":
++            negate = True
++            line = line[1:]
++            if not line:
++                continue
++        compiled, dir_only = _compile(line)
++        patterns.append((compiled, dir_only, negate))
++    return patterns
++
++
++def _strip_trailing_spaces(line):
++    """Strip trailing spaces unless escaped with an odd run of backslashes."""
++    i = len(line)
++    while i > 0 and line[i - 1] == " ":
++        bs = 0
++        j = i - 2
++        while j >= 0 and line[j] == "\\":
++            bs += 1
++            j -= 1
++        if bs % 2 == 1:
++            break
++        i -= 1
++    return line[:i]
++
++
++def _compile(pattern):
++    """Compile a gitignore pattern (after `!` strip) to (regex, dir_only)."""
++    had_leading = pattern.startswith("/")
++    if had_leading:
++        pattern = pattern[1:]
++    dir_only = pattern.endswith("/")
++    if dir_only:
++        pattern = pattern[:-1]
++    anchored = had_leading or ("/" in pattern)
++    if not anchored:
++        pattern = "**/" + pattern
++    regex = _translate(pattern)
++    return re.compile("^" + regex + "$"), dir_only
++
++
++def _translate(pat):
++    out = []
++    i, n = 0, len(pat)
++    while i < n:
++        c = pat[i]
++        if c == "*":
++            if i + 1 < n and pat[i + 1] == "*":
++                np = i + 2
++                if np < n and pat[np] == "/":
++                    out.append("(?:.*/)?")
++                    i = np + 1
++                elif np == n:
++                    out.append(".*")
++                    i = np
++                else:
++                    out.append("[^/]*")
++                    i += 2
++            else:
++                out.append("[^/]*")
++                i += 1
++        elif c == "?":
++            out.append("[^/]")
++            i += 1
++        elif c == "[":
++            end = _find_class_end(pat, i)
++            if end == -1:
++                out.append(re.escape("["))
++                i += 1
++            else:
++                out.append(_translate_class(pat[i + 1:end]))
++                i = end + 1
++        elif c == "\\" and i + 1 < n:
++            out.append(re.escape(pat[i + 1]))
++            i += 2
++        else:
++            out.append(re.escape(c))
++            i += 1
++    return "".join(out)
++
++
++def _find_class_end(pat, start):
++    n = len(pat)
++    j = start + 1
++    if j < n and pat[j] == "!":
++        j += 1
++    if j < n and pat[j] == "]":
++        j += 1
++    while j < n:
++        if pat[j] == "\\" and j + 1 < n:
++            j += 2
++        elif pat[j] == "]":
++            return j
++        else:
++            j += 1
++    return -1
++
++
++def _translate_class(content):
++    negative = content.startswith("!")
++    if negative:
++        content = content[1:]
++    out = ["[^/" if negative else "["]
++    i = 0
++    while i < len(content):
++        c = content[i]
++        if c == "\\" and i + 1 < len(content):
++            nxt = content[i + 1]
++            if nxt in r"\]^-":
++                out.append("\\" + nxt)
++            else:
++                out.append(re.escape(nxt))
++            i += 2
++        elif c == "\\":
++            out.append(r"\\")
++            i += 1
++        elif c == "]":
++            out.append(r"\]")
++            i += 1
++        else:
++            out.append(c)
++            i += 1
++    out.append("]")
++    return "".join(out)

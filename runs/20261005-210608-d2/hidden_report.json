@@ -1,0 +1,8445 @@
+{
+  "summary": {
+    "score": 0.917,
+    "passed": 917,
+    "cases": 1000,
+    "errors": 28
+  },
+  "per_set": {
+    "hidden": {
+      "cases": 500,
+      "passed": 500,
+      "score": 1.0,
+      "file_accuracy": 1.0,
+      "errors": 0,
+      "by_feature": {
+        "case": {
+          "passed": 208,
+          "cases": 208,
+          "rate": 1.0
+        },
+        "char_class": {
+          "passed": 258,
+          "cases": 258,
+          "rate": 1.0
+        },
+        "comment": {
+          "passed": 243,
+          "cases": 243,
+          "rate": 1.0
+        },
+        "double_star": {
+          "passed": 304,
+          "cases": 304,
+          "rate": 1.0
+        },
+        "escape": {
+          "passed": 154,
+          "cases": 154,
+          "rate": 1.0
+        },
+        "leading_slash": {
+          "passed": 343,
+          "cases": 343,
+          "rate": 1.0
+        },
+        "middle_slash": {
+          "passed": 403,
+          "cases": 403,
+          "rate": 1.0
+        },
+        "negation": {
+          "passed": 400,
+          "cases": 400,
+          "rate": 1.0
+        },
+        "nested_gitignore": {
+          "passed": 373,
+          "cases": 373,
+          "rate": 1.0
+        },
+        "question": {
+          "passed": 232,
+          "cases": 232,
+          "rate": 1.0
+        },
+        "star": {
+          "passed": 382,
+          "cases": 382,
+          "rate": 1.0
+        },
+        "trailing_slash": {
+          "passed": 306,
+          "cases": 306,
+          "rate": 1.0
+        },
+        "trailing_space": {
+          "passed": 208,
+          "cases": 208,
+          "rate": 1.0
+        }
+      }
+    },
+    "hard-hidden": {
+      "cases": 500,
+      "passed": 417,
+      "score": 0.834,
+      "file_accuracy": 0.9226114272213042,
+      "errors": 28,
+      "by_feature": {
+        "case": {
+          "passed": 81,
+          "cases": 107,
+          "rate": 0.7570093457943925
+        },
+        "char_class": {
+          "passed": 340,
+          "cases": 419,
+          "rate": 0.8114558472553699
+        },
+        "comment": {
+          "passed": 39,
+          "cases": 45,
+          "rate": 0.8666666666666667
+        },
+        "crlf": {
+          "passed": 98,
+          "cases": 123,
+          "rate": 0.7967479674796748
+        },
+        "double_star": {
+          "passed": 362,
+          "cases": 442,
+          "rate": 0.8190045248868778
+        },
+        "escape": {
+          "passed": 353,
+          "cases": 429,
+          "rate": 0.8228438228438228
+        },
+        "glued_double_star": {
+          "passed": 250,
+          "cases": 318,
+          "rate": 0.7861635220125787
+        },
+        "leading_slash": {
+          "passed": 323,
+          "cases": 396,
+          "rate": 0.8156565656565656
+        },
+        "leading_space": {
+          "passed": 223,
+          "cases": 276,
+          "rate": 0.8079710144927537
+        },
+        "middle_slash": {
+          "passed": 362,
+          "cases": 442,
+          "rate": 0.8190045248868778
+        },
+        "negation": {
+          "passed": 358,
+          "cases": 439,
+          "rate": 0.8154897494305239
+        },
+        "nested_gitignore": {
+          "passed": 313,
+          "cases": 389,
+          "rate": 0.8046272493573264
+        },
+        "posix_class": {
+          "passed": 108,
+          "cases": 153,
+          "rate": 0.7058823529411765
+        },
+        "question": {
+          "passed": 346,
+          "cases": 421,
+          "rate": 0.8218527315914489
+        },
+        "star": {
+          "passed": 347,
+          "cases": 427,
+          "rate": 0.8126463700234192
+        },
+        "trailing_slash": {
+          "passed": 293,
+          "cases": 363,
+          "rate": 0.8071625344352618
+        },
+        "trailing_space": {
+          "passed": 165,
+          "cases": 208,
+          "rate": 0.7932692307692307
+        },
+        "trailing_tab_or_cr": {
+          "passed": 235,
+          "cases": 306,
+          "rate": 0.7679738562091504
+        },
+        "triple_star": {
+          "passed": 264,
+          "cases": 334,
+          "rate": 0.7904191616766467
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "hidden-0000",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0001",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0002",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0003",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0004",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0005",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0006",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0007",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0008",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0009",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0010",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0011",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0012",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0013",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0014",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0015",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0016",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0017",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0018",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0019",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0020",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0021",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0022",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0023",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0024",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0025",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0026",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0027",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0028",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0029",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0030",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0031",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0032",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0033",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0034",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0035",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0036",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0037",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0038",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0039",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0040",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0041",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0042",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0043",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0044",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0045",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0046",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0047",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0048",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0049",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0050",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0051",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0052",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0053",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0054",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0055",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0056",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0057",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0058",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0059",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0060",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0061",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0062",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0063",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0064",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0065",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0066",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0067",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0068",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0069",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0070",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0071",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0072",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0073",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0074",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0075",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0076",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0077",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0078",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0079",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0080",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0081",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0082",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0083",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0084",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0085",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0086",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0087",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0088",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0089",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0090",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0091",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0092",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0093",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0094",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0095",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0096",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0097",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0098",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0099",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0100",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0101",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0102",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0103",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0104",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0105",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0106",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0107",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0108",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0109",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0110",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0111",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0112",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0113",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0114",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0115",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0116",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0117",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0118",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0119",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0120",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0121",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0122",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0123",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0124",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0125",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0126",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0127",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0128",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0129",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0130",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0131",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0132",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0133",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0134",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0135",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0136",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0137",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0138",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0139",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0140",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0141",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0142",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0143",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0144",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0145",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0146",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0147",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0148",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0149",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0150",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0151",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0152",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0153",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0154",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0155",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0156",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0157",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0158",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0159",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0160",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0161",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0162",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0163",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0164",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0165",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0166",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0167",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0168",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0169",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0170",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0171",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0172",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0173",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0174",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0175",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0176",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0177",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0178",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0179",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0180",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0181",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0182",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0183",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0184",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0185",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0186",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0187",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0188",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0189",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0190",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0191",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0192",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0193",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0194",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0195",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0196",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0197",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0198",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0199",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0200",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0201",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0202",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0203",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0204",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0205",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0206",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0207",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0208",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0209",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0210",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0211",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0212",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0213",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0214",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0215",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0216",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0217",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0218",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0219",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0220",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0221",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0222",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0223",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0224",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0225",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0226",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0227",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0228",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0229",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0230",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0231",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0232",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0233",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0234",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0235",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0236",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0237",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0238",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0239",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0240",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0241",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0242",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0243",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0244",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0245",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0246",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0247",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0248",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0249",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0250",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0251",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0252",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0253",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0254",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0255",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0256",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0257",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0258",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0259",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0260",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0261",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0262",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0263",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0264",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0265",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0266",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0267",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0268",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0269",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0270",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0271",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0272",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0273",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0274",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0275",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0276",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0277",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0278",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0279",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0280",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0281",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0282",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0283",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0284",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0285",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0286",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0287",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0288",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0289",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0290",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0291",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0292",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0293",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0294",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0295",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0296",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0297",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0298",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0299",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0300",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0301",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0302",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0303",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0304",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0305",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0306",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0307",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0308",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0309",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0310",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0311",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0312",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0313",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0314",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0315",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0316",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0317",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0318",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0319",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0320",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0321",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0322",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0323",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0324",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0325",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0326",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0327",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0328",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0329",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0330",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0331",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0332",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0333",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0334",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0335",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0336",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0337",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0338",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0339",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0340",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0341",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0342",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0343",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0344",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0345",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0346",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0347",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0348",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0349",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0350",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0351",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0352",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0353",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0354",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0355",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0356",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0357",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0358",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0359",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0360",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0361",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0362",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0363",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0364",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0365",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0366",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0367",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0368",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0369",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0370",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0371",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0372",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0373",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0374",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0375",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0376",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0377",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0378",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0379",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0380",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0381",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0382",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0383",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0384",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0385",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0386",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0387",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0388",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0389",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0390",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0391",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0392",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0393",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0394",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0395",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0396",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0397",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0398",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0399",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0400",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0401",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0402",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0403",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0404",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0405",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0406",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0407",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0408",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0409",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0410",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0411",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0412",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0413",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0414",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0415",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0416",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0417",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0418",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0419",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0420",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0421",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0422",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0423",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0424",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0425",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0426",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0427",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0428",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0429",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0430",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0431",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0432",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0433",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0434",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0435",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0436",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0437",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0438",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0439",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0440",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0441",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0442",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0443",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0444",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0445",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0446",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0447",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0448",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0449",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0450",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0451",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0452",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0453",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0454",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0455",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0456",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0457",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0458",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0459",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0460",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0461",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0462",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0463",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0464",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0465",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0466",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0467",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0468",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0469",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0470",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0471",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0472",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0473",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0474",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0475",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0476",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0477",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0478",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0479",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0480",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0481",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0482",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0483",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0484",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0485",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0486",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0487",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0488",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0489",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0490",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0491",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0492",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0493",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0494",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0495",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0496",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0497",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0498",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hidden-0499",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0000",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0001",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0002",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 25\n"
+    },
+    {
+      "id": "hard-hidden-0003",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0004",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "a.b/ba/bb/b/a /.gitignore",
+        "a.b/ba/bb/b/a /ba",
+        "a.b/ba/bb/b/ba/.gitignore"
+      ],
+      "file_acc": 0.926829268292683,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0005",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0006",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0007",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0008",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0009",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0010",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0011",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0012",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0013",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0014",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0015",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0016",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0017",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0018",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0019",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0020",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0021",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0022",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0023",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0024",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0025",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0026",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0027",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0028",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0029",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0030",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0031",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0032",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0033",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0034",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0035",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0036",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 3\n"
+    },
+    {
+      "id": "hard-hidden-0037",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0038",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0039",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0040",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0041",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0042",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0043",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0044",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0045",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0046",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0047",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "a/bbb/ab"
+      ],
+      "file_acc": 0.975609756097561,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0048",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0049",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 14\n"
+    },
+    {
+      "id": "hard-hidden-0050",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0051",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0052",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0053",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0054",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0055",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0056",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0057",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0058",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0059",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0060",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0061",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0062",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0063",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0064",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bba/b/aba/a"
+      ],
+      "file_acc": 0.9655172413793104,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0065",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0066",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 10\n"
+    },
+    {
+      "id": "hard-hidden-0067",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ab/.a/.gitignore",
+        "ab/.a/a*",
+        "ab/.a/ab/a*/.gitignore",
+        "ab/.a/ab/a*/abb",
+        "ab/.a/ab/a*/b/aab",
+        "ab/.a/ab/a*/b/aba",
+        "ab/.a/ab/a*/b/b",
+        "ab/.a/ab/aa",
+        "ab/.a/ab/aba/.gitignore",
+        "ab/.a/ab/aba/b",
+        "ab/.a/ab/aba/bba",
+        "ab/.a/baa",
+        "ab/a b/aba",
+        "ab/aa",
+        "aba",
+        "baa"
+      ],
+      "file_acc": 0.5294117647058824,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0068",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0069",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0070",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0071",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0072",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0073",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0074",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0075",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0076",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0077",
+      "pass": false,
+      "missing": [
+        "a",
+        "b/a/a.b/a/bab/.gitignore",
+        "b/a/a.b/a/bb",
+        "b/a/a.b/a/bbb",
+        "b/a/a.b/bb",
+        "b/a/aa",
+        "b/a/aba",
+        "b/a/bbb",
+        "b/ab",
+        "b/ba",
+        "b/bab",
+        "baa/a"
+      ],
+      "extra": [],
+      "file_acc": 0.33333333333333337,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0078",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0079",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0080",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0081",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0082",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0083",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0084",
+      "pass": false,
+      "missing": [
+        "aab/bb/ab"
+      ],
+      "extra": [],
+      "file_acc": 0.9642857142857143,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0085",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0086",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0087",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0088",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0089",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0090",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0091",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0092",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0093",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0094",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0095",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0096",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0097",
+      "pass": false,
+      "missing": [
+        "bb/ba/aa/!a/aaa/.gitignore",
+        "bb/ba/aa/!a/aaa/aa",
+        "bb/ba/aaa"
+      ],
+      "extra": [],
+      "file_acc": 0.8695652173913043,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0098",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0099",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 5\n"
+    },
+    {
+      "id": "hard-hidden-0100",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0101",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0102",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0103",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0104",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0105",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0106",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0107",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b"
+      ],
+      "file_acc": 0.96875,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0108",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0109",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0110",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0111",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0112",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0113",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0114",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0115",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "aab/abb",
+        "abb",
+        "bab/abb"
+      ],
+      "file_acc": 0.8695652173913043,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0116",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0117",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0118",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0119",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0120",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0121",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0122",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0123",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0124",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0125",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0126",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0127",
+      "pass": false,
+      "missing": [
+        "bab"
+      ],
+      "extra": [],
+      "file_acc": 0.967741935483871,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0128",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0129",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0130",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0131",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0132",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0133",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0134",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0135",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0136",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 14\n"
+    },
+    {
+      "id": "hard-hidden-0137",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/bab/b/b/b/.gitignore",
+        "b/bab/b/b/b/baa"
+      ],
+      "file_acc": 0.95,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0138",
+      "pass": false,
+      "missing": [
+        "#a/bab"
+      ],
+      "extra": [],
+      "file_acc": 0.9615384615384616,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0139",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0140",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0141",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0142",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0143",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0144",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 21\n"
+    },
+    {
+      "id": "hard-hidden-0145",
+      "pass": false,
+      "missing": [
+        "bba/a/aab/ab/aa/aab"
+      ],
+      "extra": [],
+      "file_acc": 0.962962962962963,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0146",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0147",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0148",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0149",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0150",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0151",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0152",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0153",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0154",
+      "pass": false,
+      "missing": [
+        "aa/a*/bb/aa/b"
+      ],
+      "extra": [],
+      "file_acc": 0.9761904761904762,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0155",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0156",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0157",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0158",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0159",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "[a]/.gitignore",
+        "[a]/aaa"
+      ],
+      "file_acc": 0.9375,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0160",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 14\n"
+    },
+    {
+      "id": "hard-hidden-0161",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0162",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0163",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0164",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bab/ba"
+      ],
+      "file_acc": 0.9,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0165",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0166",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0167",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0168",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0169",
+      "pass": false,
+      "missing": [
+        "aa/a/abb/b/a/.gitignore",
+        "aa/a/abb/b/a/a.b",
+        "aa/a/abb/b/a/aa",
+        "aa/a/abb/b/a/b",
+        "aa/a/abb/b/a/bb"
+      ],
+      "extra": [],
+      "file_acc": 0.782608695652174,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0170",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0171",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0172",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0173",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0174",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0175",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0176",
+      "pass": false,
+      "missing": [
+        "a",
+        "aab/bba/bab/a/b",
+        "aab/bba/bab/a/ba",
+        "aab/bba/bab/a/bbb"
+      ],
+      "extra": [],
+      "file_acc": 0.8823529411764706,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0177",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0178",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0179",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0180",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0181",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 14\n"
+    },
+    {
+      "id": "hard-hidden-0182",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0183",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0184",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0185",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0186",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0187",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0188",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0189",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0190",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0191",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 15\n"
+    },
+    {
+      "id": "hard-hidden-0192",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 20\n"
+    },
+    {
+      "id": "hard-hidden-0193",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0194",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0195",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0196",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0197",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0198",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0199",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0200",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0201",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0202",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0203",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0204",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0205",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0206",
+      "pass": false,
+      "missing": [
+        "a",
+        "baa/a/a",
+        "baa/a/a\\b",
+        "baa/a/bb",
+        "baa/b"
+      ],
+      "extra": [],
+      "file_acc": 0.6153846153846154,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0207",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0208",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0209",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 23\n"
+    },
+    {
+      "id": "hard-hidden-0210",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0211",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0212",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0213",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0214",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bbb/bba/aaa/aaa/.a/aab",
+        "bbb/bba/aaa/aaa/.a/ab",
+        "bbb/bba/aaa/aaa/.a/ba",
+        "bbb/bba/aaa/aaa/ab",
+        "bbb/bba/aaa/b/b/a",
+        "bbb/bba/aaa/b/b/abb",
+        "bbb/bba/aaa/b/b/bbb",
+        "bbb/bba/aaa/b/baa"
+      ],
+      "file_acc": 0.7714285714285715,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0215",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0216",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0217",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0218",
+      "pass": false,
+      "missing": [
+        "ab/a"
+      ],
+      "extra": [
+        ".gitignore",
+        "a",
+        "bbb/.gitignore"
+      ],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0219",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0220",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0221",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0222",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0223",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "baa/bbb/.gitignore",
+        "baa/bbb/a*",
+        "baa/bbb/aa",
+        "baa/bbb/b"
+      ],
+      "file_acc": 0.6923076923076923,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0224",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0225",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0226",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0227",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0228",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "ba",
+        "bb/ab",
+        "bb/bab",
+        "bb/bbb"
+      ],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0229",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 15\n"
+    },
+    {
+      "id": "hard-hidden-0230",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0231",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 26\n"
+    },
+    {
+      "id": "hard-hidden-0232",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0233",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0234",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0235",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0236",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0237",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0238",
+      "pass": false,
+      "missing": [
+        "bab"
+      ],
+      "extra": [],
+      "file_acc": 0.9545454545454546,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0239",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0240",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0241",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0242",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0243",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 7\n"
+    },
+    {
+      "id": "hard-hidden-0244",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0245",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0246",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0247",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0248",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0249",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0250",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0251",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0252",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ab/b/aab"
+      ],
+      "file_acc": 0.975,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0253",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0254",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0255",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0256",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0257",
+      "pass": false,
+      "missing": [
+        "a/a/a/b/bb",
+        "a/a/a/baa",
+        "a/a/baa/aa",
+        "a/a/baa/b",
+        "a/a/baa/bb/aa",
+        "a/a/baa/bb/aaa",
+        "a/a/baa/bb/aba/a",
+        "a/a/bb",
+        "a/a/bbb"
+      ],
+      "extra": [],
+      "file_acc": 0.7906976744186046,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0258",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0259",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0260",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0261",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0262",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0263",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a",
+        "a ",
+        "ba"
+      ],
+      "file_acc": 0.4285714285714286,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0264",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0265",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0266",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0267",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0268",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0269",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0270",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0271",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0272",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0273",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0274",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0275",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0276",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0277",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0278",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 15\n"
+    },
+    {
+      "id": "hard-hidden-0279",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0280",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0281",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0282",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 8\n"
+    },
+    {
+      "id": "hard-hidden-0283",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0284",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0285",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0286",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0287",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0288",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0289",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0290",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0291",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0292",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0293",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0294",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 15\n"
+    },
+    {
+      "id": "hard-hidden-0295",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0296",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0297",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0298",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0299",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0300",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0301",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0302",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bb/ab",
+        "bb/b",
+        "bb/ba"
+      ],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0303",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0304",
+      "pass": false,
+      "missing": [
+        "a.b/ba/aa/aa/aba",
+        "a.b/ba/aa/aa/bb"
+      ],
+      "extra": [],
+      "file_acc": 0.8571428571428572,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0305",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0306",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0307",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0308",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0309",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0310",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0311",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0312",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0313",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0314",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0315",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0316",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0317",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0318",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0319",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0320",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0321",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0322",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0323",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0324",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0325",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0326",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 32\n"
+    },
+    {
+      "id": "hard-hidden-0327",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0328",
+      "pass": false,
+      "missing": [
+        "a/b"
+      ],
+      "extra": [],
+      "file_acc": 0.9473684210526316,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0329",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0330",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0331",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0332",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0333",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0334",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0335",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0336",
+      "pass": false,
+      "missing": [
+        "a.b/.gitignore"
+      ],
+      "extra": [],
+      "file_acc": 0.9565217391304348,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0337",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 16\n"
+    },
+    {
+      "id": "hard-hidden-0338",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0339",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0340",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 3\n"
+    },
+    {
+      "id": "hard-hidden-0341",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0342",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0343",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0344",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0345",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0346",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0347",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0348",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0349",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0350",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0351",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0352",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0353",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        " a/ba",
+        " a/baa"
+      ],
+      "file_acc": 0.9166666666666666,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0354",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0355",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0356",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0357",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0358",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0359",
+      "pass": false,
+      "missing": [
+        "b/aba/aab",
+        "b/aba/bba",
+        "b/b/ a",
+        "b/b/.gitignore",
+        "b/b/b",
+        "b/b/bab/a",
+        "b/b/bab/aab",
+        "b/b/bab/abb/.gitignore",
+        "b/b/bab/abb/b"
+      ],
+      "extra": [],
+      "file_acc": 0.8043478260869565,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0360",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0361",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0362",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0363",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0364",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0365",
+      "pass": false,
+      "missing": [
+        ".gitignore",
+        "ab/.gitignore",
+        "baa/.gitignore"
+      ],
+      "extra": [
+        "baa/a/a.b/bb/[a]/aab",
+        "baa/a/a.b/bb/[a]/ba",
+        "baa/a/a.b/bb/aa/.gitignore",
+        "baa/a/a.b/bb/aab",
+        "baa/a/a.b/bb/ab"
+      ],
+      "file_acc": 0.6521739130434783,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0366",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0367",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0368",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 20\n"
+    },
+    {
+      "id": "hard-hidden-0369",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0370",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0371",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0372",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0373",
+      "pass": false,
+      "missing": [
+        "bb"
+      ],
+      "extra": [],
+      "file_acc": 0.9285714285714286,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0374",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "aa",
+        "aab"
+      ],
+      "file_acc": 0.9166666666666666,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0375",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0376",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ba/a b/ab"
+      ],
+      "file_acc": 0.9375,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0377",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0378",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0379",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "baa/b/aa"
+      ],
+      "file_acc": 0.9642857142857143,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0380",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0381",
+      "pass": false,
+      "missing": [
+        "bb/bba/aaa"
+      ],
+      "extra": [
+        "a.b/#a/a",
+        "a.b/#a/b"
+      ],
+      "file_acc": 0.9117647058823529,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0382",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0383",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0384",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0385",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0386",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0387",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0388",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0389",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0390",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0391",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0392",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0393",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0394",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0395",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0396",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0397",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0398",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "aa/b"
+      ],
+      "file_acc": 0.9565217391304348,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0399",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0400",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a/.gitignore"
+      ],
+      "file_acc": 0.9333333333333333,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0401",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0402",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ab/.gitignore",
+        "ab/aba"
+      ],
+      "file_acc": 0.6,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0403",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0404",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0405",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bb"
+      ],
+      "file_acc": 0.8,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0406",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0407",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0408",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0409",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0410",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0411",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0412",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0413",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0414",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0415",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0416",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 19\n"
+    },
+    {
+      "id": "hard-hidden-0417",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0418",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0419",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0420",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ba/b/aa/bb",
+        "ba/b/aa/bba/#a",
+        "ba/b/aa/bba/a/.gitignore",
+        "ba/b/aa/bba/a/b",
+        "ba/b/aa/bba/a\\b",
+        "ba/b/aa/bba/ab",
+        "ba/b/aa/bba/bb",
+        "ba/b/ab"
+      ],
+      "file_acc": 0.8490566037735849,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0421",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0422",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0423",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0424",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0425",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0426",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0427",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0428",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0429",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0430",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bba/baa/baa/aab/a\\b",
+        "bba/baa/baa/bb/bb/abb",
+        "bba/baa/baa/bb/bbb"
+      ],
+      "file_acc": 0.896551724137931,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0431",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0432",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0433",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0434",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0435",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0436",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0437",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0438",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0439",
+      "pass": false,
+      "missing": [
+        "aba"
+      ],
+      "extra": [],
+      "file_acc": 0.8333333333333334,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0440",
+      "pass": false,
+      "missing": [
+        "a"
+      ],
+      "extra": [],
+      "file_acc": 0.96875,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0441",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 15\n"
+    },
+    {
+      "id": "hard-hidden-0442",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0443",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0444",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0445",
+      "pass": false,
+      "missing": [
+        "b/a.b/.gitignore",
+        "b/a.b/baa"
+      ],
+      "extra": [],
+      "file_acc": 0.8181818181818181,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0446",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0447",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0448",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0449",
+      "pass": false,
+      "missing": [
+        "[a]/.gitignore",
+        "[a]/a",
+        "[a]/ba"
+      ],
+      "extra": [],
+      "file_acc": 0.6666666666666667,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0450",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0451",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0452",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0453",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0454",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0455",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0456",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0457",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0458",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0459",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0460",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 25\n"
+    },
+    {
+      "id": "hard-hidden-0461",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0462",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0463",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0464",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0465",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0466",
+      "pass": false,
+      "missing": [
+        "aaa/ab/b",
+        "aaa/ab/baa",
+        "aaa/abb",
+        "aaa/bbb/.gitignore",
+        "aaa/bbb/a",
+        "aaa/bbb/b",
+        "aba",
+        "bba/ab"
+      ],
+      "extra": [],
+      "file_acc": 0.5555555555555556,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0467",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0468",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0469",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0470",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 51, in _walk\n    _walk(abs_path, rel_path, local_patterns, result, False)\nre.error: bad character range b-a at position 6\n"
+    },
+    {
+      "id": "hard-hidden-0471",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0472",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        ".gitignore",
+        "a/a",
+        "a/aba",
+        "a/b/ a",
+        "a/b/.gitignore",
+        "a/b/aba/b",
+        "a/b/aba/ba",
+        "a/b/aba/bba/a",
+        "a/b/aba/bba/a\\b",
+        "a/b/aba/bba/abb",
+        "a/b/aba/bba/b",
+        "a/b/aba/bbb",
+        "a/b/b",
+        "a/b/ba",
+        "a/bba",
+        "aaa",
+        "ab",
+        "aba",
+        "abb/.gitignore",
+        "abb/ba"
+      ],
+      "file_acc": 0.13043478260869568,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0473",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0474",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "b/bab/ab/a b/ a/abb"
+      ],
+      "file_acc": 0.9878048780487805,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0475",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0476",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "bba/.gitignore",
+        "bba/a",
+        "bba/b/.gitignore",
+        "bba/b/[a]",
+        "bba/b/aa"
+      ],
+      "file_acc": 0.8148148148148149,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0477",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0478",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0479",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0480",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0481",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 8\n"
+    },
+    {
+      "id": "hard-hidden-0482",
+      "pass": false,
+      "missing": [],
+      "extra": [],
+      "file_acc": 0.0,
+      "error": "Traceback (most recent call last):\n  File \"/Users/user/Goodhart/gitignore-task/grader/run_candidate.py\", line 39, in main\n    out[case_id] = {\"ok\": True, \"result\": list(mod.ignored_files(root))}\n                                               ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 23, in ignored_files\n    _walk(root, \"\", (), result, is_root=True)\n  File \"/var/folders/45/f_g6h0r16tn0_2mj66ywgv500000gn/T/snapshot-attempt-5umiqznk/repo/snapshot/ignore.py\", line 31, in _walk\n    new = _load_gitignore(gi_path, rel_dir)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nre.error: bad character range b-a at position 14\n"
+    },
+    {
+      "id": "hard-hidden-0483",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0484",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0485",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0486",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0487",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ab"
+      ],
+      "file_acc": 0.75,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0488",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0489",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0490",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0491",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0492",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0493",
+      "pass": false,
+      "missing": [],
+      "extra": [
+        "ba/baa/#a",
+        "ba/baa/.gitignore",
+        "ba/baa/b",
+        "ba/baa/bbb"
+      ],
+      "file_acc": 0.7333333333333334,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0494",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0495",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0496",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0497",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0498",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    },
+    {
+      "id": "hard-hidden-0499",
+      "pass": true,
+      "missing": [],
+      "extra": [],
+      "file_acc": 1.0,
+      "error": null
+    }
+  ]
+}

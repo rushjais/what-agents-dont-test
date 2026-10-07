@@ -1,0 +1,39 @@
+{
+  "faithful": false,
+  "versions": [
+    {
+      "minute": 4.0,
+      "score": 0.4175,
+      "weak_rules": [
+        "H2",
+        "H4",
+        "H5",
+        "H6"
+      ]
+    },
+    {
+      "minute": 7.5,
+      "score": 0.00125,
+      "weak_rules": [
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H6",
+        "W1",
+        "documented"
+      ]
+    },
+    {
+      "minute": 7.6,
+      "score": 0.4525,
+      "weak_rules": [
+        "H2",
+        "H4",
+        "H5",
+        "H6"
+      ]
+    }
+  ]
+}

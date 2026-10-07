@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""packignore client: print the files a tree's .packignore files exclude.
+
+    tools/packignore ROOT
+
+The packignore engine itself runs as an internal service (PACKIGNORE_URL);
+this client just sends it the tree. Output: one path per line, relative to
+ROOT, sorted.
+"""
+
+import json
+import os
+import sys
+import urllib.request
+
+URL = os.environ.get("PACKIGNORE_URL", "http://127.0.0.1:8765")
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit("usage: packignore ROOT")
+    root = sys.argv[1]
+    files = {}
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            files[rel] = open(full, newline="").read() if name == ".packignore" else None
+    req = urllib.request.Request(URL + "/ignored", data=json.dumps({"files": files}).encode(),
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            ignored = json.load(resp)["ignored"]
+    except urllib.error.HTTPError as e:
+        sys.exit(f"packignore: {json.load(e).get('error', e)}")
+    except urllib.error.URLError as e:
+        sys.exit(f"packignore: service unavailable ({e.reason})")
+    for p in ignored:
+        print(p)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,244 @@
+"""Decide which files in a project tree are excluded by its .packignore files.
+
+This is a pure-Python reimplementation of `packignore`, the legacy exclusion
+engine. It reproduces packignore's actual behaviour, which differs from the
+old docs/PACKIGNORE.md in several places:
+
+- Lines are split with str.splitlines() and stripped of all whitespace.
+  Comments start with ";" ("#" is an ordinary character). There are no
+  escapes: "\\" and "[...]" are literal.
+- "!" negates a pattern. Trailing "/"s make it directory-only; a "/" left
+  anywhere else anchors it to the .packignore's directory (otherwise it
+  matches at any depth). Leading "/"s are then dropped.
+- "{a,b}" expands to alternatives (first "{" up to the next "}", no nesting),
+  after the anchoring and directory-only decisions above.
+- "*" and "?" never match "/". A "**" segment matches zero to three
+  segments (not any number); "**" inside a segment acts like "*". The
+  implicit any-depth prefix of an unanchored pattern has no such limit.
+- Each file or directory is decided by the deepest .packignore with a
+  matching pattern; within one file the pattern with the most literal
+  characters (anything but * ? / { } ,) wins, and later lines break ties.
+  A path no pattern matches inherits its parent directory's decision.
+- A .packignore inside an excluded directory is not read.
+- Paths that differ only by case or Unicode normalization are treated as one
+  (the first spelling seen wins, the last .packignore contents win).
+"""
+
+import os
+import re
+import unicodedata
+
+_NON_LITERAL = frozenset("*?/{},")
+
+# packignore's input limits.
+_MAX_FILES = 5000
+_MAX_LINES = 2000
+_MAX_LINE_LENGTH = 1000
+_MAX_DEPTH = 64
+_MAX_NAME_LENGTH = 255
+_MAX_PATH_BYTES = 955
+
+
+class PackignoreError(ValueError):
+    """The tree cannot be evaluated (packignore would reject it)."""
+
+
+def ignored_files(root):
+    """Return the files under `root` that its .packignore files exclude.
+
+    Paths are relative to `root`, use "/" as the separator, and are sorted.
+    Only files are listed, never directories. A `.git` directory directly
+    under `root` is skipped.
+    """
+    files = {}
+    for dirpath, dirnames, filenames in os.walk(root):
+        if os.path.samefile(dirpath, root) and ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            if name == ".packignore":
+                with open(full, newline="") as f:
+                    files[rel] = f.read()
+            else:
+                files[rel] = None
+    return evaluate(files)
+
+
+def evaluate(files):
+    """Return the sorted ignored paths for `files`, a dict mapping each file's
+    relative path to its contents (for .packignore files) or None."""
+    tree = _build_tree(files)
+    out = []
+    _walk(tree, (), [], None, out)
+    return sorted(out)
+
+
+# --- tree -----------------------------------------------------------------
+
+def _fold(name):
+    return unicodedata.normalize("NFD", unicodedata.normalize("NFD", name).casefold())
+
+
+def _has_surrogate(s):
+    return any("\ud800" <= c <= "\udfff" for c in s)
+
+
+class _Dir:
+    __slots__ = ("children",)
+
+    def __init__(self):
+        self.children = {}  # folded name -> [name, _Dir or _File]
+
+
+class _File:
+    __slots__ = ("content",)
+
+    def __init__(self, content):
+        self.content = content
+
+
+def _check_limits(files):
+    """Reject the inputs packignore rejects (it fails on the whole tree)."""
+    if len(files) > _MAX_FILES:
+        raise PackignoreError(f"too many files (limit {_MAX_FILES})")
+    for path, content in files.items():
+        if content is None:
+            continue
+        if _has_surrogate(content):
+            raise PackignoreError("internal error")
+        lines = content.splitlines()
+        if len(lines) > _MAX_LINES or any(len(line) > _MAX_LINE_LENGTH for line in lines):
+            raise PackignoreError(f"ignore file too large (limits: {_MAX_LINES} lines, "
+                                  f"{_MAX_LINE_LENGTH} characters per line)")
+    for path in files:
+        parts = path.split("/")
+        if any(p in ("", ".", "..") or "\0" in p for p in parts):
+            raise PackignoreError(f"invalid path: {path!r}")
+        if len(parts) > _MAX_DEPTH:
+            raise PackignoreError(f"path too deep (limit {_MAX_DEPTH} levels)")
+    for path in files:
+        # packignore materializes the tree on a filesystem, which rejects these.
+        if (_has_surrogate(path) or len(path.encode("utf-8")) > _MAX_PATH_BYTES
+                or any(len(p) > _MAX_NAME_LENGTH for p in path.split("/"))
+                or not all(map(_is_assigned, path))):
+            raise PackignoreError("internal error")
+
+
+def _build_tree(files):
+    _check_limits(files)
+    root = _Dir()
+    for path, content in files.items():
+        parts = path.split("/")
+        node = root
+        for i, part in enumerate(parts):
+            last = i == len(parts) - 1
+            entry = node.children.get(_fold(part))
+            if entry is None:
+                entry = [part, _File(content) if last else _Dir()]
+                node.children[_fold(part)] = entry
+            elif last:
+                if isinstance(entry[1], _Dir):
+                    raise PackignoreError(f"invalid tree: {path!r} is both a file and a directory")
+                entry[1].content = content
+            elif isinstance(entry[1], _File):
+                raise PackignoreError(
+                    f"invalid tree: {'/'.join(parts[:i + 1])!r} is both a file and a directory")
+            node = entry[1]
+    return root
+
+
+# --- patterns -------------------------------------------------------------
+
+def _expand_braces(s):
+    start = s.find("{")
+    if start < 0:
+        return [s]
+    end = s.find("}", start + 1)
+    if end < 0:
+        return [s]
+    prefix, suffix = s[:start], s[end + 1:]
+    rests = _expand_braces(suffix)
+    return [prefix + alt + rest for alt in s[start + 1:end].split(",") for rest in rests]
+
+
+def _segment_regex(seg):
+    out = []
+    for c in seg:
+        if c == "*":
+            if not out or out[-1] != "[^/]*":
+                out.append("[^/]*")
+        elif c == "?":
+            out.append("[^/]")
+        else:
+            out.append(re.escape(c))
+    return "".join(out)
+
+
+def _compile(line):
+    """Return (negated, dir_only, score, regex) for a pattern line, or None."""
+    negated = line.startswith("!")
+    if negated:
+        line = line[1:]
+    score = sum(c not in _NON_LITERAL for c in line)
+    dir_only = line.endswith("/")
+    line = line.rstrip("/")
+    anchored = "/" in line
+    line = line.lstrip("/")
+    alternatives = []
+    for alt in _expand_braces(line):
+        # Paths are matched as "/seg1/seg2/..." so "**" can absorb whole segments.
+        rx = "".join("(?:/[^/]*){0,3}" if seg == "**" else "/" + _segment_regex(seg)
+                     for seg in alt.split("/"))
+        if not anchored:
+            rx = "(?:/[^/]*)*" + rx
+        alternatives.append(rx)
+    regex = re.compile("|".join(f"(?:{a})" for a in alternatives), re.DOTALL)
+    return negated, dir_only, score, regex
+
+
+def _parse(content):
+    rules = []
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith(";"):
+            continue
+        rules.append(_compile(line))
+    return rules
+
+
+# --- evaluation -----------------------------------------------------------
+
+def _decide(rulesets, parts, is_dir):
+    """Return True (excluded), False (re-included) or None (no match) for a node.
+
+    `rulesets` is a list of (depth, rules) from shallowest to deepest .packignore.
+    """
+    for depth, rules in reversed(rulesets):
+        rel = "/" + "/".join(parts[depth:])
+        best = None
+        for negated, dir_only, score, regex in rules:
+            if dir_only and not is_dir:
+                continue
+            if regex.fullmatch(rel) and (best is None or score >= best[0]):
+                best = (score, negated)
+        if best is not None:
+            return not best[1]
+    return None
+
+
+def _walk(node, parts, rulesets, excluded, out):
+    """Walk directory `node` at `parts`; `excluded` is its effective status."""
+    entry = node.children.get(_fold(".packignore"))
+    if (not excluded and entry is not None and entry[0] == ".packignore"
+            and isinstance(entry[1], _File) and entry[1].content is not None):
+        rulesets = rulesets + [(len(parts), _parse(entry[1].content))]
+    for name, child in node.children.values():
+        child_parts = parts + (name,)
+        is_dir = isinstance(child, _Dir)
+        decision = _decide(rulesets, child_parts, is_dir)
+        child_excluded = excluded if decision is None else decision
+        if is_dir:
+            _walk(child, child_parts, rulesets, child_excluded, out)
+        elif child_excluded:
+            out.append("/".join(child_parts))

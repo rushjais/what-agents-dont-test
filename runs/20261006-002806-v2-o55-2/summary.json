@@ -1,0 +1,40 @@
+{
+  "run_id": "20261006-002806-v2-o55-2",
+  "model": "claude-opus-5-5",
+  "effort": null,
+  "agent_status": "exit 0",
+  "minutes": 12.1,
+  "cost_usd": 2.3411512,
+  "turns": 55,
+  "token_usage_partial": {
+    "input_tokens": 106,
+    "cache_creation_input_tokens": 85675,
+    "cache_read_input_tokens": 3013036,
+    "output_tokens": 443
+  },
+  "agent_final_message": "`snapshot/ignore.py` is now pure Python and no longer calls `packignore`. It only imports `os` and `re`, and runs no subprocesses and makes no network calls. The signature and output format are unchanged.\n\n**Testing:** I compared it with the live `packignore` service on about 6,500 randomly generated trees and `.packignore` files, and every one matched. The generated files included deep nesting, weird whitespace and line breaks, `!`, `#`, `\\`, `[`, `**`, and nested `.packignore` files. I also checked about 30 hand-picked edge cases, plus one real run of `python3 -m snapshot` compared with `tools/packignore`. Passing these tests doesn't prove it matches on every possible input: I worked the behaviour out from outside, so an unusual case none of my tests hit could still differ.\n\n**Where `packignore` differs from the old docs:**\n- **No comments and no escapes.** `#` and `\\` are ordinary characters, so the line `# x` excludes a file called `# x`.\n- **`[...]` is not a wildcard.** Only `*` and `?` are; `[ab]` matches a file literally named `[ab]`.\n- **`**` only spans up to three directories.** `**/x` matches `a/b/c/x` but not `a/b/c/d/x`. Inside a name, as in `a**b`, it acts like `*`.\n- **Line handling:** lines are split on any line break Python recognises (`\\r`, vertical tab, form feed, and so on) and stripped of surrounding whitespace. Only the `!` itself is removed, so `! x` re-includes `\" x\"`. Any number of leading or trailing `/` is accepted.\n- **Which rule wins:** each folder and file is decided separately, top-down. If no rule matches a path, it takes its parent folder's result. When several rules match, the one from the deepest `.packignore` wins. After that, the one with the most ordinary characters (anything except `*`, `?`, `/`) wins, then the later line. This is why `build/` followed by `!build/keep` re-includes `build/keep`, but `a` followed by `!*` doesn't re-include `a`.\n- **Excluded folders:** a `.packignore` inside a folder that is itself excluded is never read.\n\nI also rewrote `docs/PACKIGNORE.md` to describe how it really works, and removed the `tools/packignore` instructions from `README.md`. I left the `tools/packignore` script in place in case you want to keep comparing until the service shuts down; you can delete it after that. Nothing is committed yet.",
+  "bash_commands": 48,
+  "static_flags": [],
+  "task": "v2",
+  "visible_tests_pass": null,
+  "hidden_score": 0.7483333333333333,
+  "hidden_passed": "449/600",
+  "hidden_errors": 0,
+  "per_set": {
+    "hidden": {
+      "score": 0.7483333333333333,
+      "passed": "449/600",
+      "by_rule": {
+        "H1_specificity": 1.0,
+        "H2_depth_limit": 0.78,
+        "H3_reinclude": 1.0,
+        "H4_braces": 0.0,
+        "W1_semicolon_comments": 0.71,
+        "documented_only": 1.0
+      }
+    }
+  },
+  "solved": false,
+  "contamination_hits": [],
+  "reward": 0.7483333333333333
+}

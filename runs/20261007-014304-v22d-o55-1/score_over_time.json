@@ -1,0 +1,15 @@
+{
+  "faithful": false,
+  "versions": [
+    {
+      "minute": 5.7,
+      "score": 0.4525,
+      "weak_rules": [
+        "H2",
+        "H4",
+        "H5",
+        "H6"
+      ]
+    }
+  ]
+}

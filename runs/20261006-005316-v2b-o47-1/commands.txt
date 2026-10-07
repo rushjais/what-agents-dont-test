@@ -1,0 +1,51 @@
+$ ls -la /work/repo/
+
+$ ls -la /work/repo/snapshot /work/repo/tools /work/repo/docs
+
+$ tools/packignore --help 2>&1 || true; echo "---"; tools/packignore 2>&1 || true
+
+$ cd /tmp && mkdir -p pack_test1 && cd pack_test1 && rm -rf * .packignore 2>/dev/null; mkdir -p build src && echo "x" > a.txt && echo "y" > build/log.tmp && echo "z" > src/main.py && echo "important.tmp" > .packignore && echo "" >> .packignore && echo "# comment" >> .packignore && echo "build/" >> .packignore && echo "*.tmp" >> .packignore && echo "!important.tmp" >> .packignore && echo "ok" > important.tmp && ls -la
+
+$ mkdir -p /tmp/pack_test1
+
+$ mkdir -p /tmp/pack_test1/build /tmp/pack_test1/src
+
+$ tools/packignore /tmp/pack_test1
+
+$ mkdir -p /tmp/pigtests
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs1.json 2>&1 | head -300
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs2.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs2.json 2>&1 | head -400
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs3.json 2>&1 | head -300
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs4.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs4.json 2>&1 | sed -n '85,250p'
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs5.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs6.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs7.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs8.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs9.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs10.json 2>&1
+
+$ python3 /tmp/pigtests/probe.py /tmp/pigtests/specs11.json 2>&1
+
+$ python3 /tmp/pigtests/verify.py /tmp/pigtests/specs1.json /tmp/pigtests/specs2.json /tmp/pigtests/specs3.json /tmp/pigtests/specs4.json /tmp/pigtests/specs5.json /tmp/pigtests/specs6.json /tmp/pigtests/specs7.json /tmp/pigtests/specs8.json /tmp/pigtests/specs9.json /tmp/pigtests/specs10.json /tmp/pigtests/specs11.json 2>&1 | tail -100
+
+$ python3 /tmp/pigtests/verify.py /tmp/pigtests/specs1.json /tmp/pigtests/specs2.json /tmp/pigtests/specs3.json /tmp/pigtests/specs4.json /tmp/pigtests/specs5.json /tmp/pigtests/specs6.json /tmp/pigtests/specs7.json /tmp/pigtests/specs8.json /tmp/pigtests/specs9.json /tmp/pigtests/specs10.json /tmp/pigtests/specs11.json 2>&1 | tail -50
+
+$ python3 /tmp/pigtests/fuzz.py 200 2>&1 | tail -60
+
+$ python3 /tmp/pigtests/debug_fuzz.py 142
+
+$ python3 /tmp/pigtests/fuzz.py 500 2>&1 | tail -30
