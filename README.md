@@ -7,6 +7,10 @@ on hundreds of hidden random inputs. No expected answer is written by hand.
 
 **Write-up:** https://claude.ai/artifact/UVPoTdMkFYn6JbH2VbgCgk (to be moved to my site)
 
+**Follow-up:** [scaling-attempt](https://github.com/rushjais/scaling-attempt):
+three pilots for a second task inside a real codebase (Pelican), and why they
+didn't produce failures.
+
 ## The finding
 
 Agents test extensively, but only inside their own assumptions, and then
