@@ -5,7 +5,7 @@ grades an agent by **differential testing**: the agent rewrites one function
 so it behaves exactly like a reference program, and a grader compares the two
 on hundreds of hidden random inputs. No expected answer is written by hand.
 
-**Write-up:** https://claude.ai/artifact/UVPoTdMkFYn6JbH2VbgCgk (to be moved to my site)
+**Write-up:** https://rushjais.github.io/what-agents-dont-test/
 
 **Follow-up:** [scaling-attempt](https://github.com/rushjais/scaling-attempt):
 three pilots for a second task inside a real codebase (Pelican), and why they

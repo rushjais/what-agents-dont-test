@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Building an RL task for coding agents three times, and the failure they all exposed: agents test only inside their own assumptions.">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}</style>
+<title>What Agents Don't Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single reading column (~68ch) with wide tables and the chart allowed to scroll inside their own frames. Diff-style +/- markers carry pass/fail. */
+:root {
+  --bg: #f7f8f6;
+  --surface: #ffffff;
+  --fg: #1c2321;
+  --muted: #5b6662;
+  --rule: #d9dfdc;
+  --accent: #1f6f78;
+  --pass: #2f7d4f;
+  --fail: #b5412f;
+  --code-bg: #eef1ef;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121615; --surface: #1a201e; --fg: #e3e8e5; --muted: #9aa6a1; --rule: #2c3532;
+    --accent: #5fb3bb; --pass: #6cc28e; --fail: #e3836f; --code-bg: #222a27; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121615; --surface: #1a201e; --fg: #e3e8e5; --muted: #9aa6a1; --rule: #2c3532;
+  --accent: #5fb3bb; --pass: #6cc28e; --fail: #e3836f; --code-bg: #222a27; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 18px; line-height: 1.62; }
+.wrap { max-width: 44rem; margin: 0 auto; padding-inline: 20px; padding-block: 56px 96px; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; color: var(--fg); }
+h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 700; letter-spacing: -0.02em; margin: 0.2em 0 0.3em; }
+h2 { font-size: 1.6rem; font-weight: 700; margin: 2.6em 0 0.6em; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 600; margin: 1.8em 0 0.4em; }
+p { margin: 0 0 1em; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.dek { font-size: 1.2rem; color: var(--muted); margin-bottom: 1.6em; }
+.byline { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 12px; }
+code { font-family: var(--mono); font-size: 0.84em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; }
+.summary { margin: 1.4em 0 0; padding: 14px 0; border-block: 1px solid var(--rule); }
+.summary p { margin: 0; font-size: 1rem; color: var(--fg); }
+.summary strong { font-family: var(--display); font-weight: 600; }
+.finding { background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--accent); padding: 18px 22px; margin: 1.6em 0; }
+.finding p { margin: 0; font-size: 1.1rem; }
+.finding strong { font-family: var(--display); font-weight: 600; }
+.tbl { overflow-x: auto; margin: 1.2em 0 1.6em; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.86rem; font-family: var(--body); }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.p { color: var(--pass); font-family: var(--mono); font-weight: 600; }
+.f { color: var(--fail); font-family: var(--mono); font-weight: 600; }
+.diff { font-family: var(--mono); font-size: 0.84rem; background: var(--code-bg); padding: 14px 16px; overflow-x: auto; white-space: pre; line-height: 1.55; border-radius: 4px; margin: 1.2em 0; }
+.diff .p, .diff .f { font-weight: 400; }
+ul, ol { padding-left: 1.3em; margin: 0 0 1em; }
+li { margin-bottom: 0.4em; }
+.chart { background: var(--surface); border: 1px solid var(--rule); padding: 16px; margin: 1.4em 0; overflow-x: auto; }
+.chart svg { display: block; width: 100%; min-width: 320px; height: auto; }
+.chart figcaption { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
+.versions { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 12px; margin: 1.4em 0; }
+.ver { border: 1px solid var(--rule); background: var(--surface); padding: 14px 16px; min-width: 0; }
+.ver .eyebrow { display: block; margin-bottom: 4px; }
+.ver .big { font-family: var(--display); font-size: 1.6rem; font-weight: 700; }
+.ver p { font-size: 0.9rem; margin: 4px 0 0; color: var(--muted); }
+.note { font-size: 0.9rem; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 3em; }
+@media (prefers-reduced-motion: no-preference) { a { transition: color .15s; } }
+</style>
+
+</head>
+<body>
+<main class="wrap">
+  <div class="eyebrow">Building an RL task for coding agents · case study</div>
+  <h1>What Agents Don't Test</h1>
+  <p class="dek">I built a task for coding agents three times. Each version taught me something about grading them, and all three pointed to the same failure. Three pilots at larger scale then showed where that failure doesn't appear.</p>
+  <p class="byline">Rushil Jaiswal · October 2026 · Opus 4.7, Opus 5.5 and Sonnet 5.5 · 33 valid graded runs · Code: <a href="https://github.com/rushjais/what-agents-dont-test">what-agents-dont-test</a> and <a href="https://github.com/rushjais/scaling-attempt">scaling-attempt</a></p>
+
+  <div class="summary"><p><strong>In short:</strong> I built an RL task where a coding agent must reimplement a tool's behavior exactly, graded against a reference implementation on hundreds of hidden cases. Over three versions, the failing runs all made the same mistake: they tested only inside their own assumptions and reported that as proof they were done. When I tried a larger task in a real codebase, in three pilots frontier models handled readable migrations and known bug patterns easily, which sharpened the claim: failures come from behavior that has to be discovered, not from size. Next is putting that discovery problem inside a real codebase.</p></div>
+
+  <div class="finding"><p><strong>The finding:</strong> agents test extensively, but only inside their own assumptions, and then report that testing as proof they're done. The failing runs each said thousands of their own random tests matched the reference. Each one had missed exactly the behavior its tests never generated.</p></div>
+
+  <h2>The task</h2>
+  <p>A small Python tool, <code>snapshot</code>, copies a project and skips files listed in ignore files. It currently asks a reference program which files to skip. The agent is told that the reference won't exist where the tool is deployed, and must rewrite one function, <code>ignored_files(root)</code>, in pure Python so it returns <em>exactly</em> what the reference returns, for any directory tree.</p>
+  <p>Grading is differential: I generate hundreds of hidden random trees, record the reference's answer for each, and count the cases where the agent's answer matches exactly. No answer is ever written by hand, so I can't bake my own misunderstanding into the grader. The reference stays available while the agent works, so a careful agent can test itself against it. Whether it actually does is part of what the task measures.</p>
+  <p>This is the same grading idea as Mechanize's <a href="https://www.mechanize.work/technical-blog/introducing-gba-eval/">GBA Eval</a>, which compares an agent-written Game Boy Advance emulator against a reference emulator frame by frame, at a much smaller scale.</p>
+
+  <div class="versions">
+    <div class="ver"><span class="eyebrow">v1 · real git</span><span class="big">3/3</span><p>Opus 5.5 solved, ~12 min each, by recalling git's source</p></div>
+    <div class="ver"><span class="eyebrow">v2.1 · invented tool</span><span class="big">3/4</span><p>Opus 5.5 solved, ~30 min, by experimenting</p></div>
+    <div class="ver"><span class="eyebrow">v2.2 · non-path rules</span><span class="big">4/9</span><p>Opus 5.5 solved; usually fails</p></div>
+  </div>
+
+  <h2>v1: gitignore, graded against real git</h2>
+  <p>The first reference was git itself. The agent reimplements gitignore matching; the grader compares against <code>git ls-files --ignored</code> on random trees. To keep the expected answers from depending on my machine, the oracle runs git with a fake home directory, no global ignore file, case-sensitive matching, and an empty repo template, and refuses to answer if git's two lists (ignored and not ignored) don't partition the files exactly.</p>
+  <p>My first case generator used realistic names, and Opus 4.7's very first draft scored 100% on it. The agent's own fuzzer was better than mine: it used a tiny alphabet so patterns collided in odd ways. I added a hard profile built on that idea (glued and repeated <code>**</code>, POSIX classes, reversed ranges, escapes, CRLF), and the picture changed:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Model</th><th>Runs</th><th>Original set</th><th>Hard set</th><th>Solved</th></tr></thead>
+    <tbody>
+      <tr><td>Opus 4.7</td><td class="num">4</td><td class="num">100%</td><td class="num">83–91%</td><td class="f">0/4</td></tr>
+      <tr><td>Opus 5.5</td><td class="num">3</td><td class="num">100%</td><td class="num">100%</td><td class="p">3/3</td></tr>
+    </tbody>
+  </table></div>
+  <p>A minimizer that deletes ignore-file lines while the candidate still disagrees with git reduced every Opus 4.7 failure to a root cause. Two were in all four runs: reversed ranges like <code>[b-a]</code> crashed its regex translation, and POSIX classes like <code>[[:alpha:]]</code> weren't supported. Every run had fuzzed against git and reported a match. None of their fuzzers generated those inputs.</p>
+  <p>Opus 5.5 solved v1 in about 12 minutes per run. Its transcripts explain why: it ported git's <code>wildmatch.c</code> nearly line for line from memory. A task built on a famous specification tests recall, not engineering.</p>
+
+  <h2>v2: an invented tool behind a black box</h2>
+  <p>v2 replaces git with <code>packignore</code>, a legacy tool I invented, so there's nothing to recall. Its source never enters the agent's sandbox: it runs as a server on the host, and the agent gets a thin client that uploads a tree and prints the answer. The agent also gets an old README that is incomplete, and wrong in one place. Five rules are documented; the rest the agent has to discover:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Rule</th><th>Truth</th><th>Why it's a test</th></tr></thead>
+    <tbody>
+      <tr><td><code>W1</code></td><td>Comments start with <code>;</code>. The README says <code>#</code>.</td><td>Trust the docs or check them?</td></tr>
+      <tr><td><code>H1</code></td><td>The most specific pattern wins, not the last one</td><td>Contradicts the gitignore habit every model has</td></tr>
+      <tr><td><code>H2</code></td><td><code>**</code> spans at most 3 directories</td><td>Only visible in deep trees</td></tr>
+      <tr><td><code>H3</code></td><td><code>!</code> can re-include files inside an excluded directory</td><td>Half like git, half not</td></tr>
+      <tr><td><code>H4</code></td><td><code>{a,b}</code> alternation works</td><td>Syntax absent from the docs</td></tr>
+    </tbody>
+  </table></div>
+  <p>Each hidden rule has a reference test showing that a 2–3 line experiment reveals it. Every hidden case is tagged by which rules it exercises (switch a rule off; if the answer changes, the case tests that rule), and the hidden set holds 100 cases per rule, so no single quirk decides the score.</p>
+  <h3>The comment rule needed evidence</h3>
+  <p>In the first two clean runs, Opus 5.5 found every rule except one. All four Opus 5.5 runs, including two pilots, tested that <code>#</code> isn't a comment, concluded there are no comments, and never tried another character. Nothing in the environment pointed at <code>;</code>, so the only route was guessing. That's the grader checking something the agent had no reason to look for. I added a legacy <code>.packignore</code> to the starter repo that uses <code>;</code> comments (v2.1). After that, Opus 5.5 solved 3 of 4 valid runs in 27–42 minutes, and Opus 4.7 scored 43% and 66%, running out of its $10 budget both times.</p>
+
+  <h2>v2.2: rules that don't depend on the path</h2>
+  <p>Every Opus 5.5 transcript discovered rules by varying paths and patterns. None varied anything else about a file. v2.2 adds two rules that ignore the path entirely: a file whose first line contains <code>@generated</code> is excluded by default, and so is any executable file. A <code>!</code> pattern can re-include either.</p>
+  <p>The evidence sits in the agent's own repo. It contains a generated version file and two executable scripts, and running the tool on the repo itself excludes all three even though no pattern matches them. To keep the client from giving the game away, it uploads the whole tree as a tar archive, which carries contents and permissions without saying which ones matter.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Limit</th><th>Runs</th><th>Solved</th><th>Solve time</th><th>How failures ended</th></tr></thead>
+    <tbody>
+      <tr><td>60 min / $10</td><td class="num">6</td><td class="num">2</td><td class="num">26, 51 min</td><td>2 still searching at the limit; 2 stopped early, confident</td></tr>
+      <tr><td>2 h / $20</td><td class="num">3</td><td class="num">2</td><td class="num">32, 33 min</td><td>1 stopped itself with 75 minutes left</td></tr>
+      <tr><td><strong>All</strong></td><td class="num"><strong>9</strong></td><td class="num"><strong>4</strong></td><td class="num">26–51 min</td><td>3 of 5 failures: confident and wrong</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure class="chart" aria-label="Score over time for the v2.2 run that solved the task in 51 minutes">
+    <svg viewBox="0 0 640 260" role="img">
+      <title>Score over time, solved v2.2 run: 73.9% at 8 minutes, 84.6% at 37 minutes, 100% at 51 minutes</title>
+      <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--muted)">
+        <line x1="60" y1="20" x2="620" y2="20" stroke="var(--rule)"/>
+        <line x1="60" y1="110" x2="620" y2="110" stroke="var(--rule)"/>
+        <line x1="60" y1="200" x2="620" y2="200" stroke="var(--rule)"/>
+        <text x="52" y="24" text-anchor="end">100%</text>
+        <text x="52" y="114" text-anchor="end">75%</text>
+        <text x="52" y="204" text-anchor="end">50%</text>
+        <line x1="60" y1="200" x2="620" y2="200" stroke="var(--muted)"/>
+        <text x="60" y="222" text-anchor="middle">0</text>
+        <text x="200" y="222" text-anchor="middle">15</text>
+        <text x="340" y="222" text-anchor="middle">30</text>
+        <text x="480" y="222" text-anchor="middle">45</text>
+        <text x="620" y="222" text-anchor="middle">60 min</text>
+        <line x1="620" y1="20" x2="620" y2="200" stroke="var(--fail)" stroke-dasharray="4 4"/>
+        <text x="612" y="40" text-anchor="end" fill="var(--fail)">time limit</text>
+      </g>
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2.5"
+        points="134.7,114 405.3,75.4 536,20 573.3,20"/>
+      <g fill="var(--accent)">
+        <circle cx="134.7" cy="114" r="4.5"/><circle cx="405.3" cy="75.4" r="4.5"/><circle cx="536" cy="20" r="5.5"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--fg)">
+        <text x="142" y="134">min 8: 73.9%, both new rules found</text>
+        <text x="300" y="98">min 37: 84.6%</text>
+        <text x="528" y="40" text-anchor="end">min 51: 100%</text>
+      </g>
+    </svg>
+    <figcaption>One solved v2.2 run, rebuilt from its transcript's edits and scored version by version. It found the two new rules early and spent most of the hour on the rest.</figcaption>
+  </figure>
+
+  <h2>The pattern across all three versions</h2>
+  <p>Every failing run built a fuzzer, compared against the reference, and reported success. What it couldn't do was generate inputs outside its own model of the tool.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Where</th><th>Missed</th><th>How often</th><th>What its own testing said</th></tr></thead>
+    <tbody>
+      <tr><td>v1, Opus 4.7</td><td>POSIX classes, reversed ranges</td><td class="num">4 of 4 runs</td><td>Matched git</td></tr>
+      <tr><td>v2.0, Opus 5.5</td><td><code>;</code> comments</td><td class="num">4 of 4 runs</td><td>"No comments" after ruling out <code>#</code></td></tr>
+      <tr><td>v2.2, Opus 5.5</td><td>Braces, generated and executable files, the depth limit</td><td class="num">3 of 5 failures</td><td>~7,000, ~9,000 and ~4,500 random trees "identical"</td></tr>
+    </tbody>
+  </table></div>
+  <div class="diff"><span class="p">+ every v2.2 run read the generated file and the release script in its first minute</span>
+<span class="f">- two independent runs wrote different code (220 and 150 lines)</span>
+<span class="f">  with identical answers on all 800 hidden cases: the same wrong theory</span>
+<span class="f">- one run confirmed both new rules at minute 59, one minute before the limit</span>
+<span class="f">- one 2-hour run declared itself done at minute 45, missing the depth limit</span></div>
+  <p>Extra time helps an agent that is still searching. It doesn't help one that believes it's finished. Doubling the limit to two hours didn't change the solve times (both 2-hour solves finished in about 33 minutes) and didn't rescue the run that stopped early.</p>
+
+  <h2>What I got wrong along the way</h2>
+  <p>More than twenty problems in my own grader and harness were caught and fixed before they could distort a result. These were the instructive ones:</p>
+  <ul>
+    <li><strong>Machine-dependent answers.</strong> git defaults to case-insensitive matching on macOS, and my global ignore file leaked into the oracle. Either would have made the "right answer" depend on whose laptop ran the grader.</li>
+    <li><strong>Free reward.</strong> A candidate could just call git, or the starter could call the oracle with Python's absolute path. Candidates now run with an empty <code>PATH</code>, the oracle is stopped before grading, and a static check flags subprocess and network imports.</li>
+    <li><strong>The oracle froze under probing.</strong> An agent deliberately probed for limits with patterns like <code>a*a*a*…</code>, and my regex-based matcher backtracked exponentially, freezing the server for the rest of the run. I replaced it with a linear-time matcher, verified identical on 250,000 random inputs and all 900 frozen cases.</li>
+    <li><strong>The oracle leaked internals.</strong> One malformed request returned a Python traceback with a host path in it. Errors are now plain and generic.</li>
+    <li><strong>The harness ended runs early.</strong> In headless mode the session ends with the agent's turn, so a run that started fuzzing in the background and waited to be notified just stopped. The agent is now told it's running non-interactively.</li>
+    <li><strong>Laptop sleep.</strong> Runs stalled overnight and resumed hours later because the time limit used a clock that pauses during sleep. The runner now keeps the machine awake and enforces wall-clock time. Runs affected by sleep, restarts or harness bugs are marked invalid, not counted.</li>
+  </ul>
+  <p>I also made wrong calls in the analysis and corrected them on the record: I first judged brace expansion safe, first said the time limit didn't matter for a run that found the missing rules at minute 59, and first blamed a slowdown on an agent's probes when replaying them showed they were cheap.</p>
+
+  <h2>Trying to scale it up: three pilots</h2>
+  <p>The obvious weakness of this task is scale: one file, about 30 minutes. So I tried to build a second task inside a real, sizable codebase, and before building any grading infrastructure I ran cheap pilots to check that the failure I wanted to measure actually exists. It didn't, three times.</p>
+  <p>The codebase was <a href="https://github.com/getpelican/pelican">Pelican</a>, a static site generator (about 8,700 lines of source), chosen from ten measured candidates because it has a deterministic boundary to grade against (the generated site), reference-output tests already in its suite, and no prior upstream work on the changes I tried.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Pilot</th><th>Task</th><th>Runs</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Migrate the source from <code>os.path</code> to <code>pathlib</code> without changing behavior</td><td class="num">2</td><td>Both passed every check in ~10 min, by keeping <code>os.path</code> exactly where <code>pathlib</code> behaves differently</td></tr>
+      <tr><td>2</td><td>Same, but filesystem paths <em>must</em> use <code>pathlib</code> (no sidestepping the risky spots)</td><td class="num">4 (3 valid)</td><td>Every valid run passed, across three models; it separated them on cost (Sonnet 5.5 $1.80, Opus 4.7 $19.37), not correctness</td></tr>
+      <tr><td>3</td><td>Fix a real bug I found during pilot 1: with some plugins, output differs between builds (since submitted upstream with a fix and regression test: <a href="https://github.com/getpelican/pelican/pull/3621">pelican#3621</a>)</td><td class="num">4</td><td>All four fixed the root cause in 1–5 minutes</td></tr>
+    </tbody>
+  </table></div>
+  <p>Each pilot had hidden checks the agent couldn't see, and I validated each check with a control that should fail it before trusting a pass. For the migration: a site with relative URLs that the visible tests never exercise, a probe plugin checking that values reaching plugins are still strings, a theme template doing string operations on paths, incremental rebuilds, a cache written by the old code and read by the new, and unusual filesystem states. For the bug: determinism across hash seeds, determinism when Pelican runs as a library rather than from the command line, unchanged output for sites that were already reproducible, and an unchanged public API. Two tempting wrong fixes I prepared for (changing a return type, forcing a fixed hash seed) both passed Pelican's own tests and both failed exactly one hidden check. No agent tried either.</p>
+  <h3>What the pilots taught me</h3>
+  <ul>
+    <li><strong>In these pilots, when the specification was readable, careful agents didn't miss it.</strong> In a behavior-preserving migration the old code is the spec, and every run built its own old-vs-new comparison without being asked (11, 21 and more site configurations). A bigger codebase adds work, not this kind of difficulty.</li>
+    <li><strong>Known bug patterns are solved instantly.</strong> "Sets iterate in hash order, so sort them" is something every model knows.</li>
+    <li><strong>The failures in the first task came from somewhere else:</strong> behavior that had to be discovered, outside anything the agent thought to test. That's the property a larger second task would need, not more lines of code.</li>
+    <li><strong>My checkers had bugs too.</strong> My probe plugin read URLs early, which in Pelican freezes where attachments go, so the checker changed the output it was observing and briefly made a correct run look broken. And one agent killed its own process: it terminated everything whose command line contained "pelican", and my runner had put the prompt, which starts with "Pelican…", in that command line.</li>
+  </ul>
+  <p>About $70 of agent time answered that before I built a grader. Every run, check and decision, with the commit history: <a href="https://github.com/rushjais/scaling-attempt">github.com/rushjais/scaling-attempt</a>.</p>
+
+  <h2>Limits</h2>
+  <ul>
+    <li><strong>Scale.</strong> The agent rewrites one file in about 30 minutes. Production tasks, like GBA Eval's 24-hour emulator, are far larger. My attempts at a larger task in a real codebase are above; they didn't produce failures.</li>
+    <li><strong>The tool is invented.</strong> That's deliberate, to defeat recall, but some will find it contrived.</li>
+    <li><strong>Small samples.</strong> 2 to 9 valid runs per version or pilot: enough for a direction, not a rate.</li>
+    <li><strong>Three models,</strong> all from one provider, run through one harness.</li>
+  </ul>
+
+  <h2>What I'd build next</h2>
+  <ul>
+    <li><strong>Discovery inside a real codebase.</strong> The pilots suggest the next task shouldn't be bigger, but should put the mechanism that worked here (behavior that has to be found by experiment, with evidence available) inside a real project: for example, a codebase that depends on a black-box service whose undocumented behavior matters. It would get its own pilot first, and longer runs in the cloud rather than on a laptop.</li>
+    <li><strong>Grading the report as well as the code.</strong> Every failing run here made a specific, checkable claim ("identical on 9,000 trees"). Scoring whether an agent's final claims are true would reward agents that know what their testing doesn't cover.</li>
+  </ul>
+
+  <p class="note">Built with Claude Code as a coding agent under my direction: I set the direction, made the design and scoping calls, reviewed results and pushed back, and the code and much of the prose were written by the agent. Every number on this page comes from graded runs in the repository, including the invalid ones, which are kept and labeled. Code and run logs: <a href="https://github.com/rushjais/what-agents-dont-test">github.com/rushjais/what-agents-dont-test</a> (this task) and <a href="https://github.com/rushjais/scaling-attempt">github.com/rushjais/scaling-attempt</a> (the pilots).</p>
+</main>
+
+</body>
+</html>
